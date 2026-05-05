@@ -1,0 +1,16 @@
+{
+  "name": "wunschlachen-crm",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter app dev",
+    "build": "pnpm --filter app build",
+    "preview": "pnpm --filter app preview",
+    "lint": "pnpm -r lint",
+    "postinstall": "pnpm --filter app postinstall"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}
