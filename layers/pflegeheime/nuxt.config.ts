@@ -1,3 +1,3 @@
 export default defineNuxtConfig({
-  // Will be populated in Plan 2
+  // Pflegeheime B2B module
 })
