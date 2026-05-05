@@ -1,0 +1,255 @@
+// CRUD operations for the Directus "Leads" collection
+
+import type { Lead, LeadStatus, LeadSource } from '~/types/crm'
+
+const COLLECTION = 'Leads' // Capital L — matches Directus collection name
+
+export interface LeadFilters {
+  search?: string
+  status?: LeadStatus | null
+  lead_source?: LeadSource | null
+  dental_service?: string | null
+  followUpDue?: boolean
+  hasTag?: string | null
+}
+
+export interface LeadPagination {
+  page: number
+  limit: number
+  total: number
+}
+
+const LEAD_LIST_FIELDS = [
+  'id',
+  'first_name',
+  'last_name',
+  'mail',
+  'phone',
+  'status',
+  'lead_source',
+  'follow_up',
+  'oportunity_value',
+  'missed_appointments',
+  'Tags',
+  'dental_service.id',
+  'dental_service.name',
+  'location.id',
+  'location.name',
+  'date_created',
+  'date_updated',
+]
+
+const LEAD_DETAIL_FIELDS = [
+  ...LEAD_LIST_FIELDS,
+  'message',
+  'date_time',
+  'GDPR_accepted_at',
+  'query_params',
+  'newsletter_accepted_time',
+  'revenue',
+  'lost_reason',
+  'user_created',
+  'user_updated',
+]
+
+export const useLeads = () => {
+  const { getItems, getItem, updateItem, updateItems, createItem } = useSecureData()
+
+  const leads = ref<Lead[]>([])
+  const currentLead = ref<Lead | null>(null)
+  const pagination = ref<LeadPagination>({ page: 1, limit: 50, total: 0 })
+  const isLoading = ref(false)
+  const error = ref<Error | null>(null)
+
+  const buildFilter = (filters: LeadFilters): Record<string, any> | undefined => {
+    const filter: Record<string, any> = {}
+
+    if (filters.status) filter.status = { _eq: filters.status }
+    if (filters.lead_source) filter.lead_source = { _eq: filters.lead_source }
+    if (filters.dental_service) filter.dental_service = { _eq: filters.dental_service }
+
+    if (filters.followUpDue) {
+      const today = new Date().toISOString().split('T')[0]
+      filter.follow_up = { _lte: today }
+      filter.status = { _nin: ['done', 'cancelled'] }
+    }
+
+    return Object.keys(filter).length > 0 ? filter : undefined
+  }
+
+  const fetchLeads = async (
+    filters: LeadFilters = {},
+    sort: string[] = ['-date_updated'],
+    page?: number,
+  ) => {
+    isLoading.value = true
+    error.value = null
+    const currentPage = page || pagination.value.page
+
+    try {
+      const result = await getItems<Lead>({
+        collection: COLLECTION,
+        params: {
+          fields: LEAD_LIST_FIELDS,
+          filter: buildFilter(filters),
+          search: filters.search || undefined,
+          sort,
+          limit: pagination.value.limit,
+          page: currentPage,
+          meta: ['total_count', 'filter_count'],
+        },
+      })
+      leads.value = result
+      pagination.value.page = currentPage
+      return result
+    } catch (err) {
+      error.value = err as Error
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const fetchLead = async (id: string) => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const result = await getItem<Lead>({
+        collection: COLLECTION,
+        id,
+        params: { fields: LEAD_DETAIL_FIELDS },
+      })
+      currentLead.value = result
+      return result
+    } catch (err) {
+      error.value = err as Error
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  const updateLead = async (id: string, data: Partial<Lead>) => {
+    try {
+      const result = await updateItem<Lead>({
+        collection: COLLECTION,
+        id,
+        data,
+      })
+      // Update in local list
+      const idx = leads.value.findIndex(l => l.id === id)
+      if (idx !== -1) leads.value[idx] = { ...leads.value[idx], ...data }
+      if (currentLead.value?.id === id) currentLead.value = { ...currentLead.value, ...data }
+      return result
+    } catch (err) {
+      error.value = err as Error
+      throw err
+    }
+  }
+
+  const updateLeadsBulk = async (ids: string[], data: Partial<Lead>) => {
+    try {
+      return await updateItems({
+        collection: COLLECTION,
+        keys: ids,
+        data,
+      })
+    } catch (err) {
+      error.value = err as Error
+      throw err
+    }
+  }
+
+  const createLead = async (data: Partial<Lead>) => {
+    try {
+      return await createItem<Lead>({
+        collection: COLLECTION,
+        data,
+      })
+    } catch (err) {
+      error.value = err as Error
+      throw err
+    }
+  }
+
+  const fetchStageCounts = async () => {
+    // useSecureData doesn't support groupBy, so fetch all statuses and count client-side
+    try {
+      const result = await getItems<{ status: LeadStatus }>({
+        collection: COLLECTION,
+        params: {
+          fields: ['status'],
+          limit: -1,
+        },
+      })
+      const counts: Record<string, number> = {}
+      for (const item of result) {
+        counts[item.status] = (counts[item.status] || 0) + 1
+      }
+      return Object.entries(counts).map(([status, count]) => ({
+        status: status as LeadStatus,
+        count: { id: count },
+      }))
+    } catch (err) {
+      error.value = err as Error
+      throw err
+    }
+  }
+
+  const fetchDueFollowUps = async () => {
+    const today = new Date().toISOString().split('T')[0]
+    try {
+      return await getItems<Lead>({
+        collection: COLLECTION,
+        params: {
+          fields: LEAD_LIST_FIELDS,
+          filter: {
+            follow_up: { _lte: today },
+            status: { _nin: ['done', 'cancelled'] },
+          },
+          sort: ['follow_up'],
+          limit: 50,
+        },
+      })
+    } catch (err) {
+      error.value = err as Error
+      throw err
+    }
+  }
+
+  const fetchLeadCount = async (filters: LeadFilters = {}) => {
+    try {
+      const result = await getItems({
+        collection: COLLECTION,
+        params: {
+          aggregate: { count: ['id'] },
+          filter: buildFilter(filters),
+          search: filters.search || undefined,
+        },
+      })
+      const total = (result as any)?.[0]?.count?.id || 0
+      pagination.value.total = Number(total)
+      return Number(total)
+    } catch (err) {
+      error.value = err as Error
+      throw err
+    }
+  }
+
+  return {
+    leads,
+    currentLead,
+    pagination,
+    isLoading,
+    error,
+    fetchLeads,
+    fetchLead,
+    updateLead,
+    updateLeadsBulk,
+    createLead,
+    fetchStageCounts,
+    fetchDueFollowUps,
+    fetchLeadCount,
+  }
+}

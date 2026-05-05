@@ -1,3 +1,4 @@
 export default defineNuxtConfig({
-  // Will be populated in Plan 3
+  // Patienten B2C module - no additional config needed
+  // All shared config comes from base layer
 })

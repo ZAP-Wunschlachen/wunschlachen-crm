@@ -1,0 +1,61 @@
+[
+  {
+    "name": "Erstansprache",
+    "description": "E-Mail → 3 Tage warten → Follow-up E-Mail → 2 Tage → SMS",
+    "trigger_type": "new_lead",
+    "steps": [
+      { "id": "t1s1", "type": "email", "label": "Begrüßungs-E-Mail", "config": { "template_id": "erstansprache-1" } },
+      { "id": "t1s2", "type": "wait", "label": "3 Tage warten", "config": { "days": 3 } },
+      { "id": "t1s3", "type": "email", "label": "Follow-up E-Mail", "config": { "template_id": "followup-1" } },
+      { "id": "t1s4", "type": "wait", "label": "2 Tage warten", "config": { "days": 2 } },
+      { "id": "t1s5", "type": "sms", "label": "Follow-up SMS", "config": { "message": "Hallo {{ patient.first_name }}, haben Sie unsere E-Mail erhalten? Wir freuen uns auf Ihre Rückmeldung. Ihr Wunschlachen-Team" } }
+    ]
+  },
+  {
+    "name": "Termin-Erinnerung",
+    "description": "SMS 24h vor Termin → E-Mail 2h vor Termin",
+    "trigger_type": "manual",
+    "steps": [
+      { "id": "t2s1", "type": "sms", "label": "Erinnerung (24h)", "config": { "message": "Hallo {{ patient.first_name }}, zur Erinnerung: Ihr Zahnarzttermin ist morgen. Bitte denken Sie an Ihre Versichertenkarte. Ihr Wunschlachen-Team" } },
+      { "id": "t2s2", "type": "wait", "label": "22 Stunden warten", "config": { "days": 1 } },
+      { "id": "t2s3", "type": "email", "label": "Erinnerung (2h)", "config": { "template_id": "termin-erinnerung-1" } }
+    ]
+  },
+  {
+    "name": "Nach Behandlung",
+    "description": "Danke-E-Mail → 7 Tage → Review-Anfrage → 30 Tage → Recall-E-Mail",
+    "trigger_type": "stage_change",
+    "trigger_config": { "to_status": "done" },
+    "steps": [
+      { "id": "t3s1", "type": "email", "label": "Danke-E-Mail", "config": { "template_id": "nachsorge-1" } },
+      { "id": "t3s2", "type": "wait", "label": "7 Tage warten", "config": { "days": 7 } },
+      { "id": "t3s3", "type": "sms", "label": "Review-Anfrage", "config": { "message": "Hallo {{ patient.first_name }}, wie war Ihr Besuch bei uns? Wir würden uns über eine Google-Bewertung freuen: https://g.page/wunschlachen" } },
+      { "id": "t3s4", "type": "wait", "label": "30 Tage warten", "config": { "days": 30 } },
+      { "id": "t3s5", "type": "email", "label": "Recall-E-Mail", "config": { "template_id": "allgemein-1" } }
+    ]
+  },
+  {
+    "name": "Reaktivierung",
+    "description": "Erinnerungs-E-Mail → 5 Tage → Follow-up SMS → 7 Tage → Anruf-Aufgabe",
+    "trigger_type": "manual",
+    "steps": [
+      { "id": "t4s1", "type": "email", "label": "Erinnerungs-E-Mail", "config": { "template_id": "followup-2" } },
+      { "id": "t4s2", "type": "wait", "label": "5 Tage warten", "config": { "days": 5 } },
+      { "id": "t4s3", "type": "sms", "label": "Follow-up SMS", "config": { "message": "Hallo {{ patient.first_name }}, wir haben seit einer Weile nichts von Ihnen gehört. Dürfen wir Sie zu einem Beratungsgespräch einladen? Ihr Wunschlachen-Team" } },
+      { "id": "t4s4", "type": "wait", "label": "7 Tage warten", "config": { "days": 7 } },
+      { "id": "t4s5", "type": "task", "label": "Lead anrufen", "config": { "description": "Lead anrufen — Reaktivierung nach Inaktivität" } }
+    ]
+  },
+  {
+    "name": "Lead Nurturing",
+    "description": "Info-E-Mail → 14 Tage → Wert-E-Mail → 14 Tage → Anruf-Aufgabe",
+    "trigger_type": "manual",
+    "steps": [
+      { "id": "t5s1", "type": "email", "label": "Info-E-Mail", "config": { "template_id": "erstansprache-1" } },
+      { "id": "t5s2", "type": "wait", "label": "14 Tage warten", "config": { "days": 14 } },
+      { "id": "t5s3", "type": "email", "label": "Wert-E-Mail", "config": { "template_id": "followup-1" } },
+      { "id": "t5s4", "type": "wait", "label": "14 Tage warten", "config": { "days": 14 } },
+      { "id": "t5s5", "type": "task", "label": "Persönlicher Anruf", "config": { "description": "Lead persönlich anrufen — Lead Nurturing abschließen" } }
+    ]
+  }
+]
