@@ -22,7 +22,7 @@ export const useUserRole = () => {
   const defaultPath = computed(() => {
     if (hasCrmAccess.value) return '/dashboard'
     if (hasCustomerAccess.value) return '/dash'
-    return '/login'
+    return '/dashboard'
   })
 
   return { role, hasCrmAccess, hasPflegeheimeAccess, hasPatientenAccess, hasPraxenAccess, hasCustomerAccess, defaultPath }

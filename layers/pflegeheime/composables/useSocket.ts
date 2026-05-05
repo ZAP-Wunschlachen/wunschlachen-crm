@@ -160,7 +160,8 @@ export const useSocket = (
       } else {
         if (!currentUser.value) {
           console.error('Authentication failed Please Login Again:', data)
-          return navigateTo('/login')
+          const { redirectToLogin } = useAuth()
+          return redirectToLogin()
         }
         console.error('Authentication failed:', data)
       }
