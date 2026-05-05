@@ -5,9 +5,13 @@
   "scripts": {
     "dev": "pnpm --filter app dev",
     "build": "pnpm --filter app build",
+    "generate": "pnpm --filter app generate && mkdir -p .output && cp -r app/.output/public .output/public",
     "preview": "pnpm --filter app preview",
     "lint": "pnpm -r lint",
     "postinstall": "pnpm --filter app postinstall"
+  },
+  "devDependencies": {
+    "nuxt": "^3.6.5"
   },
   "engines": {
     "node": ">=18.0.0",
