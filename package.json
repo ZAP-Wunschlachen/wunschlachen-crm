@@ -3,18 +3,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter app dev",
-    "build": "pnpm --filter app build",
-    "generate": "pnpm --filter app generate && mkdir -p .output && cp -r app/.output/public .output/public",
-    "preview": "pnpm --filter app preview",
-    "lint": "pnpm -r lint",
-    "postinstall": "pnpm --filter app postinstall"
+    "dev": "npx pnpm@latest --filter app dev",
+    "build": "npx pnpm@latest --filter app build",
+    "generate": "npx pnpm@latest --filter app generate && mkdir -p .output && cp -r app/.output/public .output/public",
+    "preview": "npx pnpm@latest --filter app preview",
+    "postinstall": "npx pnpm@latest --filter app postinstall"
   },
   "devDependencies": {
     "nuxt": "^3.6.5"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=8.0.0"
+    "node": ">=18.0.0"
   }
 }
