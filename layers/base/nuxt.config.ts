@@ -1,4 +1,8 @@
 import Aura from '@primevue/themes/aura'
+import { fileURLToPath } from 'node:url'
+import { dirname, resolve } from 'node:path'
+
+const currentDir = dirname(fileURLToPath(import.meta.url))
 
 export default defineNuxtConfig({
   ssr: false,
@@ -9,7 +13,11 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
   ],
 
-  css: ['primeicons/primeicons.css', '~/assets/css/global.css'],
+  css: ['primeicons/primeicons.css', resolve(currentDir, 'assets/css/global.css')],
+
+  tailwindcss: {
+    configPath: resolve(currentDir, '../../tailwind.config.ts'),
+  },
 
   primevue: {
     options: {

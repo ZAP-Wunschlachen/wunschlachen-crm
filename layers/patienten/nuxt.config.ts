@@ -1,4 +1,10 @@
+import { fileURLToPath } from 'node:url'
+import { dirname, resolve } from 'node:path'
+
+const currentDir = dirname(fileURLToPath(import.meta.url))
+
 export default defineNuxtConfig({
-  // Patienten B2C module - no additional config needed
-  // All shared config comes from base layer
+  alias: {
+    '~/types': resolve(currentDir, 'types'),
+  },
 })

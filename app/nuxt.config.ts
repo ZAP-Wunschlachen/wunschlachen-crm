@@ -1,6 +1,8 @@
 export default defineNuxtConfig({
   extends: [
     '../layers/base',
+    '../layers/pflegeheime',
+    '../layers/patienten',
   ],
 
   app: {
