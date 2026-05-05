@@ -7,5 +7,11 @@
     "dev": "nuxt dev",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@wunschlachen/base": "workspace:*"
+  },
+  "devDependencies": {
+    "nuxt": "^3.6.5"
   }
 }
