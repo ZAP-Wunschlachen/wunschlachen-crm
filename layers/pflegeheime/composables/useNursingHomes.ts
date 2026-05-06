@@ -5,6 +5,8 @@
  * Uses direct Directus API since nursing_home is not supported by secure-data proxy.
  */
 
+import type { NursingHome, NursingHomeListOptions } from '../types/nursing-home'
+
 const NURSING_HOME_FIELDS = [
   'id',
   'name',
@@ -72,10 +74,38 @@ export const useNursingHomes = () => {
     }
   }
 
+  /**
+   * List nursing homes with pagination, optional search and sort.
+   */
+  const fetchNursingHomes = async (
+    opts: NursingHomeListOptions = {},
+  ): Promise<NursingHome[]> => {
+    isLoading.value = true
+    error.value = null
+    try {
+      const params = new URLSearchParams({
+        fields: 'id,name,Street,number,zip,city,fone,total_capacity,distance_from_dental_office,status',
+        limit: String(opts.limit ?? 100),
+        offset: String(opts.offset ?? 0),
+        sort: opts.sort ?? 'name',
+      })
+      if (opts.search) params.set('search', opts.search)
+      return (await fetchDirectus(`/items/nursing_home?${params}`)) || []
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error'
+      error.value = msg
+      console.error('Failed to fetch nursing homes:', err)
+      return []
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     isLoading,
     error,
     fetchNursingHome,
     searchNursingHomes,
+    fetchNursingHomes,
   }
 }
