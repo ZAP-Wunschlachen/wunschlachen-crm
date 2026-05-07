@@ -8,38 +8,24 @@
 
       <nav class="flex-1 overflow-y-auto p-3 space-y-1">
         <div class="mb-4">
-          <p class="px-3 py-1 text-xs font-semibold text-gray-400 uppercase">Ubersicht</p>
+          <p class="px-3 py-1 text-xs font-semibold text-gray-400 uppercase">Übersicht</p>
           <NavItem to="/dashboard" icon="pi pi-home" label="Dashboard" />
-          <NavItem to="/inbox" icon="pi pi-inbox" label="Inbox" />
-          <NavItem to="/aufgaben" icon="pi pi-check-square" label="Aufgaben" />
         </div>
 
         <div v-if="hasPflegeheimeAccess" class="mb-4">
           <p class="px-3 py-1 text-xs font-semibold text-gray-400 uppercase">Pflege</p>
           <NavItem to="/pflegeheime" icon="pi pi-building" label="Heime" />
           <NavItem to="/pflegeheime/bewohner" icon="pi pi-users" label="Bewohner" />
-          <NavItem to="/pflegeheime/vertraege" icon="pi pi-file" label="Vertrage" />
         </div>
 
         <div v-if="hasPatientenAccess" class="mb-4">
-          <p class="px-3 py-1 text-xs font-semibold text-gray-400 uppercase">Implant</p>
+          <p class="px-3 py-1 text-xs font-semibold text-gray-400 uppercase">Patienten</p>
           <NavItem to="/patienten" icon="pi pi-user" label="Leads" />
           <NavItem to="/patienten/pipeline" icon="pi pi-th-large" label="Pipeline" />
-          <NavItem to="/patienten/marketing" icon="pi pi-chart-bar" label="Marketing" />
-          <NavItem to="/patienten/voice-ai" icon="pi pi-phone" label="Voice AI" />
-        </div>
-
-        <div v-if="hasPraxenAccess" class="mb-4">
-          <p class="px-3 py-1 text-xs font-semibold text-gray-400 uppercase">Praxen</p>
-          <NavItem to="/praxen" icon="pi pi-briefcase" label="Partner" />
-          <NavItem to="/praxen/referrals" icon="pi pi-share-alt" label="Referrals" />
-        </div>
-
-        <div class="mb-4">
-          <p class="px-3 py-1 text-xs font-semibold text-gray-400 uppercase">Tools</p>
-          <NavItem to="/workflows" icon="pi pi-bolt" label="Workflows" />
-          <NavItem to="/statistiken" icon="pi pi-chart-line" label="Statistiken" />
-          <NavItem to="/einstellungen" icon="pi pi-cog" label="Einstellungen" />
+          <NavItem to="/patienten/termine" icon="pi pi-calendar" label="Termine" />
+          <NavItem to="/patienten/bewertungen" icon="pi pi-star" label="Bewertungen" />
+          <NavItem to="/patienten/workflows" icon="pi pi-bolt" label="Workflows" />
+          <NavItem to="/patienten/einstellungen" icon="pi pi-cog" label="Einstellungen" />
         </div>
       </nav>
 
