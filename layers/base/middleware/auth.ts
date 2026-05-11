@@ -10,21 +10,22 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const config = useRuntimeConfig()
   const authUrl = config.public.authUrl as string
   const devAuthBypass = DEV_MODE_BYPASS_AUTH || (config.public.devAuthBypass as boolean)
-  const { user, checkAuthStatus } = useAuth()
+  const { checkAuthStatus } = useAuth()
+  // useState direkt — useAuth liefert readonly(user), wir brauchen mutate für Mock
+  const userState = useState<any>('auth.user', () => null)
 
   // Dev-only: Mock-User setzen, Auth komplett überspringen
   if (devAuthBypass) {
-    if (!user.value) {
-      user.value = {
+    if (!userState.value) {
+      userState.value = {
         id: 'dev-tony',
         email: 'tony.guenther@wunschlachen.de',
         first_name: 'Tony',
         last_name: 'Günther (Dev-Bypass)',
         role: 'administrator',
         nursing_home: null,
-      } as any
+      }
     }
-    // Routing-Decision für `/`
     if (to.path === '/') {
       return navigateTo('/dashboard')
     }
@@ -32,9 +33,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   // ===== Production Auth-Flow =====
-  if (!user.value) {
+  if (!userState.value) {
     await checkAuthStatus()
   }
+  const user = userState
 
   if (!user.value?.id) {
     return navigateTo(authUrl, { external: true })

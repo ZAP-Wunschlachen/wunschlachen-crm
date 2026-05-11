@@ -1,6 +1,6 @@
 <template>
   <NuxtLink
-    :to="path"
+    :to="resolvedPath"
     :class="[
       'group relative flex items-center rounded-md text-[13px] font-medium transition-all duration-150',
       collapsed ? 'justify-center px-0 py-2.5' : 'gap-2.5 px-2.5 py-[7px]',
@@ -12,7 +12,7 @@
       class="w-5 text-center flex-shrink-0"
       :style="collapsed ? 'font-size: 18px' : 'font-size: 15px'"
     />
-    <span v-if="!collapsed">{{ label }}</span>
+    <span v-if="!collapsed" class="truncate">{{ label }}</span>
 
     <!-- Tooltip im collapsed-State -->
     <span
@@ -25,8 +25,19 @@
 </template>
 
 <script setup lang="ts">
+import type { CustomerType } from '../composables/useCustomerType'
+
 const props = defineProps<{
-  path: string
+  /**
+   * Statischer Pfad — wird verwendet wenn `paths` nicht gesetzt ist.
+   */
+  path?: string
+  /**
+   * Smart-Routing: Pfad pro Customer-Type. Wenn der aktuelle
+   * customerType in `paths` matcht, wird die entsprechende URL genutzt.
+   * Fallback: `paths.heimkunden` oder `paths.patienten` oder `path`.
+   */
+  paths?: Partial<Record<CustomerType, string>>
   label: string
   icon: string
   collapsed?: boolean
@@ -34,8 +45,33 @@ const props = defineProps<{
 }>()
 
 const route = useRoute()
+const { customerType } = useCustomerType()
+
+const resolvedPath = computed(() => {
+  if (props.paths) {
+    return (
+      props.paths[customerType.value] ||
+      props.paths.heimkunden ||
+      props.paths.patienten ||
+      props.paths.all ||
+      props.path ||
+      '/'
+    )
+  }
+  return props.path || '/'
+})
+
+// Active wenn aktuelle Route mit IRGENDEINEM zugewiesenen Pfad matcht
+// (egal welcher Tab gerade gewählt ist)
+const allPossiblePaths = computed(() => {
+  if (props.paths) return Object.values(props.paths).filter(Boolean) as string[]
+  return [props.path || '/']
+})
+
 const isActive = computed(() => {
-  if (props.exact) return route.path === props.path
-  return route.path === props.path || route.path.startsWith(props.path + '/')
+  return allPossiblePaths.value.some((p) => {
+    if (props.exact) return route.path === p
+    return route.path === p || route.path.startsWith(p + '/')
+  })
 })
 </script>
