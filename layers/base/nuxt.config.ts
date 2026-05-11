@@ -23,13 +23,15 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    // Server-only: niemals im Client-Bundle exposed
+    brevoToken: process.env.BREVO_TOKEN || '',
+    brevoSenderEmail: process.env.BREVO_SENDER_EMAIL || '',
+    brevoSenderName: process.env.BREVO_SENDER_NAME || 'Wunschlachen',
+
     public: {
       socketUrl: process.env.SOCKET_URL || '',
       directusUrl: process.env.DIRECTUS_URL || 'https://wunschlachen.app',
       authUrl: process.env.AUTH_URL || 'https://login.wunschlachen.app',
-      brevoToken: process.env.BREVO_TOKEN || '',
-      brevoSenderEmail: process.env.BREVO_SENDER_EMAIL || '',
-      brevoSenderName: process.env.BREVO_SENDER_NAME || 'Wunschlachen',
     },
   },
 })
