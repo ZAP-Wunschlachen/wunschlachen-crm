@@ -284,7 +284,24 @@ CRM-Hauptrepo hat `directus-extensions/`:
 
 ---
 
-## 6. Aktualisierte Phasen-Übersicht (Plan v6, final)
+## 6. Aktualisierte Phasen-Übersicht (Plan v7, final)
+
+### Plan v7 Erweiterung
+Nach Phase 0-7 kommen zwei neue Phasen:
+
+| Phase | Inhalt | Aufwand |
+|---|---|---|
+| **8 Navigation v2** | Salesforce-Style Sidebar (funktions-orientiert), `<CustomerTypeTabs>`-Component, Top-Level-Pages in app/ die zwischen Heimkunden/Patienten umschalten, `useUnified*`-Wrapper-Composables | 8-12 Tage |
+| **9 Ticket-System** | Zendesk-Style Inbox mit E-Mail/SMS/WhatsApp/Form/Phone-Channels, Directus-Schema (tickets, ticket_messages, ticket_macros), Nitro-Webhooks für Inbound, SLA + Auto-Assign | 15-25 Tage |
+
+**Personas (final, ohne Bewohner — die deckt customer-app):**
+- **Heimkunden** = Pflegeheim-Institutionen (B2B)
+- **Patienten** = Implant-Lead-Funnel (B2C)
+- Tab-Switch pro Page: `Alle | Heimkunden | Patienten`
+
+**Reihenfolge:** Phase 8 vor Phase 9. Phase 5c/5e (Backend gegen real Directus) und Phase 6/7 (Tests + Cutover) laufen danach.
+
+### Plan v6 unverändert
 
 | Phase | Inhalt | Aufwand |
 |---|---|---|
