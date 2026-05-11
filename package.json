@@ -10,9 +10,15 @@
     "postinstall": "npx pnpm@9 --filter app postinstall"
   },
   "devDependencies": {
-    "nuxt": "^3.6.5"
+    "nuxt": "3.20.0"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "nuxt": "3.20.0",
+      "vite": "^6.3.0"
+    }
   }
 }
