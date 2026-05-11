@@ -3,9 +3,23 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const config = useRuntimeConfig()
   const authUrl = config.public.authUrl as string
+  const devAuthBypass = config.public.devAuthBypass as boolean
   const { user, checkAuthStatus } = useAuth()
 
-  if (!user.value) {
+  // Dev-only: Mock-User setzen, Auth-Redirect überspringen
+  // Aktiviert via NUXT_PUBLIC_DEV_AUTH_BYPASS=1 in .env.local
+  if (devAuthBypass && !user.value) {
+    user.value = {
+      id: 'dev-tony',
+      email: 'tony.guenther@wunschlachen.de',
+      first_name: 'Tony',
+      last_name: 'Günther (Dev-Bypass)',
+      role: 'administrator',
+      nursing_home: null,
+    } as any
+  }
+
+  if (!user.value && !devAuthBypass) {
     await checkAuthStatus()
   }
 

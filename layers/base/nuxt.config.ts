@@ -32,6 +32,10 @@ export default defineNuxtConfig({
       socketUrl: process.env.SOCKET_URL || '',
       directusUrl: process.env.DIRECTUS_URL || 'https://wunschlachen.app',
       authUrl: process.env.AUTH_URL || 'https://login.wunschlachen.app',
+      // Dev-only: Auth komplett überspringen, Mock-User setzen
+      // Aktivieren via .env.local: NUXT_PUBLIC_DEV_AUTH_BYPASS=1
+      // Niemals in Production setzen!
+      devAuthBypass: process.env.NUXT_PUBLIC_DEV_AUTH_BYPASS === '1',
     },
   },
 })
