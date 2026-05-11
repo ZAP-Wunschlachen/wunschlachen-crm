@@ -5,9 +5,8 @@
   "dependencies": {
     "@fontsource/outfit": "^5.2.8",
     "@pinia/nuxt": "^0.11.3",
-    "@primevue/nuxt-module": "^4.5.4",
-    "@primevue/themes": "^4.5.4",
     "@vueuse/core": "^14.2.1",
+    "@zap-wunschlachen/wl-shared-components": "^1.0.38",
     "date-fns": "^3.6.0",
     "date-fns-tz": "^3.2.0",
     "echarts": "^6.0.0",
@@ -15,10 +14,10 @@
     "nuxt": "^3.6.5",
     "pinia": "^3.0.4",
     "primeicons": "^7.0.0",
-    "primevue": "^4.5.4",
     "vue": "^3.5.13",
     "vue-echarts": "^8.0.1",
-    "vue-router": "^4.5.1"
+    "vue-router": "^4.5.1",
+    "vuetify": "^3.6.0"
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.12.0",

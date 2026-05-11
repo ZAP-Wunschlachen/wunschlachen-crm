@@ -1,4 +1,3 @@
-import Aura from '@primevue/themes/aura'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 
@@ -7,9 +6,13 @@ const currentDir = dirname(fileURLToPath(import.meta.url))
 export default defineNuxtConfig({
   ssr: false,
   devtools: { enabled: true },
+
+  build: {
+    transpile: ['vuetify', '@zap-wunschlachen/wl-shared-components'],
+  },
+
   modules: [
     '@nuxtjs/tailwindcss',
-    '@primevue/nuxt-module',
     '@pinia/nuxt',
   ],
 
@@ -17,21 +20,6 @@ export default defineNuxtConfig({
 
   tailwindcss: {
     configPath: resolve(currentDir, '../../tailwind.config.ts'),
-  },
-
-  primevue: {
-    options: {
-      theme: {
-        preset: Aura,
-        options: {
-          darkModeSelector: '.dark-mode',
-          cssLayer: {
-            name: 'primevue',
-            order: 'tailwind-base, primevue, tailwind-utilities',
-          },
-        },
-      },
-    },
   },
 
   runtimeConfig: {
