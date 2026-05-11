@@ -1,25 +1,38 @@
+// =============================================================================
+// TEMP DEV-MODE: Auth komplett überspringen
+// Auf `false` setzen wenn echte Auth aktiviert werden soll (Phase 5e).
+// =============================================================================
+const DEV_MODE_BYPASS_AUTH = true
+
 export default defineNuxtRouteMiddleware(async (to) => {
   if (process.env.NODE_ENV === 'test') return
 
   const config = useRuntimeConfig()
   const authUrl = config.public.authUrl as string
-  const devAuthBypass = config.public.devAuthBypass as boolean
+  const devAuthBypass = DEV_MODE_BYPASS_AUTH || (config.public.devAuthBypass as boolean)
   const { user, checkAuthStatus } = useAuth()
 
-  // Dev-only: Mock-User setzen, Auth-Redirect überspringen
-  // Aktiviert via NUXT_PUBLIC_DEV_AUTH_BYPASS=1 in .env.local
-  if (devAuthBypass && !user.value) {
-    user.value = {
-      id: 'dev-tony',
-      email: 'tony.guenther@wunschlachen.de',
-      first_name: 'Tony',
-      last_name: 'Günther (Dev-Bypass)',
-      role: 'administrator',
-      nursing_home: null,
-    } as any
+  // Dev-only: Mock-User setzen, Auth komplett überspringen
+  if (devAuthBypass) {
+    if (!user.value) {
+      user.value = {
+        id: 'dev-tony',
+        email: 'tony.guenther@wunschlachen.de',
+        first_name: 'Tony',
+        last_name: 'Günther (Dev-Bypass)',
+        role: 'administrator',
+        nursing_home: null,
+      } as any
+    }
+    // Routing-Decision für `/`
+    if (to.path === '/') {
+      return navigateTo('/dashboard')
+    }
+    return // alle anderen Routes durchlassen
   }
 
-  if (!user.value && !devAuthBypass) {
+  // ===== Production Auth-Flow =====
+  if (!user.value) {
     await checkAuthStatus()
   }
 
