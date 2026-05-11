@@ -47,6 +47,7 @@
           <SidebarSection label="Patienten B2C" :collapsed="collapsed" />
           <SidebarLink path="/patienten" label="Übersicht" icon="pi pi-objects-column" :collapsed="collapsed" exact />
           <SidebarLink path="/patienten/pipeline" label="Pipeline" icon="pi pi-bars" :collapsed="collapsed" />
+          <SidebarLink path="/patienten/leads" label="Leads" icon="pi pi-user" :collapsed="collapsed" />
           <SidebarLink path="/patienten/termine" label="Termine" icon="pi pi-calendar" :collapsed="collapsed" />
           <SidebarLink path="/patienten/bewertungen" label="Bewertungen" icon="pi pi-star" :collapsed="collapsed" />
           <SidebarLink path="/patienten/voice-ai" label="Voice-AI" icon="pi pi-microphone" :collapsed="collapsed" />
@@ -149,6 +150,7 @@ const titleMap: Record<string, string> = {
   '/crm/einstellungen': 'CRM-Einstellungen',
   '/patienten': 'Patienten-Übersicht',
   '/patienten/pipeline': 'Patienten Pipeline',
+  '/patienten/leads': 'Patienten Leads',
   '/patienten/termine': 'Patienten Termine',
   '/patienten/bewertungen': 'Bewertungen',
   '/patienten/voice-ai': 'Voice-AI',
