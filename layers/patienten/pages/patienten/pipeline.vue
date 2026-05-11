@@ -39,7 +39,7 @@ const showCreate = ref(false)
 const loadLeads = async () => {
   loading.value = true
   try {
-    const { fetchLeads, pagination } = useLeads()
+    const { fetchLeads, pagination } = usePatientLeads()
     pagination.value.limit = 500
     const result = await fetchLeads({}, ['-date_updated'], 1)
     allLeads.value = result
@@ -55,7 +55,7 @@ const onStatusChange = async (id: string, newStatus: LeadStatus) => {
   if (lead) lead.status = newStatus
 
   try {
-    const { updateLead } = useLeads()
+    const { updateLead } = usePatientLeads()
     await updateLead(id, { status: newStatus })
   } catch (err) {
     console.error('Status update failed:', err)

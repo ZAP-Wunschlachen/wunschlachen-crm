@@ -1,4 +1,4 @@
-// composables/useWorkflows.ts — Workflow engine for Praxis CRM
+// composables/usePatientWorkflows.ts — Workflow engine for Praxis CRM
 
 import type {
   Workflow,
@@ -59,7 +59,7 @@ const evaluateCondition = (lead: Lead, config: WorkflowStepConditionConfig): boo
 }
 
 // --- Composable ---
-export const useWorkflows = () => {
+export const usePatientWorkflows = () => {
   const workflows = ref<Workflow[]>([])
 
   const fetchWorkflows = (triggerType?: WorkflowTriggerType): Workflow[] => {

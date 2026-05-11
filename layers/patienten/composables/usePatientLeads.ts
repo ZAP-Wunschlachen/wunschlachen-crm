@@ -52,7 +52,7 @@ const LEAD_DETAIL_FIELDS = [
   'user_updated',
 ]
 
-export const useLeads = () => {
+export const usePatientLeads = () => {
   const { getItems, getItem, updateItem, updateItems, createItem } = useSecureData()
 
   const leads = ref<Lead[]>([])

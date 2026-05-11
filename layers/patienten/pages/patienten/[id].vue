@@ -167,7 +167,7 @@ const isOverdue = computed(() => {
 })
 
 const loadLead = async () => {
-  const { fetchLead } = useLeads()
+  const { fetchLead } = usePatientLeads()
   lead.value = await fetchLead(route.params.id as string)
   refreshActivities()
 }
@@ -179,7 +179,7 @@ const refreshActivities = () => {
 const saveField = async (field: string, value: any) => {
   if (!lead.value) return
   try {
-    const { updateLead } = useLeads()
+    const { updateLead } = usePatientLeads()
     await updateLead(lead.value.id, { [field]: value })
     ;(lead.value as any)[field] = value
   } catch (err) {
@@ -194,7 +194,7 @@ const saveTextField = async (field: string, event: Event) => {
   const previousValue = (lead.value as any)[field]
   if (newValue === previousValue) return
   try {
-    const { updateLead } = useLeads()
+    const { updateLead } = usePatientLeads()
     await updateLead(lead.value.id, { [field]: newValue || null })
     ;(lead.value as any)[field] = newValue
   } catch (err) {

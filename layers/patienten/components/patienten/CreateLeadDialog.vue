@@ -47,7 +47,7 @@ const canSubmit = computed(() => form.value.first_name.trim() && form.value.last
 const close = () => emit('update:visible', false)
 
 const submit = async () => {
-  const { createLead } = useLeads()
+  const { createLead } = usePatientLeads()
   await createLead({ ...form.value, status: 'open' as any })
   form.value = { first_name: '', last_name: '', mail: '', phone: '' }
   emit('created')

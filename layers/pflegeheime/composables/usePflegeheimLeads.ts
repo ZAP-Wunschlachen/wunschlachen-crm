@@ -1,5 +1,5 @@
 /**
- * useLeads Composable
+ * usePflegeheimLeads Composable
  *
  * LOCAL MODE: Uses localStorage for all lead data.
  * When ready for production, switch USE_LOCAL to false
@@ -110,7 +110,7 @@ export const getLocalLeads = (): NursingHomeLead[] => {
   return _allLeads.value
 }
 
-export const useLeads = () => {
+export const usePflegeheimLeads = () => {
   // Only initialize Directus API when not in local mode
   const secureData = USE_LOCAL ? null : useSecureData()
   const getItems = secureData?.getItems ?? (async () => [])

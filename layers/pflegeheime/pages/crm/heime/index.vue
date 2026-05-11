@@ -46,7 +46,7 @@
             v-for="h in heime"
             :key="h.id"
             class="border-b border-gray-50 last:border-b-0 hover:bg-gray-50/80 cursor-pointer transition-colors"
-            @click="navigateTo(`/pflegeheime/${h.id}`)"
+            @click="navigateTo(`/crm/heime/${h.id}`)"
           >
             <td class="px-4 py-3 font-medium text-gray-900">{{ h.name }}</td>
             <td class="px-4 py-3 text-gray-500">{{ formatAddress(h) }}</td>

@@ -200,7 +200,7 @@ const debouncedLoad = () => {
 }
 
 const loadLeads = async () => {
-  const { fetchLeads, fetchLeadCount, pagination } = useLeads()
+  const { fetchLeads, fetchLeadCount, pagination } = usePatientLeads()
   pagination.value.limit = limit
 
   const filters = {

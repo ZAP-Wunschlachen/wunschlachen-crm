@@ -1,5 +1,5 @@
 /**
- * useWorkflows Composable
+ * usePflegeheimWorkflows Composable
  *
  * CRUD for workflows + workflow execution engine.
  * LOCAL MODE: Uses localStorage for workflow data + client-side step execution.
@@ -47,7 +47,7 @@ const saveRunsToStorage = () => {
   } catch { /* ignore */ }
 }
 
-export const useWorkflows = () => {
+export const usePflegeheimWorkflows = () => {
   const secureData = USE_LOCAL ? null : useSecureData()
   const getItems = secureData?.getItems ?? (async () => [])
   const getItem = secureData?.getItem ?? (async () => null as any)
@@ -129,7 +129,7 @@ export const useWorkflows = () => {
     if (!wf || !wf.steps || wf.steps.length === 0) return []
 
     const { createActivity } = useActivities()
-    const { fetchLead } = useLeads()
+    const { fetchLead } = usePflegeheimLeads()
 
     const runs: CrmWorkflowRun[] = []
 

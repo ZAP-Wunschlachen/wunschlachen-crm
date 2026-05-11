@@ -64,7 +64,7 @@ import type { Lead } from '~/types/crm'
 definePageMeta({ layout: 'crm', middleware: ['auth'] })
 
 const route = useRoute()
-const { fetchWorkflow, updateWorkflow, removeWorkflow, executeWorkflow } = useWorkflows()
+const { fetchWorkflow, updateWorkflow, removeWorkflow, executeWorkflow } = usePatientWorkflows()
 const { templates: emailTemplates, fetchTemplates: fetchEmailTemplates } = useEmailTemplates()
 
 const workflow = ref<Workflow | null>(null)
@@ -109,7 +109,7 @@ const deleteWorkflow = () => {
 const runWorkflow = async () => {
   if (!workflow.value) return
   try {
-    const { fetchLeads } = useLeads()
+    const { fetchLeads } = usePatientLeads()
     const leads = await fetchLeads({}, ['-date_updated'], 1)
     const activeLeads = leads.filter((l: Lead) => !['done', 'cancelled'].includes(l.status))
     await executeWorkflow(workflow.value.id, activeLeads)

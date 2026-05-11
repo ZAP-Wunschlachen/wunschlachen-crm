@@ -143,7 +143,7 @@ definePageMeta({ layout: 'crm', middleware: 'auth' })
 
 const PIPELINE_STAGES = ['Unqualified', 'Qualified', 'Follow-up', 'Presentation', 'Email', 'Emergency', 'Won', 'Lost', 'Cancelled']
 
-const { leads, pagination, fetchLeads, fetchLeadCount, isLoading } = useLeads()
+const { leads, pagination, fetchLeads, fetchLeadCount, isLoading } = usePflegeheimLeads()
 const { smartViews, fetchSmartViews } = useSmartViews()
 
 const searchQuery = ref('')

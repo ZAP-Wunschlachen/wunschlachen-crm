@@ -25,7 +25,7 @@ const bgColor = ref('bg-dental-blue--5')
 
 onMounted(async () => {
   try {
-    const { fetchLeads, pagination } = useLeads()
+    const { fetchLeads, pagination } = usePatientLeads()
     pagination.value.limit = 200
     const leads = await fetchLeads({}, ['-date_created'], 1)
 

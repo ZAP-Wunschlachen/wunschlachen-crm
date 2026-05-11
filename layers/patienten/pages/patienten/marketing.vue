@@ -56,7 +56,7 @@ const sourceCounts = computed(() => {
 const maxSourceCount = computed(() => Math.max(...Object.values(sourceCounts.value), 1))
 
 onMounted(async () => {
-  const { fetchLeads, pagination } = useLeads()
+  const { fetchLeads, pagination } = usePatientLeads()
   pagination.value.limit = 500
   allLeads.value = await fetchLeads({}, ['-date_created'], 1)
 })

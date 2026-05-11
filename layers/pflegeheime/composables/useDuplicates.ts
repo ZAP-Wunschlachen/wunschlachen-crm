@@ -5,7 +5,7 @@
  * Supports merging duplicate leads (activities, contacts, documents transfer).
  */
 
-import { getLocalLeads } from './useLeads'
+import { getLocalLeads } from './usePflegeheimLeads'
 
 export interface DuplicateMatch {
   leadA: NursingHomeLead
@@ -233,7 +233,7 @@ export const useDuplicates = () => {
    * Merge leadB into leadA
    */
   const mergeLeads = async (keepId: string, removeId: string) => {
-    const { fetchLead, updateLead } = useLeads()
+    const { fetchLead, updateLead } = usePflegeheimLeads()
     const { activities: acts, fetchActivities, updateActivity } = useActivities()
     const { fetchContacts, editContact } = useContacts()
     const keepLead = await fetchLead(keepId)
@@ -281,7 +281,7 @@ export const useDuplicates = () => {
     // 4. Delete the duplicate lead
     const allLeads = getLocalLeads()
     const filtered = allLeads.filter(l => l.id !== removeId)
-    const { importLeadsToLocal } = await import('./useLeads')
+    const { importLeadsToLocal } = await import('./usePflegeheimLeads')
     importLeadsToLocal(filtered)
 
     // 5. Remove from duplicate groups

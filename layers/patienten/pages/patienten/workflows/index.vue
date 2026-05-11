@@ -55,7 +55,7 @@ import type { Workflow } from '~/types/workflow'
 
 definePageMeta({ layout: 'crm', middleware: ['auth'] })
 
-const { workflows, fetchWorkflows, createWorkflow, updateWorkflow, getTemplates } = useWorkflows()
+const { workflows, fetchWorkflows, createWorkflow, updateWorkflow, getTemplates } = usePatientWorkflows()
 
 const loading = ref(true)
 const templates = getTemplates()

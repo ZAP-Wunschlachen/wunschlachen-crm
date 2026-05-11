@@ -51,7 +51,7 @@ export const useReactivation = () => {
     const threshold = thresholdDays ?? config.value.thresholdDays
 
     try {
-      const { fetchLeads } = useLeads()
+      const { fetchLeads } = usePatientLeads()
       const { getAllActivities } = useLeadActivities()
 
       // Fetch all non-completed leads
