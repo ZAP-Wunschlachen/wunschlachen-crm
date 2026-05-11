@@ -1,0 +1,26 @@
+{
+  "name": "directus-extension-email-service",
+  "version": "1.0.0",
+  "description": "CRM Email Service - IONOS & Gmail IMAP/SMTP integration",
+  "type": "module",
+  "directus:extension": {
+    "type": "endpoint",
+    "path": "dist/index.js",
+    "source": "src/index.ts",
+    "host": "^11.0.0"
+  },
+  "scripts": {
+    "build": "npx @directus/extensions-sdk build",
+    "dev": "npx @directus/extensions-sdk build -w"
+  },
+  "dependencies": {
+    "imapflow": "^1.0.160",
+    "nodemailer": "^6.9.14",
+    "mailparser": "^3.7.1"
+  },
+  "devDependencies": {
+    "@directus/extensions-sdk": "^11.0.0",
+    "@types/nodemailer": "^6.4.15",
+    "typescript": "^5.4.0"
+  }
+}

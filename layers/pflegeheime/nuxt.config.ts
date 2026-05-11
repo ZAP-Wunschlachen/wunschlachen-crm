@@ -1,3 +1,10 @@
+import { fileURLToPath } from 'node:url'
+import { dirname, resolve } from 'node:path'
+
+const currentDir = dirname(fileURLToPath(import.meta.url))
+
 export default defineNuxtConfig({
-  // Pflegeheime B2B module
+  alias: {
+    '~/types': resolve(currentDir, 'types'),
+  },
 })

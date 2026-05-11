@@ -1,0 +1,24 @@
+{
+  "name": "directus-extension-crawler-service",
+  "version": "1.0.0",
+  "description": "CRM Web Crawler - Pflegeheim-Verzeichnisse crawlen und als Leads importieren",
+  "type": "module",
+  "directus:extension": {
+    "type": "endpoint",
+    "path": "dist/index.js",
+    "source": "src/index.ts",
+    "host": "^11.0.0"
+  },
+  "scripts": {
+    "build": "npx @directus/extensions-sdk build",
+    "dev": "npx @directus/extensions-sdk build -w"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@directus/extensions-sdk": "^11.0.0",
+    "typescript": "^5.4.0"
+  }
+}
