@@ -3,11 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npx pnpm@latest --filter app dev",
-    "build": "npx pnpm@latest --filter app build",
-    "generate": "npx pnpm@latest --filter app generate && mkdir -p .output && cp -r app/.output/public .output/public",
-    "preview": "npx pnpm@latest --filter app preview",
-    "postinstall": "npx pnpm@latest --filter app postinstall"
+    "dev": "npx pnpm@9 --filter app dev",
+    "build": "npx pnpm@9 --filter app build",
+    "generate": "npx pnpm@9 --filter app generate && mkdir -p .output && cp -r app/.output/public .output/public",
+    "preview": "npx pnpm@9 --filter app preview",
+    "postinstall": "npx pnpm@9 --filter app postinstall"
   },
   "devDependencies": {
     "nuxt": "^3.6.5"
