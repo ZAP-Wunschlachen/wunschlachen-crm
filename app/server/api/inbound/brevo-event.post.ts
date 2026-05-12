@@ -44,6 +44,18 @@ interface BrevoWebhookEvent {
   sending_ip?: string
 }
 
+// Brevo-Event → unser internes event_type
+const EVENT_TYPE_MAP: Record<BrevoWebhookEvent['event'], string> = {
+  request: 'sent',
+  delivered: 'delivered',
+  opens: 'opened',
+  click: 'clicked',
+  bounce: 'bounced',
+  blocked: 'bounced',
+  spam: 'spam',
+  unsubscribed: 'unsubscribed',
+}
+
 export default defineEventHandler(async (event) => {
   const body = await readBody<BrevoWebhookEvent | BrevoWebhookEvent[]>(event)
   const events = Array.isArray(body) ? body : [body]
@@ -84,13 +96,14 @@ export default defineEventHandler(async (event) => {
       continue
     }
 
-    // Persistieren in email_events (sobald Collection da)
+    // Persistieren in email_events
+    const eventType = EVENT_TYPE_MAP[ev.event] || ev.event
     try {
       await $fetch(`${directusUrl}/items/email_events`, {
         method: 'POST',
         body: {
           lead_id: resolvedLeadId,
-          event_type: ev.event,
+          event_type: eventType,
           occurred_at: ev.date || new Date().toISOString(),
           message_id: ev['message-id'] || null,
           click_url: ev.link || null,

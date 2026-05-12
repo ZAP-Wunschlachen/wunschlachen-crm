@@ -1,9 +1,24 @@
 /**
- * useEmailEvents — Brevo-Tracking-Events pro Lead (Plan v9, A3)
+ * useEmailEvents — Brevo-Tracking-Events pro Lead (Plan v9 Phase B)
  *
  * In Production: Brevo-Webhook `/api/inbound/brevo-event` schreibt in Directus
- * Collection `email_events`. Im Mock-Mode liefern wir vordefinierte Events
- * für die Demo-Leads zurück.
+ * Collection `email_events`. Im Mock-Mode persistieren wir in localStorage,
+ * damit Events nach Webhook-Trigger zur Verfügung stehen.
+ *
+ * Directus-Schema (siehe docs/EMAIL_EVENTS_SCHEMA.md):
+ *   { id uuid, lead_id uuid FK, activity_id uuid FK?, event_type string,
+ *     occurred_at timestamp, click_url string?, message_id string?,
+ *     raw_payload json, date_created timestamp }
+ *
+ * Brevo-Events-Mapping:
+ *   request    → sent
+ *   delivered  → delivered
+ *   opens      → opened
+ *   click      → clicked
+ *   bounce     → bounced
+ *   spam       → spam
+ *   unsubscribed → unsubscribed
+ *   blocked    → bounced
  */
 
 import type { LeadActivity } from '~/types/crm'
@@ -20,7 +35,7 @@ export type EmailEventType =
 export interface EmailEvent {
   id: string
   lead_id: string
-  activity_id?: string          // FK auf zugehörige Aktivität (E-Mail-Versand)
+  activity_id?: string
   event_type: EmailEventType
   occurred_at: string
   click_url?: string
@@ -28,28 +43,99 @@ export interface EmailEvent {
 }
 
 const USE_MOCK = true
+const STORAGE_KEY = 'patient-crm-email-events'
+const SEED_KEY = 'patient-crm-email-events-seeded'
 
-// Mock-Events: pro Aktivität liefern wir den letzten erreichten Tracking-Status
-const mockEventsByActivity: Record<string, EmailEventType> = {
-  'pact-1': 'opened',
-  'pact-2': 'clicked',
-  'pact-4': 'delivered',
-  // pact-3, pact-5 etc. → nicht in der Map → status bleibt "sent" (default)
+const STATUS_PRIORITY: Record<EmailEventType, number> = {
+  sent: 0,
+  delivered: 1,
+  opened: 2,
+  clicked: 3,
+  bounced: 4,
+  spam: 5,
+  unsubscribed: 6,
+}
+
+const readEvents = (): EmailEvent[] => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+const writeEvents = (events: EmailEvent[]) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(events))
+  } catch {
+    /* ignore */
+  }
+}
+
+const seedMockEvents = () => {
+  if (typeof window === 'undefined') return
+  if (localStorage.getItem(SEED_KEY)) return
+
+  const now = Date.now()
+  const day = 86400000
+  const seed: EmailEvent[] = [
+    // pl-1 — Maria Schmidt (mehrere Touches)
+    { id: 'ee-1', lead_id: 'pl-1', activity_id: 'pact-1', event_type: 'opened',    occurred_at: new Date(now - 2 * day).toISOString(), message_id: 'msg-001' },
+    { id: 'ee-2', lead_id: 'pl-1', activity_id: 'pact-1', event_type: 'delivered', occurred_at: new Date(now - 2 * day - 3600_000).toISOString(), message_id: 'msg-001' },
+    // pl-2 — Thomas Becker (HKP-Klick)
+    { id: 'ee-3', lead_id: 'pl-2', activity_id: 'pact-2', event_type: 'clicked',   occurred_at: new Date(now - 1 * day).toISOString(), click_url: 'https://wunschlachen.app/hkp/preview', message_id: 'msg-002' },
+    { id: 'ee-4', lead_id: 'pl-2', activity_id: 'pact-2', event_type: 'opened',    occurred_at: new Date(now - 1 * day - 1800_000).toISOString(), message_id: 'msg-002' },
+    { id: 'ee-5', lead_id: 'pl-2', activity_id: 'pact-2', event_type: 'delivered', occurred_at: new Date(now - 1 * day - 7200_000).toISOString(), message_id: 'msg-002' },
+    // pl-3 — Anna Wolf (nur delivered)
+    { id: 'ee-6', lead_id: 'pl-3', activity_id: 'pact-4', event_type: 'delivered', occurred_at: new Date(now - 5 * day).toISOString(), message_id: 'msg-004' },
+    // pl-4 — Lisa Wagner (bounce)
+    { id: 'ee-7', lead_id: 'pl-4', activity_id: 'pact-6', event_type: 'bounced',   occurred_at: new Date(now - 3 * day).toISOString(), message_id: 'msg-006' },
+  ]
+  writeEvents(seed)
+  localStorage.setItem(SEED_KEY, 'v1')
 }
 
 export const useEmailEvents = () => {
+  if (typeof window !== 'undefined') seedMockEvents()
+
   /**
-   * Liefert den letzten Event-Status für eine Aktivität (E-Mail).
-   * Wenn keine Events vorliegen → 'sent' als Default.
+   * Alle Events für eine Aktivität (geordnet vom letzten Event rückwärts).
    */
-  const getEmailStatus = (activityId: string): EmailEventType => {
-    if (USE_MOCK) return mockEventsByActivity[activityId] || 'sent'
-    // TODO Phase B: aus Directus laden
-    return 'sent'
+  const getEventsForActivity = (activityId: string): EmailEvent[] => {
+    if (!USE_MOCK) return [] // TODO Phase B: Directus-Fetch
+    return readEvents()
+      .filter((e) => e.activity_id === activityId)
+      .sort((a, b) => b.occurred_at.localeCompare(a.occurred_at))
   }
 
   /**
-   * Liefert engagement-stats für einen Lead (alle E-Mails aggregiert).
+   * Alle Events für einen Lead (alle E-Mails).
+   */
+  const getEventsForLead = (leadId: string): EmailEvent[] => {
+    if (!USE_MOCK) return []
+    return readEvents()
+      .filter((e) => e.lead_id === leadId)
+      .sort((a, b) => b.occurred_at.localeCompare(a.occurred_at))
+  }
+
+  /**
+   * Letzter (= highest-priority) Status für eine Aktivität.
+   * Beispiel: wenn opened+clicked existieren → clicked.
+   */
+  const getEmailStatus = (activityId: string): EmailEventType => {
+    const events = getEventsForActivity(activityId)
+    if (events.length === 0) return 'sent'
+    return events.reduce<EmailEventType>(
+      (max, ev) =>
+        STATUS_PRIORITY[ev.event_type] > STATUS_PRIORITY[max] ? ev.event_type : max,
+      'sent',
+    )
+  }
+
+  /**
+   * Engagement-Stats für einen Lead.
+   * Berechnet aus echten Events (Mock oder Directus).
    */
   const getEngagementStats = (activities: LeadActivity[]): {
     total_emails: number
@@ -88,6 +174,22 @@ export const useEmailEvents = () => {
   }
 
   /**
+   * Neuen Event persistieren (vom Brevo-Webhook aufgerufen).
+   * Im Mock-Mode → localStorage; in Prod → Directus.
+   */
+  const recordEvent = (event: Omit<EmailEvent, 'id'>): EmailEvent | null => {
+    if (!USE_MOCK) return null
+    const all = readEvents()
+    const next: EmailEvent = {
+      ...event,
+      id: `ee-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    }
+    all.push(next)
+    writeEvents(all)
+    return next
+  }
+
+  /**
    * UI-Helper: visuelle Repräsentation des Status.
    */
   const getStatusBadge = (status: EmailEventType) => {
@@ -109,5 +211,12 @@ export const useEmailEvents = () => {
     }
   }
 
-  return { getEmailStatus, getEngagementStats, getStatusBadge }
+  return {
+    getEmailStatus,
+    getEventsForActivity,
+    getEventsForLead,
+    getEngagementStats,
+    getStatusBadge,
+    recordEvent,
+  }
 }
