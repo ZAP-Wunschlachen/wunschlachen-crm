@@ -59,17 +59,30 @@
         </option>
       </select>
 
-      <!-- Sort by score -->
-      <button
-        class="px-2 py-1 rounded-2xl text-[10px] transition-colors ml-auto"
-        :class="sortByScore
-          ? 'bg-dental-blue-0 text-white'
-          : 'bg-white text-dental-blue-0 hover:bg-[#ededed] border border-dental-blue--5'"
-        @click="toggleSortByScore"
-      >
-        <i class="pi pi-sort-amount-down text-[10px] mr-1" />
-        Nach Score
-      </button>
+      <!-- Sort buttons -->
+      <div class="flex gap-1 ml-auto">
+        <button
+          class="px-2 py-1 rounded-2xl text-[10px] transition-colors"
+          :class="sortMode === 'urgency'
+            ? 'bg-dental-blue-0 text-white'
+            : 'bg-white text-dental-blue-0 hover:bg-[#ededed] border border-dental-blue--5'"
+          @click="sortMode = sortMode === 'urgency' ? 'default' : 'urgency'"
+          title="Dringende Leads zuerst (NBA-Engine)"
+        >
+          <i class="pi pi-exclamation-triangle text-[10px] mr-1" />
+          Dringend
+        </button>
+        <button
+          class="px-2 py-1 rounded-2xl text-[10px] transition-colors"
+          :class="sortMode === 'score'
+            ? 'bg-dental-blue-0 text-white'
+            : 'bg-white text-dental-blue-0 hover:bg-[#ededed] border border-dental-blue--5'"
+          @click="sortMode = sortMode === 'score' ? 'default' : 'score'"
+        >
+          <i class="pi pi-sort-amount-down text-[10px] mr-1" />
+          Score
+        </button>
+      </div>
     </div>
 
     <!-- Table -->
@@ -77,13 +90,13 @@
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b border-dental-blue--5">
+            <th class="text-left px-2 py-3 text-xs font-medium text-dental-blue--2">!</th>
             <th class="text-left px-4 py-3 text-xs font-medium text-dental-blue--2">Name</th>
-            <th class="text-left px-4 py-3 text-xs font-medium text-dental-blue--2">Dental Service</th>
             <th class="text-left px-4 py-3 text-xs font-medium text-dental-blue--2">Status</th>
+            <th class="text-left px-4 py-3 text-xs font-medium text-dental-blue--2">Nächste Aktion</th>
             <th class="text-left px-4 py-3 text-xs font-medium text-dental-blue--2">Score</th>
             <th class="text-left px-4 py-3 text-xs font-medium text-dental-blue--2">Quelle</th>
             <th class="text-left px-4 py-3 text-xs font-medium text-dental-blue--2">Follow-up</th>
-            <th class="text-left px-4 py-3 text-xs font-medium text-dental-blue--2">Erstellt</th>
           </tr>
         </thead>
         <tbody>
@@ -93,9 +106,18 @@
             class="border-b border-dental-blue--5 last:border-0 hover:bg-[#ededed] cursor-pointer transition-colors"
             @click="navigateTo(`/patienten/leads/${lead.id}`)"
           >
+            <td class="px-2 py-3">
+              <span
+                class="inline-block w-2 h-2 rounded-full"
+                :style="{ backgroundColor: getNbaForLead(lead).urgencyColor }"
+                :title="getNbaForLead(lead).reason"
+              />
+            </td>
             <td class="px-4 py-3 font-medium text-dental-blue-0">{{ lead.first_name }} {{ lead.last_name }}</td>
-            <td class="px-4 py-3 text-dental-blue--2">{{ getServiceName(lead) }}</td>
             <td class="px-4 py-3"><PatientenLeadStatusBadge :status="lead.status" /></td>
+            <td class="px-4 py-3 text-xs text-dental-blue--2 max-w-[280px] truncate" :title="getNbaForLead(lead).reason">
+              {{ getNbaForLead(lead).primaryAction }}
+            </td>
             <td class="px-4 py-3">
               <PatientenLeadScoreBadge v-if="getScore(lead.id) != null" :score="getScore(lead.id)!" />
               <span v-else class="text-xs text-dental-blue--3">—</span>
@@ -104,7 +126,6 @@
             <td class="px-4 py-3 text-xs" :class="isOverdue(lead) ? 'text-red-500 font-medium' : 'text-dental-blue--3'">
               {{ lead.follow_up ? formatDate(lead.follow_up) : '—' }}
             </td>
-            <td class="px-4 py-3 text-xs text-dental-blue--3">{{ formatDate(lead.date_created) }}</td>
           </tr>
           <tr v-if="displayLeads.length === 0">
             <td colspan="7" class="px-4 py-8 text-center text-dental-blue--3">Keine Leads gefunden</td>
@@ -142,7 +163,8 @@ const search = ref('')
 const activeStatus = ref<LeadStatus | null>(null)
 const activeSource = ref<LeadSource | null>(null)
 const showCreate = ref(false)
-const sortByScore = ref(false)
+type SortMode = 'default' | 'urgency' | 'score'
+const sortMode = ref<SortMode>('default')
 
 const limit = 25
 const totalPages = computed(() => Math.ceil(total.value / limit))
@@ -166,13 +188,54 @@ const getScore = (leadId: string): number | null => {
   return scores.value.get(leadId)?.total ?? null
 }
 
+// NBA pro Lead (memoisiert)
+const { compute: computeNBA, getUrgencyStyle } = useNextBestAction()
+
+interface LeadNbaInfo {
+  urgency: import('../../../composables/useNextBestAction').ActionUrgency
+  urgencyColor: string
+  primaryAction: string
+  reason: string
+  urgencyRank: number
+}
+
+const URGENCY_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
+
+const nbaCache = computed<Record<string, LeadNbaInfo>>(() => {
+  const cache: Record<string, LeadNbaInfo> = {}
+  for (const lead of leads.value) {
+    const result = computeNBA(lead)
+    const primary = result.actions.find((a) => a.primary) || result.actions[0]
+    cache[lead.id] = {
+      urgency: result.urgency,
+      urgencyColor: getUrgencyStyle(result.urgency).color,
+      primaryAction: primary?.label || 'Beobachten',
+      reason: result.reason,
+      urgencyRank: URGENCY_RANK[result.urgency] ?? 99,
+    }
+  }
+  return cache
+})
+
+const getNbaForLead = (lead: any): LeadNbaInfo =>
+  nbaCache.value[lead.id] || {
+    urgency: 'low',
+    urgencyColor: '#94a3b8',
+    primaryAction: '—',
+    reason: '',
+    urgencyRank: 99,
+  }
+
 const displayLeads = computed(() => {
-  if (!sortByScore.value) return leads.value
-  return [...leads.value].sort((a, b) => {
-    const scoreA = getScore(a.id) ?? 0
-    const scoreB = getScore(b.id) ?? 0
-    return scoreB - scoreA
-  })
+  if (sortMode.value === 'score') {
+    return [...leads.value].sort((a, b) => (getScore(b.id) ?? 0) - (getScore(a.id) ?? 0))
+  }
+  if (sortMode.value === 'urgency') {
+    return [...leads.value].sort(
+      (a, b) => getNbaForLead(a).urgencyRank - getNbaForLead(b).urgencyRank,
+    )
+  }
+  return leads.value
 })
 
 const statusFilters = {
@@ -194,9 +257,7 @@ const toggleStatus = (status: LeadStatus) => {
   loadLeads()
 }
 
-const toggleSortByScore = () => {
-  sortByScore.value = !sortByScore.value
-}
+// (sortMode wird inline gesetzt — kein Toggle nötig)
 
 let debounceTimer: ReturnType<typeof setTimeout>
 const debouncedLoad = () => {

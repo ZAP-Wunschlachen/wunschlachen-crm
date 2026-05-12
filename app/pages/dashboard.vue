@@ -27,6 +27,11 @@
       </div>
     </div>
 
+    <!-- Sales-Urgency-Card (Plan v9 Erweiterung) -->
+    <div v-if="hasPatientenAccess" class="mb-4">
+      <PatientenUrgencyKpiCard />
+    </div>
+
     <!-- Bereichs-Cards -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <!-- Heimkunden -->

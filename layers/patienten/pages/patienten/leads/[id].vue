@@ -395,6 +395,7 @@ const onAction = (action: import('../../../composables/useNextBestAction').NextB
 
 // Plan v9: State-Machine-validierte Folge-Status
 const { getNextStatuses, canTransition } = useLeadStatusTransitions()
+const { addActivity } = useLeadActivities()
 const allowedNextStatuses = computed(() => {
   if (!lead.value) return []
   return getNextStatuses(lead.value.status).filter((s) => s !== lead.value!.status)
@@ -411,9 +412,31 @@ const onStatusChange = async (newStatus: string) => {
     })
     return
   }
+  const fromStatus = lead.value.status
+  const now = new Date().toISOString()
   saveField('status', newStatus)
-  // last_status_change_at parallel updaten
-  saveField('last_status_change_at', new Date().toISOString())
+  saveField('last_status_change_at', now)
+
+  // Plan v9: Audit-Trail in Timeline
+  try {
+    addActivity({
+      lead_id: lead.value.id,
+      type: 'stage_change',
+      subject: `Status-Wechsel: ${LEAD_STATUS_CONFIG[fromStatus]?.label} → ${LEAD_STATUS_CONFIG[newStatus as keyof typeof LEAD_STATUS_CONFIG]?.label}`,
+      content: `Manuell durch ${getCurrentUserNameForActivity()}`,
+      metadata: { from_status: fromStatus, to_status: newStatus as any },
+      date_created: now,
+    } as any)
+    await loadActivities()
+  } catch (e) {
+    console.warn('Status-Change-Activity-Log fehlgeschlagen:', e)
+  }
+}
+
+const getCurrentUserNameForActivity = (): string => {
+  const u = useState<any>('auth.user').value
+  if (!u) return 'System'
+  return `${u.first_name || ''} ${u.last_name || ''}`.trim() || 'System'
 }
 
 // Plan v9 A5: No-Show-Handler
