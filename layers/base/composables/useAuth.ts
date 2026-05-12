@@ -1,5 +1,11 @@
 import type { User } from '../types'
 
+// =============================================================================
+// TEMP DEV-MODE: alle externen Auth-Calls (refresh/logout-redirect) deaktivieren
+// solange wir mit Mock-User arbeiten. Auf `false` setzen wenn echte Auth aktiv.
+// =============================================================================
+const DEV_MODE_BYPASS_AUTH = true
+
 enum AuthState {
   LOGGED_OUT = 'LOGGED_OUT',
   LOGGED_IN = 'LOGGED_IN',
@@ -35,10 +41,12 @@ export const useAuth = () => {
   }
 
   const redirectToLogin = () => {
+    if (DEV_MODE_BYPASS_AUTH) return // Dev-Mode: kein Redirect
     if (AUTH_URL) return navigateTo(AUTH_URL, { external: true })
   }
 
   const redirectToLogout = () => {
+    if (DEV_MODE_BYPASS_AUTH) return // Dev-Mode: kein Redirect
     if (AUTH_URL) return navigateTo(`${AUTH_URL}/logout`, { external: true })
   }
 
@@ -49,6 +57,7 @@ export const useAuth = () => {
   }
 
   const refreshToken = async (): Promise<boolean> => {
+    if (DEV_MODE_BYPASS_AUTH) return true // Dev-Mode: faked success
     try {
       if (currentState.value === AuthState.REFRESHING) return true
       currentState.value = AuthState.REFRESHING

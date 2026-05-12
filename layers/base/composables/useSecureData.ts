@@ -1,3 +1,6 @@
+// TEMP DEV-MODE: bei devBypass keine echten Directus-Calls — return leere Daten
+const DEV_MODE_BYPASS_AUTH = true
+
 export interface QueryOptions {
   fields?: string[]
   filter?: Record<string, any>
@@ -69,6 +72,7 @@ export const useSecureData = () => {
   }
 
   const getItems = async <T = any>(params: { collection: string; params?: QueryOptions }): Promise<T[]> => {
+    if (DEV_MODE_BYPASS_AUTH) return [] as T[]  // Dev-Mode: keine echten Calls
     isLoading.value = true
     error.value = null
     try {
@@ -81,6 +85,7 @@ export const useSecureData = () => {
   }
 
   const getItem = async <T = any>(params: { collection: string; id: string; params?: QueryOptions }): Promise<T> => {
+    if (DEV_MODE_BYPASS_AUTH) return {} as T
     isLoading.value = true
     error.value = null
     try {
@@ -93,6 +98,7 @@ export const useSecureData = () => {
   }
 
   const createItem = async <T = any>(params: { collection: string; data: T | T[] }): Promise<T | string[]> => {
+    if (DEV_MODE_BYPASS_AUTH) return params.data as any
     isLoading.value = true
     error.value = null
     try {
@@ -105,6 +111,7 @@ export const useSecureData = () => {
   }
 
   const updateItem = async <T = any>(params: { collection: string; id: string; data: Partial<T> }): Promise<T> => {
+    if (DEV_MODE_BYPASS_AUTH) return params.data as T
     isLoading.value = true
     error.value = null
     try {
@@ -117,6 +124,7 @@ export const useSecureData = () => {
   }
 
   const updateItems = async (params: { collection: string; keys: string[]; data: Record<string, any> }): Promise<string[]> => {
+    if (DEV_MODE_BYPASS_AUTH) return params.keys
     isLoading.value = true
     error.value = null
     try {
@@ -129,6 +137,7 @@ export const useSecureData = () => {
   }
 
   const deleteItem = async (params: { collection: string; id: string }): Promise<void> => {
+    if (DEV_MODE_BYPASS_AUTH) return
     isLoading.value = true
     error.value = null
     try {
@@ -140,6 +149,7 @@ export const useSecureData = () => {
   }
 
   const deleteItems = async (params: { collection: string; keys: string[] }): Promise<void> => {
+    if (DEV_MODE_BYPASS_AUTH) return
     isLoading.value = true
     error.value = null
     try {

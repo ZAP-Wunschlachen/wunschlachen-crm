@@ -1,0 +1,56 @@
+[
+  {
+    "id": "erstansprache-1",
+    "name": "Willkommen — Neuer Patient",
+    "subject": "Willkommen bei Wunschlachen, {{ patient.first_name }}!",
+    "body_html": "<p>Hallo {{ patient.first_name }} {{ patient.last_name }},</p>\n<p>vielen Dank für Ihr Interesse an unserer Praxis {{ location.name }}.</p>\n<p>Wir freuen uns, Sie bald bei uns begrüßen zu dürfen. Gerne vereinbaren wir einen ersten Beratungstermin mit Ihnen.</p>\n<p>Haben Sie Fragen? Antworten Sie einfach auf diese E-Mail oder rufen Sie uns an.</p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "erstansprache",
+    "variables": ["patient.first_name", "patient.last_name", "location.name"],
+    "is_active": true
+  },
+  {
+    "id": "followup-1",
+    "name": "Follow-up nach Erstgespräch",
+    "subject": "Nachfrage zu Ihrem Beratungsgespräch",
+    "body_html": "<p>Hallo {{ patient.first_name }},</p>\n<p>ich wollte mich nochmals bezüglich Ihres Beratungsgesprächs melden. Haben Sie bereits eine Entscheidung getroffen?</p>\n<p>Falls Sie noch Fragen haben oder weitere Informationen benötigen, stehe ich Ihnen gerne zur Verfügung.</p>\n<p>Beste Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "follow_up",
+    "variables": ["patient.first_name"],
+    "is_active": true
+  },
+  {
+    "id": "followup-2",
+    "name": "Follow-up — Termin vereinbaren",
+    "subject": "Terminvorschlag für {{ patient.first_name }} {{ patient.last_name }}",
+    "body_html": "<p>Liebe/r {{ patient.first_name }},</p>\n<p>ich melde mich nochmals bezüglich Ihrer Behandlung. Gerne würde ich einen Termin mit Ihnen vereinbaren.</p>\n<p>Wären folgende Zeiten möglich?</p>\n<ul>\n<li>[Termin 1]</li>\n<li>[Termin 2]</li>\n</ul>\n<p>Ich freue mich auf Ihre Rückmeldung.</p>\n<p>Mit freundlichen Grüßen<br/>Ihr Wunschlachen-Team</p>",
+    "category": "follow_up",
+    "variables": ["patient.first_name", "patient.last_name"],
+    "is_active": true
+  },
+  {
+    "id": "termin-erinnerung-1",
+    "name": "Termin-Erinnerung (24h)",
+    "subject": "Erinnerung: Ihr Termin morgen",
+    "body_html": "<p>Hallo {{ patient.first_name }},</p>\n<p>dies ist eine freundliche Erinnerung an Ihren Termin morgen in unserer Praxis {{ location.name }}.</p>\n<p>Bitte bringen Sie Ihre Versichertenkarte mit. Falls Sie den Termin nicht wahrnehmen können, sagen Sie bitte rechtzeitig ab.</p>\n<p>Wir freuen uns auf Sie!</p>\n<p>Ihr Wunschlachen-Team</p>",
+    "category": "termin_erinnerung",
+    "variables": ["patient.first_name", "location.name"],
+    "is_active": true
+  },
+  {
+    "id": "nachsorge-1",
+    "name": "Nachsorge nach Behandlung",
+    "subject": "Wie geht es Ihnen nach der Behandlung?",
+    "body_html": "<p>Hallo {{ patient.first_name }},</p>\n<p>wir hoffen, dass es Ihnen nach der Behandlung gut geht. Falls Sie Beschwerden haben oder Fragen aufkommen, zögern Sie nicht, uns zu kontaktieren.</p>\n<p>Wir empfehlen einen Kontrolltermin in [X] Wochen. Gerne können wir diesen direkt für Sie vereinbaren.</p>\n<p>Beste Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "nachsorge",
+    "variables": ["patient.first_name"],
+    "is_active": true
+  },
+  {
+    "id": "allgemein-1",
+    "name": "Allgemeine Nachricht",
+    "subject": "",
+    "body_html": "<p>Sehr geehrte/r {{ patient.first_name }} {{ patient.last_name }},</p>\n<p></p>\n<p>Mit freundlichen Grüßen<br/>Ihr Wunschlachen-Team</p>",
+    "category": "allgemein",
+    "variables": ["patient.first_name", "patient.last_name"],
+    "is_active": true
+  }
+]

@@ -126,7 +126,7 @@
 </template>
 
 <script setup lang="ts">
-import Dialog from 'primevue/dialog'
+
 import {
   ACTIVITY_TYPE_CONFIG,
   ACTIVITY_DIRECTION_LABELS,

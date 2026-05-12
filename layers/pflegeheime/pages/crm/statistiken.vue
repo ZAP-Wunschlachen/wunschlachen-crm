@@ -834,7 +834,11 @@ const provisionNewCount = computed(() => provisionRows.value.filter(r => r.isNew
 const provisionExistingCount = computed(() => provisionRows.value.filter(r => !r.isNew).reduce((s, r) => s + r.count, 0))
 const provisionTotal = computed(() => provisionRows.value.reduce((s, r) => s + r.total, 0))
 
+// TEMP DEV-MODE: bei devBypass keine echten Directus-Calls — return []
+const _DEV_BYPASS = true
+
 const fetchDirectus = async (path: string) => {
+  if (_DEV_BYPASS) return []
   const config = useRuntimeConfig()
   const baseURL = config.public.directusUrl || 'https://wunschlachen.app'
   const securePath = path.startsWith('/items/') ? path.replace('/items/', '/secure-data/items/') : path

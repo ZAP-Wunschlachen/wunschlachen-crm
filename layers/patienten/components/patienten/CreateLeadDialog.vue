@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import Dialog from 'primevue/dialog'
+
 import { LEAD_SOURCE_CONFIG, type LeadSource } from '~/types/crm'
 
 const visible = defineModel<boolean>('visible', { default: false })
