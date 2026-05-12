@@ -54,7 +54,7 @@
             v-for="contact in filteredContacts"
             :key="contact.id"
             class="border-b border-gray-50 hover:bg-[#172774]/[0.02] cursor-pointer transition-colors"
-            @click="navigateToLead(contact)"
+            @click="navigateTo(`/crm/kontakte/${contact.id}`)"
           >
             <td class="px-3 py-2">
               <div class="flex items-center gap-2">
@@ -113,7 +113,6 @@
 
 <script setup lang="ts">
 import type { NursingHomeContact } from '~/types/crm'
-import { getLocalLeads } from '~/composables/usePflegeheimLeads'
 
 definePageMeta({ layout: 'crm', middleware: 'auth' })
 
@@ -121,7 +120,6 @@ const { contacts, fetchAllContacts } = useContacts()
 
 const searchQuery = ref('')
 const loading = ref(false)
-const leadMap = ref<Record<string, string>>({})
 
 const fullName = (c: NursingHomeContact) =>
   [c.first_name, c.last_name].filter(Boolean).join(' ') || '–'
@@ -137,12 +135,6 @@ const getNursingHomeName = (c: NursingHomeContact) => {
   return '–'
 }
 
-const getNursingHomeId = (c: NursingHomeContact): string | null => {
-  if (typeof c.nursing_home_id === 'object' && c.nursing_home_id) return c.nursing_home_id.id
-  if (typeof c.nursing_home_id === 'string') return c.nursing_home_id
-  return null
-}
-
 const filteredContacts = computed(() => {
   if (!searchQuery.value) return contacts.value
   const q = searchQuery.value.toLowerCase()
@@ -156,36 +148,10 @@ const filteredContacts = computed(() => {
   })
 })
 
-const navigateToLead = (contact: NursingHomeContact) => {
-  const nhId = getNursingHomeId(contact)
-  if (nhId && leadMap.value[nhId]) {
-    navigateTo(`/crm/leads/${leadMap.value[nhId]}`)
-  }
-}
-
-const loadLeadMap = () => {
-  try {
-    const leads = getLocalLeads()
-    const map: Record<string, string> = {}
-    for (const lead of leads) {
-      const nhId = typeof lead.nursing_home_id === 'object'
-        ? (lead.nursing_home_id as any)?.id
-        : lead.nursing_home_id
-      if (nhId) map[nhId] = lead.id
-    }
-    leadMap.value = map
-  } catch (err) {
-    console.error('Failed to load lead map:', err)
-  }
-}
-
 onMounted(async () => {
   loading.value = true
   try {
-    await Promise.all([
-      fetchAllContacts(),
-      loadLeadMap(),
-    ])
+    await fetchAllContacts()
   } finally {
     loading.value = false
   }
