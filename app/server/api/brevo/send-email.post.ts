@@ -8,13 +8,17 @@ const BREVO_API = 'https://api.brevo.com/v3'
 
 interface BrevoSendEmailBody {
   to: { email: string; name?: string }[]
-  subject: string
-  htmlContent: string
+  subject?: string
+  htmlContent?: string
   textContent?: string
   tags?: string[]
   // Optional: Override-Sender (falls nicht config.brevoSenderEmail genutzt werden soll)
   senderEmail?: string
   senderName?: string
+  // Plan v9 Phase C: Brevo-Template-ID als Alternative zu htmlContent/subject
+  templateId?: number
+  // Optional: Brevo-Template-Params (für {{params.var}})
+  params?: Record<string, string | number>
 }
 
 export default defineEventHandler(async (event) => {
@@ -33,10 +37,18 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody<BrevoSendEmailBody>(event)
 
-  if (!body?.to?.length || !body?.subject || !body?.htmlContent) {
+  if (!body?.to?.length) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Missing required fields: to, subject, htmlContent',
+      statusMessage: 'Missing required field: to',
+    })
+  }
+
+  // Entweder Inline-Content (subject+htmlContent) ODER templateId
+  if (!body.templateId && (!body.subject || !body.htmlContent)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Either templateId OR (subject + htmlContent) is required',
     })
   }
 
@@ -50,6 +62,21 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Brevo-Body: Template-Mode oder Inline-Content
+  const brevoBody: Record<string, any> = {
+    sender: { name: senderName, email: senderEmail },
+    to: body.to,
+    tags: body.tags,
+  }
+  if (body.templateId) {
+    brevoBody.templateId = body.templateId
+    if (body.params) brevoBody.params = body.params
+  } else {
+    brevoBody.subject = body.subject
+    brevoBody.htmlContent = body.htmlContent
+    if (body.textContent) brevoBody.textContent = body.textContent
+  }
+
   try {
     const response = await $fetch<{ messageId: string }>(`${BREVO_API}/smtp/email`, {
       method: 'POST',
@@ -57,14 +84,7 @@ export default defineEventHandler(async (event) => {
         'api-key': apiKey,
         'Content-Type': 'application/json',
       },
-      body: {
-        sender: { name: senderName, email: senderEmail },
-        to: body.to,
-        subject: body.subject,
-        htmlContent: body.htmlContent,
-        textContent: body.textContent,
-        tags: body.tags,
-      },
+      body: brevoBody,
     })
 
     return { success: true, messageId: response.messageId }

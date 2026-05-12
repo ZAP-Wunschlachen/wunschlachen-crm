@@ -52,6 +52,24 @@ export const useEmailTemplates = () => {
     return _allTemplates.value.find(t => t.id === id) || null
   }
 
+  /**
+   * Lookup by stable key (Plan v9 Phase C).
+   * Beispiel: getByKey('reactivation-financing')
+   */
+  const getByKey = (key: string): EmailTemplate | null => {
+    return _allTemplates.value.find(t => t.key === key && t.is_active) || null
+  }
+
+  /**
+   * Templates für einen bestimmten Lead-Status — sortiert nach Kategorie.
+   * Beispiel: getForStatus('hkp_sent') → HKP-Followup-Templates
+   */
+  const getForStatus = (status: string): EmailTemplate[] => {
+    return _allTemplates.value
+      .filter(t => t.is_active && t.for_status?.includes(status))
+      .sort((a, b) => a.category.localeCompare(b.category))
+  }
+
   const createTemplate = async (data: Partial<EmailTemplate>) => {
     const newTemplate: EmailTemplate = {
       id: `custom_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -98,6 +116,8 @@ export const useEmailTemplates = () => {
     templates,
     fetchTemplates,
     fetchTemplate,
+    getByKey,
+    getForStatus,
     createTemplate,
     updateTemplate,
     deleteTemplate,
