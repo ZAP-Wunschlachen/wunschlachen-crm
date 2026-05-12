@@ -6,3 +6,60 @@
 body {
   font-family: 'Outfit', sans-serif;
 }
+
+/* =========================================================
+ * Global Form-Field Styles
+ *
+ * Tailwind v3 setzt im preflight border-width:0. Scoped <style>-Blöcke
+ * in einzelnen Vue-Files können das nicht zuverlässig überschreiben.
+ * Diese globale Definition stellt sicher dass alle .field-input
+ * Elemente einen sichtbaren Rahmen haben.
+ * ========================================================= */
+
+.field-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  border: 1px solid #e5e6ee; /* dental-blue--5 */
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  color: #172774; /* dental-blue-0 */
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field-input:hover {
+  border-color: #cacdde; /* dental-blue--4 */
+}
+
+.field-input:focus {
+  border-color: #172774; /* dental-blue-0 */
+  box-shadow: 0 0 0 3px rgba(23, 39, 116, 0.1);
+}
+
+.field-input:disabled {
+  background-color: #f5f5f7;
+  color: #7079a8;
+  cursor: not-allowed;
+}
+
+.field-input::placeholder {
+  color: #a3a9c6;
+}
+
+/* Select-Variante */
+select.field-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='%237079a8' d='M3 5l3 3 3-3z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+}
+
+/* Textarea-Variante */
+textarea.field-input {
+  resize: vertical;
+  min-height: 5rem;
+  line-height: 1.4;
+}
