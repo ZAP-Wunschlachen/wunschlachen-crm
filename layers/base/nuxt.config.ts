@@ -28,6 +28,13 @@ export default defineNuxtConfig({
     brevoSenderEmail: process.env.BREVO_SENDER_EMAIL || '',
     brevoSenderName: process.env.BREVO_SENDER_NAME || 'Wunschlachen',
 
+    // Phase 9 Ticket-System
+    whatsappPhoneId: process.env.WHATSAPP_PHONE_ID || '',
+    whatsappToken: process.env.WHATSAPP_TOKEN || '',
+    whatsappVerifyToken: process.env.WHATSAPP_VERIFY_TOKEN || '',
+    cronSecret: process.env.CRON_SECRET || '',
+    formAllowedOrigins: process.env.FORM_ALLOWED_ORIGINS || '',
+
     public: {
       socketUrl: process.env.SOCKET_URL || '',
       directusUrl: process.env.DIRECTUS_URL || 'https://wunschlachen.app',

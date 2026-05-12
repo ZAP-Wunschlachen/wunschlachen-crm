@@ -26,8 +26,7 @@
         <SidebarLink path="/dashboard" label="Dashboard" icon="pi pi-th-large" :collapsed="collapsed" exact />
 
         <SidebarSection label="Eingang" :collapsed="collapsed" />
-        <!-- Inbox — Phase 9: Ticket-System -->
-        <SidebarLink path="/crm/inbox" label="Inbox" icon="pi pi-inbox" :collapsed="collapsed" />
+        <SidebarLink path="/inbox" label="Inbox" icon="pi pi-inbox" :collapsed="collapsed" />
 
         <SidebarSection label="Sales" :collapsed="collapsed" />
         <SidebarLink
@@ -245,7 +244,7 @@ watch(
 // Page-Title
 const titleMap: Record<string, string> = {
   '/dashboard': 'Dashboard',
-  '/crm/inbox': 'Inbox',
+  '/inbox': 'Inbox',
   '/crm/pipeline': 'Pipeline',
   '/crm/leads': 'Leads',
   '/crm/heime': 'Heimkunden',
