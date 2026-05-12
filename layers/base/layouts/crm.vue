@@ -41,14 +41,26 @@
           icon="pi pi-user-plus"
           :collapsed="collapsed"
         />
+        <!-- Entity-Stammdaten: Heime nur in B2B/Alle, Patienten nur in B2C/Alle -->
         <SidebarLink
-          :paths="{ heimkunden: '/crm/heime', patienten: '/patienten', all: '/crm/heime' }"
-          label="Kunden"
-          icon="pi pi-users"
+          v-if="customerType !== 'patienten'"
+          path="/crm/heime"
+          label="Heime"
+          icon="pi pi-building"
           :collapsed="collapsed"
         />
         <SidebarLink
-          :paths="{ heimkunden: '/crm/kontakte', patienten: '/patienten/leads', all: '/crm/kontakte' }"
+          v-if="customerType !== 'heimkunden'"
+          path="/patienten"
+          label="Patienten"
+          icon="pi pi-user"
+          :collapsed="collapsed"
+          exact
+        />
+        <!-- Kontakte = Ansprechpartner im Pflegeheim (B2B-spezifisch) -->
+        <SidebarLink
+          v-if="customerType !== 'patienten'"
+          path="/crm/kontakte"
           label="Kontakte"
           icon="pi pi-id-card"
           :collapsed="collapsed"
@@ -197,11 +209,13 @@ const personaTabs: { value: CustomerType; label: string; icon: string }[] = [
 ]
 
 // Mapping: aktuelle Route → korrespondierende Route in der anderen Persona
-const personaRouteMap: { heimkunden: string; patienten: string; all?: string }[] = [
+// Entity-spezifische B2B-Pages (heime, kontakte) haben keine direkte B2C-Entsprechung;
+// beim Switch zu Patienten fallen sie auf /patienten (Übersicht) zurück.
+const personaRouteMap: { heimkunden: string; patienten: string }[] = [
   { heimkunden: '/crm/pipeline', patienten: '/patienten/pipeline' },
   { heimkunden: '/crm/leads', patienten: '/patienten/leads' },
   { heimkunden: '/crm/heime', patienten: '/patienten' },
-  { heimkunden: '/crm/kontakte', patienten: '/patienten/leads' },
+  { heimkunden: '/crm/kontakte', patienten: '/patienten' },
   { heimkunden: '/crm/termine', patienten: '/patienten/termine' },
   { heimkunden: '/crm/workflows', patienten: '/patienten/workflows' },
   { heimkunden: '/crm/einstellungen', patienten: '/patienten/einstellungen' },
@@ -250,7 +264,7 @@ const titleMap: Record<string, string> = {
   '/inbox': 'Inbox',
   '/crm/pipeline': 'Pipeline',
   '/crm/leads': 'Leads',
-  '/crm/heime': 'Heimkunden',
+  '/crm/heime': 'Heime',
   '/crm/kontakte': 'Kontakte',
   '/crm/aktivitaeten': 'Aktivitäten',
   '/crm/termine': 'Termine',
