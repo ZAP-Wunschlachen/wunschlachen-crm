@@ -7,6 +7,9 @@ import type { PipelineKPIs } from '~/types/analytics'
 const BOM = '\uFEFF'
 const SEPARATOR = ';'
 
+/**
+ * Format date to DD.MM.YYYY
+ */
 const formatDate = (dateStr: string | undefined): string => {
   if (!dateStr) return ''
   try {
@@ -20,6 +23,9 @@ const formatDate = (dateStr: string | undefined): string => {
   }
 }
 
+/**
+ * Format date to DD.MM.YYYY HH:mm
+ */
 const formatDateTime = (dateStr: string | undefined): string => {
   if (!dateStr) return ''
   try {
@@ -35,6 +41,9 @@ const formatDateTime = (dateStr: string | undefined): string => {
   }
 }
 
+/**
+ * Escape CSV field (handle semicolons, quotes, newlines)
+ */
 const escapeField = (value: any): string => {
   if (value === null || value === undefined) return ''
   const str = String(value)
@@ -44,12 +53,18 @@ const escapeField = (value: any): string => {
   return str
 }
 
+/**
+ * Build CSV string from headers and rows
+ */
 const buildCSV = (headers: string[], rows: string[][]): string => {
   const headerLine = headers.map(escapeField).join(SEPARATOR)
   const dataLines = rows.map(row => row.map(escapeField).join(SEPARATOR))
   return BOM + [headerLine, ...dataLines].join('\n')
 }
 
+/**
+ * Download CSV as file
+ */
 const downloadCSV = (csvContent: string, filename: string) => {
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
@@ -63,6 +78,9 @@ const downloadCSV = (csvContent: string, filename: string) => {
 }
 
 export const useExport = () => {
+  /**
+   * Export leads as CSV
+   */
   const exportLeads = (leads: Lead[], filename = 'leads-export') => {
     const headers = [
       'Vorname',
@@ -72,8 +90,8 @@ export const useExport = () => {
       'Status',
       'Quelle',
       'Behandlung',
-      'Wert (EUR)',
-      'Umsatz (EUR)',
+      'Wert (€)',
+      'Umsatz (€)',
       'Follow-up',
       'Tags',
       'Erstellt',
@@ -100,6 +118,9 @@ export const useExport = () => {
     downloadCSV(csv, filename)
   }
 
+  /**
+   * Export activities as CSV
+   */
   const exportActivities = (activities: LeadActivity[], filename = 'aktivitaeten-export') => {
     const headers = [
       'Datum',
@@ -129,6 +150,9 @@ export const useExport = () => {
     downloadCSV(csv, filename)
   }
 
+  /**
+   * Export pipeline KPIs as CSV
+   */
   const exportPipeline = (kpis: PipelineKPIs, periodLabel: string, filename = 'pipeline-export') => {
     const headers = ['Kennzahl', 'Wert', 'Zeitraum']
 
