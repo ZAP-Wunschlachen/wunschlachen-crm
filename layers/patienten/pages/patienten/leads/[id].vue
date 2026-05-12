@@ -202,15 +202,29 @@
         <!-- RIGHT COLUMN -->
         <div class="space-y-4">
           <!-- Status -->
-          <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
-            <h2 class="text-sm font-semibold text-dental-blue-0 mb-2">Status</h2>
+          <div id="status-section" class="bg-white rounded-lg p-4 border border-dental-blue--5">
+            <div class="flex items-center justify-between mb-2">
+              <h2 class="text-sm font-semibold text-dental-blue-0">Status</h2>
+              <span v-if="LEAD_STATUS_CONFIG[lead.status]?.description"
+                class="text-[10px] text-dental-blue--3 italic"
+                :title="LEAD_STATUS_CONFIG[lead.status].description">ⓘ Info</span>
+            </div>
             <select
               :value="lead.status"
               class="field-input bg-white"
-              @change="saveField('status', ($event.target as HTMLSelectElement).value)"
+              @change="onStatusChange(($event.target as HTMLSelectElement).value)"
             >
-              <option v-for="(cfg, key) in LEAD_STATUS_CONFIG" :key="key" :value="key">{{ cfg.label }}</option>
+              <!-- Aktueller Status (immer drin) -->
+              <option :value="lead.status">{{ LEAD_STATUS_CONFIG[lead.status].label }} (aktuell)</option>
+              <!-- Erlaubte Folge-Status via State-Machine -->
+              <option v-for="nextStatus in allowedNextStatuses" :key="nextStatus" :value="nextStatus">
+                → {{ LEAD_STATUS_CONFIG[nextStatus].label }}
+              </option>
             </select>
+            <p v-if="LEAD_STATUS_CONFIG[lead.status]?.description"
+              class="text-[11px] text-dental-blue--3 mt-1.5 leading-tight">
+              {{ LEAD_STATUS_CONFIG[lead.status].description }}
+            </p>
           </div>
 
           <!-- Follow-up -->
@@ -224,6 +238,9 @@
             />
             <p v-if="isOverdue" class="text-[10px] text-red-500 mt-1 font-medium">Überfällig!</p>
           </div>
+
+          <!-- E-Mail-Engagement (Brevo-Tracking) -->
+          <PatientenEngagementStatsCard :activities="activities" />
 
           <!-- Lead Score -->
           <PatientenLeadScoreBreakdown v-if="leadScore" :result="leadScore" />
@@ -374,6 +391,29 @@ const onAction = (action: import('../../../composables/useNextBestAction').NextB
     default:
       console.warn('Unhandled action type:', action.type)
   }
+}
+
+// Plan v9: State-Machine-validierte Folge-Status
+const { getNextStatuses, canTransition } = useLeadStatusTransitions()
+const allowedNextStatuses = computed(() => {
+  if (!lead.value) return []
+  return getNextStatuses(lead.value.status).filter((s) => s !== lead.value!.status)
+})
+
+const onStatusChange = async (newStatus: string) => {
+  if (!lead.value) return
+  if (newStatus === lead.value.status) return
+  if (!canTransition(lead.value.status, newStatus as any)) {
+    toast.add({
+      severity: 'warn',
+      summary: 'Status-Wechsel nicht erlaubt',
+      detail: `${lead.value.status} → ${newStatus} ist gemäß State-Machine nicht möglich`,
+    })
+    return
+  }
+  saveField('status', newStatus)
+  // last_status_change_at parallel updaten
+  saveField('last_status_change_at', new Date().toISOString())
 }
 
 // Plan v9 A5: No-Show-Handler
