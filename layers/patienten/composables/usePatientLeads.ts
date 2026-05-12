@@ -220,7 +220,17 @@ export const usePatientLeads = () => {
   }
 
   const fetchStageCounts = async () => {
-    // useSecureData doesn't support groupBy, so fetch all statuses and count client-side
+    if (USE_MOCK_DATA) {
+      const mock = readMockLeads()
+      const counts: Record<string, number> = {}
+      for (const item of mock) {
+        counts[item.status] = (counts[item.status] || 0) + 1
+      }
+      return Object.entries(counts).map(([status, count]) => ({
+        status: status as LeadStatus,
+        count: { id: count },
+      }))
+    }
     try {
       const result = await getItems<{ status: LeadStatus }>({
         collection: COLLECTION,
@@ -244,6 +254,15 @@ export const usePatientLeads = () => {
   }
 
   const fetchDueFollowUps = async () => {
+    if (USE_MOCK_DATA) {
+      const today = new Date().toISOString().split('T')[0]
+      return readMockLeads().filter(
+        (l: any) =>
+          l.follow_up &&
+          l.follow_up.slice(0, 10) <= today &&
+          !['done', 'cancelled'].includes(l.status),
+      )
+    }
     const today = new Date().toISOString().split('T')[0]
     try {
       return await getItems<Lead>({
@@ -265,6 +284,23 @@ export const usePatientLeads = () => {
   }
 
   const fetchLeadCount = async (filters: LeadFilters = {}) => {
+    if (USE_MOCK_DATA) {
+      let mock = readMockLeads()
+      if (filters.status) mock = mock.filter((l) => l.status === filters.status)
+      if (filters.lead_source) mock = mock.filter((l) => l.lead_source === filters.lead_source)
+      if (filters.search) {
+        const q = filters.search.toLowerCase()
+        mock = mock.filter(
+          (l) =>
+            l.first_name?.toLowerCase().includes(q) ||
+            l.last_name?.toLowerCase().includes(q) ||
+            l.mail?.toLowerCase().includes(q),
+        )
+      }
+      pagination.value.total = mock.length
+      return mock.length
+    }
+
     try {
       const result = await getItems({
         collection: COLLECTION,
