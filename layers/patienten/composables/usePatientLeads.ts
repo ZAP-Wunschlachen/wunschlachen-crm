@@ -4,6 +4,25 @@ import type { Lead, LeadStatus, LeadSource } from '~/types/crm'
 
 const COLLECTION = 'Leads' // Capital L — matches Directus collection name
 
+// Mock-Mode: nutzt localStorage 'patient-crm-mock-leads' (seeded via mock-seed.client.ts)
+// Auf `false` setzen sobald Directus-Backend verfügbar ist.
+const USE_MOCK_DATA = true
+const MOCK_STORAGE_KEY = 'patient-crm-mock-leads'
+
+const readMockLeads = (): Lead[] => {
+  if (typeof localStorage === 'undefined') return []
+  try {
+    return JSON.parse(localStorage.getItem(MOCK_STORAGE_KEY) || '[]')
+  } catch {
+    return []
+  }
+}
+const writeMockLeads = (data: Lead[]) => {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(data))
+  }
+}
+
 export interface LeadFilters {
   search?: string
   status?: LeadStatus | null
@@ -86,6 +105,26 @@ export const usePatientLeads = () => {
     error.value = null
     const currentPage = page || pagination.value.page
 
+    if (USE_MOCK_DATA) {
+      let mock = readMockLeads()
+      // Client-side Filter (vereinfacht)
+      if (filters.status) mock = mock.filter((l) => l.status === filters.status)
+      if (filters.lead_source) mock = mock.filter((l) => l.lead_source === filters.lead_source)
+      if (filters.search) {
+        const q = filters.search.toLowerCase()
+        mock = mock.filter(
+          (l) =>
+            l.first_name?.toLowerCase().includes(q) ||
+            l.last_name?.toLowerCase().includes(q) ||
+            l.mail?.toLowerCase().includes(q),
+        )
+      }
+      leads.value = mock
+      pagination.value = { page: 1, limit: mock.length, total: mock.length }
+      isLoading.value = false
+      return mock
+    }
+
     try {
       const result = await getItems<Lead>({
         collection: COLLECTION,
@@ -113,6 +152,13 @@ export const usePatientLeads = () => {
   const fetchLead = async (id: string) => {
     isLoading.value = true
     error.value = null
+
+    if (USE_MOCK_DATA) {
+      const mock = readMockLeads().find((l) => l.id === id) || null
+      currentLead.value = mock
+      isLoading.value = false
+      return mock
+    }
 
     try {
       const result = await getItem<Lead>({

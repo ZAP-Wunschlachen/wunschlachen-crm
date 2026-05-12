@@ -4,6 +4,18 @@ import type { Appointment, AttendanceStatus } from '~/types/appointments'
 
 const COLLECTION = 'appointments'
 
+const USE_MOCK_DATA = true
+const MOCK_KEY = 'patient-crm-mock-appointments'
+
+const readMock = (): Appointment[] => {
+  if (typeof localStorage === 'undefined') return []
+  try {
+    return JSON.parse(localStorage.getItem(MOCK_KEY) || '[]')
+  } catch {
+    return []
+  }
+}
+
 const APPOINTMENT_FIELDS = [
   'id',
   'start_date_time',
@@ -66,6 +78,22 @@ export const useAppointments = () => {
     isLoading.value = true
     error.value = null
 
+    if (USE_MOCK_DATA) {
+      let mock = readMock()
+      const rangeStart = new Date(dateRange.start).getTime()
+      const rangeEnd = new Date(dateRange.end).getTime()
+      mock = mock.filter((a) => {
+        const t = new Date(a.start_date_time).getTime()
+        return t >= rangeStart && t <= rangeEnd
+      })
+      if (filters?.attendance_status) {
+        mock = mock.filter((a) => a.attendance_status === filters.attendance_status)
+      }
+      appointments.value = mock
+      isLoading.value = false
+      return mock
+    }
+
     try {
       const result = await getItems<Appointment>({
         collection: COLLECTION,
@@ -92,6 +120,12 @@ export const useAppointments = () => {
   const fetchLeadAppointments = async (leadId: string) => {
     isLoading.value = true
     error.value = null
+
+    if (USE_MOCK_DATA) {
+      const mock = readMock().filter((a: any) => a.lead_id === leadId)
+      isLoading.value = false
+      return mock
+    }
 
     try {
       const result = await getItems<Appointment>({
