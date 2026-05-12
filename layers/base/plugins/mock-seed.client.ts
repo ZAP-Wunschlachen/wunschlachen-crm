@@ -228,7 +228,7 @@ function seedHeimkunden() {
       is_primary: true,
     },
   ]
-  localStorage.setItem('crm_lead_contacts', JSON.stringify(contacts))
+  localStorage.setItem('crm_contacts', JSON.stringify(contacts))
 }
 
 function seedHeimAktivitaeten() {
