@@ -10,12 +10,32 @@
  */
 
 const DEV_MODE_BYPASS_AUTH = true
-const SEED_FLAG = 'mock_seed_v1_applied'
+const SEED_VERSION = 'v3'
+const SEED_FLAG = 'mock_seed_version'
 
 export default defineNuxtPlugin(() => {
   if (!DEV_MODE_BYPASS_AUTH) return
   if (typeof localStorage === 'undefined') return
-  if (localStorage.getItem(SEED_FLAG)) return
+
+  const currentVersion = localStorage.getItem(SEED_FLAG)
+  if (currentVersion === SEED_VERSION) return
+
+  // Neue Version → cleanup alle Mock-Keys + neu seeden
+  const keysToClean = [
+    'crm_leads',
+    'crm_lead_contacts', // alter falscher Key
+    'crm_contacts',
+    'nursing_home_lead_activities',
+    'crm_workflows',
+    'patient-crm-mock-leads',
+    'patient-crm-activities',
+    'patient-crm-workflows',
+    'patient-crm-mock-appointments',
+    'praxis-crm-google-reviews',
+    'praxis-crm-email-templates',
+    'mock_seed_v1_applied',
+  ]
+  keysToClean.forEach((k) => localStorage.removeItem(k))
 
   seedHeimkunden()
   seedHeimAktivitaeten()
@@ -27,9 +47,15 @@ export default defineNuxtPlugin(() => {
   seedGoogleReviews()
   seedEmailTemplates()
 
-  localStorage.setItem(SEED_FLAG, new Date().toISOString())
+  localStorage.setItem(SEED_FLAG, SEED_VERSION)
   // eslint-disable-next-line no-console
-  console.log('[mock-seed] Demo-Daten in localStorage geseedet (v1)')
+  console.log(`[mock-seed] Demo-Daten ${SEED_VERSION} geseedet`)
+
+  // Hard-Reload damit Module-Level-State der Composables die frischen Daten liest
+  if (!sessionStorage.getItem('mock_seed_reloaded')) {
+    sessionStorage.setItem('mock_seed_reloaded', '1')
+    window.location.reload()
+  }
 })
 
 const iso = (offsetMinutes = 0) => new Date(Date.now() + offsetMinutes * 60 * 1000).toISOString()
