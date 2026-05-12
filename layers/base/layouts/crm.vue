@@ -157,6 +157,9 @@
         <slot />
       </main>
     </div>
+
+    <!-- Global Toast-Notifications (verfügbar in allen Pages) -->
+    <Toast />
   </div>
 </template>
 

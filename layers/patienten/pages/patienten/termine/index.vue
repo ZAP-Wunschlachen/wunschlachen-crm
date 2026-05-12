@@ -103,8 +103,8 @@
 </template>
 
 <script setup lang="ts">
-import Toast from 'primevue/toast'
-import { useToast } from 'primevue/usetoast'
+
+
 import { ATTENDANCE_STATUS_CONFIG, type AttendanceStatus } from '~/types/appointments'
 
 definePageMeta({ layout: 'crm', middleware: ['auth'] })
