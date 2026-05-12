@@ -1,7 +1,12 @@
 <template>
   <div class="p-6 max-w-7xl">
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-dental-blue-0">Leads</h1>
+      <div>
+        <h1 class="text-2xl font-bold text-dental-blue-0">Patienten</h1>
+        <p class="text-xs text-dental-blue--3 mt-0.5">
+          Stammdaten — Sales-Pipeline unter <NuxtLink to="/patienten/leads" class="underline hover:text-dental-blue-0">Leads</NuxtLink>
+        </p>
+      </div>
       <div class="flex items-center gap-2">
         <button
           class="px-4 py-2 text-sm font-medium text-dental-blue-0 border border-dental-blue--5 rounded-lg hover:bg-[#ededed] flex items-center gap-2"
@@ -15,7 +20,7 @@
           @click="showCreate = true"
         >
           <i class="pi pi-plus text-xs" />
-          Neuer Lead
+          Neuer Patient
         </button>
       </div>
     </div>

@@ -19,7 +19,7 @@
       v-else
       :leads="allLeads"
       class="flex-1"
-      @select="(lead) => navigateTo(`/patienten/${lead.id}`)"
+      @select="(lead) => navigateTo(`/patienten/leads/${lead.id}`)"
       @status-change="onStatusChange"
     />
 

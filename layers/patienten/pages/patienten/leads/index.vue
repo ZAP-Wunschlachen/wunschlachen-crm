@@ -91,7 +91,7 @@
             v-for="lead in displayLeads"
             :key="lead.id"
             class="border-b border-dental-blue--5 last:border-0 hover:bg-[#ededed] cursor-pointer transition-colors"
-            @click="navigateTo(`/patienten/${lead.id}`)"
+            @click="navigateTo(`/patienten/leads/${lead.id}`)"
           >
             <td class="px-4 py-3 font-medium text-dental-blue-0">{{ lead.first_name }} {{ lead.last_name }}</td>
             <td class="px-4 py-3 text-dental-blue--2">{{ getServiceName(lead) }}</td>

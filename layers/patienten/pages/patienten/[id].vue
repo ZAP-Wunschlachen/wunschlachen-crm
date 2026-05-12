@@ -1,456 +1,304 @@
 <template>
   <div class="p-6 max-w-5xl">
-    <!-- Back -->
-    <button class="flex items-center gap-1 text-sm text-dental-blue--2 hover:text-dental-blue-0 mb-4" @click="navigateTo('/patienten/leads')">
+    <button
+      class="flex items-center gap-1 text-sm text-dental-blue--2 hover:text-dental-blue-0 mb-4"
+      @click="navigateTo('/patienten')"
+    >
       <i class="pi pi-arrow-left text-xs" />
-      Zurück
+      Zurück zur Patientenliste
     </button>
 
-    <div v-if="!lead" class="text-center text-dental-blue--3 py-12">Lade Lead...</div>
+    <div v-if="!lead" class="text-center text-dental-blue--3 py-12">
+      <i class="pi pi-spin pi-spinner text-2xl" />
+      <p class="mt-2 text-sm">Lade Patientendaten…</p>
+    </div>
 
-    <template v-else>
+    <div v-else>
       <!-- Header -->
       <div class="flex items-start justify-between mb-6">
-        <h1 class="text-2xl font-bold text-dental-blue-0">{{ lead.first_name }} {{ lead.last_name }}</h1>
-        <PatientenLeadStatusBadge :status="lead.status" />
+        <div>
+          <h1 class="text-2xl font-bold text-dental-blue-0">
+            {{ lead.first_name }} {{ lead.last_name }}
+          </h1>
+          <p class="text-sm text-dental-blue--3 mt-0.5">
+            Patient-ID: {{ lead.id }}
+          </p>
+        </div>
+        <NuxtLink
+          :to="`/patienten/leads/${lead.id}`"
+          class="px-3 py-1.5 text-xs font-medium border border-dental-blue--5 rounded-lg text-dental-blue-0 hover:bg-dental-blue--6"
+        >
+          <i class="pi pi-chart-line text-[10px] mr-1" />
+          Sales-Detail öffnen
+        </NuxtLink>
       </div>
 
+      <!-- Two-column grid: links Stammdaten, rechts Sidebar -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- LEFT COLUMN -->
         <div class="lg:col-span-2 space-y-6">
-
-          <!-- Contact Card -->
+          <!-- Kontaktdaten -->
           <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
-            <h2 class="text-sm font-semibold text-dental-blue-0 mb-3">Kontakt</h2>
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-sm font-semibold text-dental-blue-0">Kontaktdaten</h2>
+              <button
+                v-if="!editing"
+                class="text-[11px] font-medium text-dental-blue-0 hover:underline"
+                @click="startEdit"
+              >
+                <i class="pi pi-pencil text-[10px] mr-1" />Bearbeiten
+              </button>
+              <div v-else class="flex gap-2">
+                <button
+                  class="text-[11px] font-medium text-dental-blue--3 hover:text-dental-blue-0"
+                  @click="cancelEdit"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  class="text-[11px] font-medium text-white bg-dental-blue-0 px-2 py-1 rounded hover:bg-dental-blue-1"
+                  :disabled="saving"
+                  @click="saveEdit"
+                >
+                  <i v-if="saving" class="pi pi-spin pi-spinner text-[10px] mr-1" />
+                  {{ saving ? 'Speichern…' : 'Speichern' }}
+                </button>
+              </div>
+            </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="text-xs text-dental-blue--3">Vorname</label>
-                <input
-                  :value="lead.first_name"
-                  type="text"
-                  class="field-input"
-                  @blur="saveTextField('first_name', $event)"
-                />
+                <input v-model="form.first_name" :disabled="!editing" class="field-input" />
               </div>
               <div>
                 <label class="text-xs text-dental-blue--3">Nachname</label>
-                <input
-                  :value="lead.last_name"
-                  type="text"
-                  class="field-input"
-                  @blur="saveTextField('last_name', $event)"
-                />
+                <input v-model="form.last_name" :disabled="!editing" class="field-input" />
               </div>
               <div>
                 <label class="text-xs text-dental-blue--3">Telefon</label>
-                <input
-                  :value="lead.phone"
-                  type="tel"
-                  class="field-input"
-                  @blur="saveTextField('phone', $event)"
-                />
+                <input v-model="form.phone" :disabled="!editing" class="field-input" type="tel" />
               </div>
               <div>
                 <label class="text-xs text-dental-blue--3">E-Mail</label>
-                <input
-                  :value="lead.mail"
-                  type="email"
-                  class="field-input"
-                  @blur="saveTextField('mail', $event)"
-                />
-              </div>
-              <div>
-                <label class="text-xs text-dental-blue--3">Standort</label>
-                <select
-                  :value="locationId"
-                  class="field-input bg-white"
-                  @change="saveField('location', ($event.target as HTMLSelectElement).value || null)"
-                >
-                  <option value="">— Auswählen —</option>
-                  <option v-for="loc in locations" :key="loc.id" :value="loc.id">{{ loc.name }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="text-xs text-dental-blue--3">Quelle</label>
-                <select
-                  :value="lead.lead_source || ''"
-                  class="field-input bg-white"
-                  @change="saveField('lead_source', ($event.target as HTMLSelectElement).value || null)"
-                >
-                  <option value="">— Auswählen —</option>
-                  <option v-for="(cfg, key) in LEAD_SOURCE_CONFIG" :key="key" :value="key">{{ cfg.label }}</option>
-                </select>
+                <input v-model="form.mail" :disabled="!editing" class="field-input" type="email" />
               </div>
             </div>
           </div>
 
-          <!-- Treatment Card -->
+          <!-- Patient-Info / Behandlung -->
           <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
-            <h2 class="text-sm font-semibold text-dental-blue-0 mb-3">Behandlung</h2>
+            <h2 class="text-sm font-semibold text-dental-blue-0 mb-3">Behandlungs-Info</h2>
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="text-xs text-dental-blue--3">Zahnärztliche Leistung</label>
-                <select
-                  :value="dentalServiceId"
-                  class="field-input bg-white"
-                  @change="saveField('dental_service', ($event.target as HTMLSelectElement).value || null)"
+                <p class="text-sm text-dental-blue-0 py-2">
+                  {{ getServiceName(lead) || '—' }}
+                </p>
+              </div>
+              <div>
+                <label class="text-xs text-dental-blue--3">Geplanter Behandlungswert</label>
+                <p class="text-sm text-dental-blue-0 py-2 tabular-nums">
+                  {{ lead.oportunity_value ? `${lead.oportunity_value} €` : '—' }}
+                </p>
+              </div>
+              <div>
+                <label class="text-xs text-dental-blue--3">Standort</label>
+                <p class="text-sm text-dental-blue-0 py-2">
+                  {{ getLocationName(lead) || '—' }}
+                </p>
+              </div>
+              <div>
+                <label class="text-xs text-dental-blue--3">Lead-Quelle</label>
+                <p class="text-sm text-dental-blue-0 py-2">
+                  {{ lead.lead_source || '—' }}
+                </p>
+              </div>
+            </div>
+            <div v-if="lead.message" class="mt-3 pt-3 border-t border-dental-blue--5">
+              <label class="text-xs text-dental-blue--3">Anfrage-Nachricht</label>
+              <p class="text-sm text-dental-blue-0 mt-1 whitespace-pre-wrap">{{ lead.message }}</p>
+            </div>
+          </div>
+
+          <!-- Termine -->
+          <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-sm font-semibold text-dental-blue-0">Termine</h2>
+              <NuxtLink to="/patienten/termine" class="text-[11px] text-dental-blue-0 hover:underline">
+                Alle Termine →
+              </NuxtLink>
+            </div>
+            <div v-if="!appointments.length" class="text-sm text-dental-blue--3 py-3">
+              Keine Termine für diesen Patienten.
+            </div>
+            <ul v-else class="divide-y divide-dental-blue--5">
+              <li v-for="a in appointments" :key="a.id" class="py-2 flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-dental-blue-0">
+                    {{ formatDateTime(a.start_date_time) }}
+                  </p>
+                  <p class="text-[11px] text-dental-blue--3">
+                    {{ a.calendar_column?.name || 'Praxis' }}
+                  </p>
+                </div>
+                <span
+                  class="text-[10px] font-medium px-2 py-0.5 rounded-full"
+                  :class="statusBadgeClass(a.attendance_status)"
                 >
-                  <option value="">— Auswählen —</option>
-                  <option v-for="svc in services" :key="svc.id" :value="svc.id">{{ svc.name }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="text-xs text-dental-blue--3">Wert (€)</label>
-                <input
-                  :value="lead.oportunity_value"
-                  type="number"
-                  class="field-input"
-                  @blur="saveField('oportunity_value', Number(($event.target as HTMLInputElement).value) || null)"
-                />
-              </div>
-              <div>
-                <label class="text-xs text-dental-blue--3">Umsatz (€)</label>
-                <input
-                  :value="lead.revenue"
-                  type="number"
-                  class="field-input"
-                  @blur="saveField('revenue', Number(($event.target as HTMLInputElement).value) || null)"
-                />
-              </div>
-              <div>
-                <label class="text-xs text-dental-blue--3">Datum/Zeit</label>
-                <input
-                  :value="lead.date_time || ''"
-                  type="datetime-local"
-                  class="field-input"
-                  @change="saveField('date_time', ($event.target as HTMLInputElement).value || null)"
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- Message Card -->
-          <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
-            <h2 class="text-sm font-semibold text-dental-blue-0 mb-2">Nachricht</h2>
-            <textarea
-              :value="lead.message"
-              rows="4"
-              class="field-input resize-none"
-              @blur="saveTextField('message', $event)"
-            />
-          </div>
-
-          <!-- Tags Card -->
-          <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
-            <h2 class="text-sm font-semibold text-dental-blue-0 mb-2">Tags</h2>
-            <div class="flex flex-wrap gap-1 mb-2">
-              <span
-                v-for="(tag, i) in (lead.Tags || [])"
-                :key="i"
-                class="inline-flex items-center gap-1 px-2 py-0.5 bg-dental-blue--5 text-dental-blue-0 rounded-full text-[10px] font-medium"
-              >
-                {{ tag }}
-                <button class="hover:text-power-red-0" @click="removeTag(i)">
-                  <i class="pi pi-times text-[8px]" />
-                </button>
-              </span>
-            </div>
-            <input
-              v-model="newTag"
-              type="text"
-              class="field-input"
-              placeholder="Tag hinzufügen + Enter"
-              @keydown.enter.prevent="addTag"
-            />
-          </div>
-
-          <!-- Activities -->
-          <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
-            <h2 class="text-sm font-semibold text-dental-blue-0 mb-3">Aktivitäten</h2>
-            <PatientenActivityQuickActions class="mb-4" @select="openActivityDialog" />
-            <PatientenActivityFeed :activities="activities" @removed="onActivityRemoved" />
+                  {{ statusLabel(a.attendance_status) }}
+                </span>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <!-- RIGHT COLUMN -->
-        <div class="space-y-4">
-          <!-- Status -->
+        <!-- Sidebar: Stammdaten-Metadaten -->
+        <aside class="space-y-4">
           <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
-            <h2 class="text-sm font-semibold text-dental-blue-0 mb-2">Status</h2>
-            <select
-              :value="lead.status"
-              class="field-input bg-white"
-              @change="saveField('status', ($event.target as HTMLSelectElement).value)"
-            >
-              <option v-for="(cfg, key) in LEAD_STATUS_CONFIG" :key="key" :value="key">{{ cfg.label }}</option>
-            </select>
+            <h3 class="text-xs font-semibold text-dental-blue--3 uppercase tracking-wider mb-2">
+              Status
+            </h3>
+            <p class="text-sm text-dental-blue-0 font-medium">
+              {{ statusLabelLead(lead.status) }}
+            </p>
+            <p class="text-[11px] text-dental-blue--3 mt-1">
+              Tags:
+              <span v-if="lead.Tags?.length">{{ lead.Tags.join(', ') }}</span>
+              <span v-else>—</span>
+            </p>
           </div>
 
-          <!-- Follow-up -->
           <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
-            <h2 class="text-sm font-semibold text-dental-blue-0 mb-2">Follow-up</h2>
-            <input
-              :value="lead.follow_up || ''"
-              type="date"
-              class="field-input"
-              @change="saveField('follow_up', ($event.target as HTMLInputElement).value || null)"
-            />
-            <p v-if="isOverdue" class="text-[10px] text-red-500 mt-1 font-medium">Überfällig!</p>
+            <h3 class="text-xs font-semibold text-dental-blue--3 uppercase tracking-wider mb-2">
+              Zeitstempel
+            </h3>
+            <dl class="text-[11px] space-y-1">
+              <div class="flex justify-between">
+                <dt class="text-dental-blue--3">Erstellt</dt>
+                <dd class="text-dental-blue-0">{{ formatDate(lead.date_created) }}</dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-dental-blue--3">Aktualisiert</dt>
+                <dd class="text-dental-blue-0">{{ formatDate(lead.date_updated) }}</dd>
+              </div>
+              <div v-if="lead.follow_up" class="flex justify-between">
+                <dt class="text-dental-blue--3">Follow-up</dt>
+                <dd class="text-dental-blue-0">{{ formatDate(lead.follow_up) }}</dd>
+              </div>
+            </dl>
           </div>
 
-          <!-- Lead Score -->
-          <PatientenLeadScoreBreakdown v-if="leadScore" :result="leadScore" />
-
-          <!-- Response Time -->
-          <div v-if="responseTime" class="bg-white rounded-lg p-4 border border-dental-blue--5">
-            <h2 class="text-sm font-semibold text-dental-blue-0 mb-2">Reaktionszeit</h2>
-            <PatientenResponseTimeBadge :result="responseTime" />
-          </div>
-
-          <!-- Appointments (C3) -->
-          <PatientenLeadAppointments
-            ref="leadAppointmentsRef"
-            :lead-id="(route.params.id as string)"
-            @create="appointmentDialogVisible = true"
-          />
-
-          <!-- Lost reason (cancelled only) -->
-          <div v-if="lead.status === 'cancelled'" class="bg-white rounded-lg p-4 border border-dental-blue--5">
-            <h2 class="text-sm font-semibold text-dental-blue-0 mb-2">Verlust-Grund</h2>
-            <select
-              :value="lead.lost_reason || ''"
-              class="field-input bg-white"
-              @change="saveField('lost_reason', ($event.target as HTMLSelectElement).value || null)"
-            >
-              <option value="">— Auswählen —</option>
-              <option v-for="(label, key) in LOST_REASON_LABELS" :key="key" :value="key">{{ label }}</option>
-            </select>
-          </div>
-
-          <!-- Meta -->
-          <div class="bg-white rounded-lg p-4 border border-dental-blue--5 text-[11px] text-dental-blue--3 space-y-1">
-            <p>Erstellt: {{ formatDate(lead.date_created) }}</p>
-            <p>Aktualisiert: {{ formatDate(lead.date_updated) }}</p>
-            <p v-if="lead.GDPR_accepted_at">DSGVO: {{ formatDate(lead.GDPR_accepted_at) }}</p>
-            <p v-if="lead.newsletter_accepted_time">Newsletter: {{ formatDate(lead.newsletter_accepted_time) }}</p>
-          </div>
-        </div>
+          <NuxtLink
+            :to="`/patienten/leads/${lead.id}`"
+            class="block bg-dental-blue-0 text-white text-sm font-medium text-center py-2.5 rounded-lg hover:bg-dental-blue-1 transition-colors"
+          >
+            <i class="pi pi-chart-line text-xs mr-1.5" />
+            Zur Sales-Detail
+          </NuxtLink>
+        </aside>
       </div>
-    </template>
-
-    <!-- Activity Dialog -->
-    <PatientenActivityLogDialog
-      v-model:visible="activityDialogVisible"
-      :lead-id="(route.params.id as string)"
-      :initial-type="activityDialogType"
-      @saved="refreshActivities"
-    />
-
-    <!-- Email Compose Dialog -->
-    <PatientenEmailComposeDialog
-      v-model:visible="emailDialogVisible"
-      :lead-id="(route.params.id as string)"
-      :lead="lead"
-      @saved="refreshActivities"
-    />
-
-    <!-- Appointment Create Dialog -->
-    <PatientenAppointmentCreateDialog
-      v-model:visible="appointmentDialogVisible"
-      :lead-id="(route.params.id as string)"
-      @saved="onAppointmentSaved"
-    />
-
-    <!-- Toast -->
-    <Toast position="bottom-right" />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { Lead } from '~/types/crm'
 
-
-import {
-  LEAD_STATUS_CONFIG,
-  LEAD_SOURCE_CONFIG,
-  LOST_REASON_LABELS,
-  type Lead,
-  type LeadActivityType,
-  type LeadActivity,
-} from '~/types/crm'
-import type { LeadScoreResult, ResponseTimeResult } from '~/types/analytics'
-
-definePageMeta({ layout: 'crm', middleware: ['auth'] })
+definePageMeta({ layout: 'crm', middleware: 'auth' })
 
 const route = useRoute()
-const toast = useToast()
+const id = computed(() => route.params.id as string)
+
+const { fetchLead, updateLead } = usePatientLeads()
+const { fetchLeadAppointments } = useAppointments()
+
 const lead = ref<Lead | null>(null)
-
-// Dropdown data
-const { locations, fetchLocations } = useLocations()
-const { services, fetchDentalServices } = useDentalServices()
-
-// Activities
-const { getActivities, removeActivity } = useLeadActivities()
-const activities = ref<LeadActivity[]>([])
-const { scoreLead } = useLeadScoring()
-const { getResponseTime } = useResponseTime()
-
-const leadScore = computed((): LeadScoreResult | null => {
-  if (!lead.value) return null
-  const allLeadsStore = usePatientLeads()
-  const maxOV = Math.max(...(allLeadsStore.leads.value || []).map(l => l.oportunity_value || 0), lead.value.oportunity_value || 0, 1)
-  return scoreLead(lead.value, activities.value, maxOV)
+const appointments = ref<any[]>([])
+const editing = ref(false)
+const saving = ref(false)
+const form = reactive({
+  first_name: '',
+  last_name: '',
+  phone: '',
+  mail: '',
 })
 
-const responseTime = computed((): ResponseTimeResult | null => {
-  if (!lead.value) return null
-  return getResponseTime(lead.value, activities.value)
-})
-
-const activityDialogVisible = ref(false)
-const activityDialogType = ref<LeadActivityType>('note')
-const emailDialogVisible = ref(false)
-
-// Appointments
-const appointmentDialogVisible = ref(false)
-const leadAppointmentsRef = ref<InstanceType<typeof import('~/components/crm/LeadAppointments.vue').default> | null>(null)
-
-const onAppointmentSaved = () => {
-  leadAppointmentsRef.value?.reload()
-}
-
-// Tags
-const newTag = ref('')
-
-// Computed helpers for relational FK ids
-const locationId = computed(() => {
-  if (!lead.value?.location) return ''
-  return typeof lead.value.location === 'object' ? lead.value.location.id : lead.value.location
-})
-
-const dentalServiceId = computed(() => {
-  if (!lead.value?.dental_service) return ''
-  return typeof lead.value.dental_service === 'object' ? lead.value.dental_service.id : lead.value.dental_service
-})
-
-const isOverdue = computed(() => {
-  if (!lead.value?.follow_up) return false
-  return lead.value.follow_up < new Date().toISOString().split('T')[0]
-})
-
-// Load data
 const loadLead = async () => {
-  const { fetchLead } = usePatientLeads()
-  lead.value = await fetchLead(route.params.id as string)
-  refreshActivities()
+  const result = await fetchLead(id.value)
+  if (result) {
+    lead.value = result
+    Object.assign(form, {
+      first_name: result.first_name || '',
+      last_name: result.last_name || '',
+      phone: result.phone || '',
+      mail: result.mail || '',
+    })
+  }
+  if (result?.id) {
+    appointments.value = await fetchLeadAppointments(result.id)
+  }
 }
 
-const refreshActivities = () => {
-  activities.value = getActivities(route.params.id as string)
-}
+watch(id, loadLead, { immediate: true })
 
-// Save field with error handling (for dropdowns/selects that use :value)
-const saveField = async (field: string, value: any) => {
-  if (!lead.value) return
-  const previousValue = (lead.value as any)[field]
-  try {
-    const { updateLead } = usePatientLeads()
-    await updateLead(lead.value.id, { [field]: value })
-    ;(lead.value as any)[field] = value
-  } catch (err) {
-    // Revert
-    ;(lead.value as any)[field] = previousValue
-    toast.add({
-      severity: 'error',
-      summary: 'Fehler',
-      detail: 'Speichern fehlgeschlagen',
-      life: 3000,
+const startEdit = () => {
+  editing.value = true
+}
+const cancelEdit = () => {
+  editing.value = false
+  if (lead.value) {
+    Object.assign(form, {
+      first_name: lead.value.first_name || '',
+      last_name: lead.value.last_name || '',
+      phone: lead.value.phone || '',
+      mail: lead.value.mail || '',
     })
   }
 }
-
-// Save text field from blur event — captures value from DOM, reverts input on failure
-const saveTextField = async (field: string, event: Event) => {
+const saveEdit = async () => {
   if (!lead.value) return
-  const input = event.target as HTMLInputElement | HTMLTextAreaElement
-  const newValue = input.value
-  const previousValue = (lead.value as any)[field]
-  if (newValue === previousValue) return // No change
+  saving.value = true
   try {
-    const { updateLead } = usePatientLeads()
-    await updateLead(lead.value.id, { [field]: newValue || null })
-    ;(lead.value as any)[field] = newValue
-  } catch (err) {
-    // Revert the DOM input and local state
-    input.value = previousValue || ''
-    toast.add({
-      severity: 'error',
-      summary: 'Fehler',
-      detail: 'Speichern fehlgeschlagen',
-      life: 3000,
-    })
+    await updateLead(lead.value.id, { ...form })
+    Object.assign(lead.value, form)
+    editing.value = false
+  } finally {
+    saving.value = false
   }
 }
 
-// Tags
-const addTag = async () => {
-  const tag = newTag.value.trim()
-  if (!tag || !lead.value) return
-  const previousTags = lead.value.Tags ? [...lead.value.Tags] : []
-  const tags = [...previousTags, tag]
-  lead.value.Tags = tags
-  newTag.value = ''
-  try {
-    const { updateLead } = usePatientLeads()
-    await updateLead(lead.value.id, { Tags: tags })
-  } catch {
-    lead.value.Tags = previousTags
-    toast.add({ severity: 'error', summary: 'Fehler', detail: 'Speichern fehlgeschlagen', life: 3000 })
+const getServiceName = (l: Lead) => {
+  if (typeof l.dental_service === 'object' && l.dental_service) return l.dental_service.name
+  return '—'
+}
+const getLocationName = (l: Lead) => {
+  if (typeof l.location === 'object' && l.location) return l.location.name
+  return '—'
+}
+
+const formatDate = (iso?: string) =>
+  iso ? new Date(iso).toLocaleDateString('de-DE') : '—'
+const formatDateTime = (iso: string) =>
+  new Date(iso).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })
+
+const statusLabelLead = (status?: string) => {
+  const map: Record<string, string> = {
+    open: 'Offen',
+    contacted: 'Kontaktiert',
+    contacted_twice: '2x kontaktiert',
+    scheduled: 'Termin ausgemacht',
+    rescheduling: 'Termin verschoben',
+    email_sendet: 'E-Mail versandt',
+    hkp_sended: 'HKP versandt',
+    done: 'Abgeschlossen',
+    cancelled: 'Abgesagt',
   }
+  return map[status || ''] || status || '—'
 }
-
-const removeTag = async (index: number) => {
-  if (!lead.value) return
-  const previousTags = lead.value.Tags ? [...lead.value.Tags] : []
-  const tags = [...previousTags]
-  tags.splice(index, 1)
-  lead.value.Tags = tags
-  try {
-    const { updateLead } = usePatientLeads()
-    await updateLead(lead.value.id, { Tags: tags })
-  } catch {
-    lead.value.Tags = previousTags
-    toast.add({ severity: 'error', summary: 'Fehler', detail: 'Speichern fehlgeschlagen', life: 3000 })
-  }
-}
-
-// Activities
-const openActivityDialog = (type: LeadActivityType) => {
-  if (type === 'email') {
-    emailDialogVisible.value = true
-    return
-  }
-  activityDialogType.value = type
-  activityDialogVisible.value = true
-}
-
-const onActivityRemoved = (id: string) => {
-  removeActivity(id)
-  refreshActivities()
-}
-
-const formatDate = (date: string) => {
-  try { return new Date(date).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' }) }
-  catch { return date }
-}
-
-onMounted(async () => {
-  await Promise.all([loadLead(), fetchLocations(), fetchDentalServices()])
-})
+const statusLabel = (s: string) => ({ scheduled: 'Geplant', attended: 'Erschienen', missed: 'Verpasst' }[s] || s)
+const statusBadgeClass = (s: string) =>
+  s === 'attended'
+    ? 'bg-green-100 text-green-800'
+    : s === 'missed'
+      ? 'bg-red-100 text-red-700'
+      : 'bg-blue-100 text-blue-800'
 </script>
-
-<style scoped>
-.field-input {
-  @apply w-full px-3 py-2 text-sm border border-dental-blue--5 rounded-lg outline-none focus:border-dental-blue-0 text-dental-blue-0;
-}
-</style>
