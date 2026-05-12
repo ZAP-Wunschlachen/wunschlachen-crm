@@ -95,9 +95,9 @@
           >
             <td class="px-4 py-3 font-medium text-dental-blue-0">{{ lead.first_name }} {{ lead.last_name }}</td>
             <td class="px-4 py-3 text-dental-blue--2">{{ getServiceName(lead) }}</td>
-            <td class="px-4 py-3"><CrmLeadStatusBadge :status="lead.status" /></td>
+            <td class="px-4 py-3"><PatientenLeadStatusBadge :status="lead.status" /></td>
             <td class="px-4 py-3">
-              <CrmLeadScoreBadge v-if="getScore(lead.id) != null" :score="getScore(lead.id)!" />
+              <PatientenLeadScoreBadge v-if="getScore(lead.id) != null" :score="getScore(lead.id)!" />
               <span v-else class="text-xs text-dental-blue--3">—</span>
             </td>
             <td class="px-4 py-3 text-dental-blue--2 text-xs">{{ getSourceLabel(lead) }}</td>
@@ -126,7 +126,7 @@
       </button>
     </div>
 
-    <CrmCreateLeadDialog v-model:visible="showCreate" @created="loadLeads" />
+    <PatientenCreateLeadDialog v-model:visible="showCreate" @created="loadLeads" />
   </div>
 </template>
 
