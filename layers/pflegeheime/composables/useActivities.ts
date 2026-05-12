@@ -6,7 +6,7 @@
  * and ensure nursing_home_lead_activities collection exists in Directus.
  */
 
-const USE_LOCAL = false
+const USE_LOCAL = true
 const STORAGE_KEY = 'nursing_home_lead_activities'
 
 export interface ActivityFilters {

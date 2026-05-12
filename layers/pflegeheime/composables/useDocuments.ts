@@ -6,7 +6,7 @@
  * When ready for production, switch USE_LOCAL to false.
  */
 
-const USE_LOCAL = false
+const USE_LOCAL = true
 const STORAGE_KEY = 'nursing_home_lead_documents'
 
 // Shared state

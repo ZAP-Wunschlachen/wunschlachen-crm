@@ -5,7 +5,7 @@
  * When ready for production, switch USE_LOCAL to false.
  */
 
-const USE_LOCAL = false
+const USE_LOCAL = true
 const STORAGE_KEY = 'crm_contacts'
 
 export interface ContactFilters {

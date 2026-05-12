@@ -16,7 +16,7 @@ const SMART_VIEW_FIELDS = [
   'user_created',
 ]
 
-const USE_LOCAL = false
+const USE_LOCAL = true
 const STORAGE_KEY = 'nursing_home_lead_smart_views'
 
 // Shared state

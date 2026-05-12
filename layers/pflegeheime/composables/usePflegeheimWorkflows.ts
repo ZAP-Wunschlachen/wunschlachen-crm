@@ -15,7 +15,7 @@ const WORKFLOW_RUN_FIELDS = [
   'current_step', 'started_at', 'completed_at', 'log',
 ]
 
-const USE_LOCAL = false
+const USE_LOCAL = true
 const STORAGE_KEY = 'crm_workflows'
 const RUNS_STORAGE_KEY = 'crm_workflow_runs'
 

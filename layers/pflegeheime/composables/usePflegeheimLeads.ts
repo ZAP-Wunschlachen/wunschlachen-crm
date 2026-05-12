@@ -6,7 +6,7 @@
  * and data will be fetched from Directus.
  */
 
-const USE_LOCAL = false
+const USE_LOCAL = true
 const STORAGE_KEY = 'crm_leads'
 const CONTACTS_STORAGE_KEY = 'crm_lead_contacts'
 
