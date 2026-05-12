@@ -57,10 +57,10 @@
         class="px-2 py-1.5 bg-white border border-gray-200 rounded-md text-[12px] text-gray-600 focus:outline-none focus:ring-1 focus:ring-[#172774]/30"
         @change="loadLeads(1)"
       >
-        <option :value="null">Alle Prioritaeten</option>
+        <option :value="null">Alle Prioritäten</option>
         <option value="high">A (100+ Betten)</option>
-        <option value="medium">B (50-100 Betten)</option>
-        <option value="low">C (0-50 Betten)</option>
+        <option value="medium">B (50–100 Betten)</option>
+        <option value="low">C (0–50 Betten)</option>
       </select>
     </div>
 
@@ -100,9 +100,9 @@
               <span class="text-[11px] text-gray-400 ml-1.5">{{ getNursingHomeLocation(lead) }}</span>
             </td>
             <td class="px-3 py-2"><CrmLeadStatusBadge :stage="lead.opportunity_stage" /></td>
-            <td class="px-3 py-2">{{ lead.priority || '-' }}</td>
-            <td class="px-3 py-2 text-gray-500 tabular-nums">{{ getNursingHomeCapacity(lead) || '-' }}</td>
-            <td class="px-3 py-2">{{ lead.follow_up_date ? formatDate(lead.follow_up_date) : '-' }}</td>
+            <td class="px-3 py-2"><CrmPriorityBadge :priority="lead.priority" /></td>
+            <td class="px-3 py-2 text-gray-500 tabular-nums">{{ getNursingHomeCapacity(lead) || '–' }}</td>
+            <td class="px-3 py-2"><CrmFollowUpIndicator :date="lead.follow_up_date" /></td>
             <td class="px-3 py-2 text-[11px] text-gray-400 tabular-nums">{{ formatDate(lead.date_updated) }}</td>
           </tr>
         </tbody>
@@ -112,21 +112,52 @@
       <div class="flex items-center justify-between px-3 py-2 border-t border-gray-100 bg-gray-50/40">
         <div class="flex items-center gap-2">
           <p class="text-[11px] text-gray-400 tabular-nums">{{ currentPage }} / {{ totalPages }}</p>
+          <select
+            :value="pagination.limit"
+            class="px-1.5 py-0.5 text-[11px] text-gray-500 bg-white border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#172774]/30"
+            @change="changePageSize(Number(($event.target as HTMLSelectElement).value))"
+          >
+            <option :value="25">25</option>
+            <option :value="50">50</option>
+            <option :value="100">100</option>
+            <option :value="250">250</option>
+          </select>
+          <span class="text-[11px] text-gray-400">pro Seite</span>
         </div>
         <div class="flex gap-1">
           <button
             :disabled="currentPage <= 1"
             class="px-2 py-0.5 text-[11px] rounded border border-gray-200 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             @click="loadLeads(currentPage - 1)"
-          >&#8592;</button>
+          >←</button>
           <button
             :disabled="currentPage >= totalPages"
             class="px-2 py-0.5 text-[11px] rounded border border-gray-200 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             @click="loadLeads(currentPage + 1)"
-          >&#8594;</button>
+          >→</button>
         </div>
       </div>
     </div>
+
+    <!-- Active Smart View banner -->
+    <div v-if="activeSmartView" class="mt-3 flex items-center gap-2 px-3 py-2 bg-[#172774]/5 border border-[#172774]/20 rounded-lg">
+      <i :class="activeSmartView.icon || 'pi pi-filter'" class="text-[12px] text-[#172774]" />
+      <span class="text-[12px] text-[#172774] font-medium">{{ activeSmartView.name }}</span>
+      <button
+        class="ml-auto text-[10px] text-gray-400 hover:text-gray-600 transition-colors"
+        @click="clearSmartView"
+      >
+        <i class="pi pi-times text-[10px]" />
+        Filter zurücksetzen
+      </button>
+    </div>
+
+    <!-- Save View Dialog -->
+    <CrmSaveViewDialog
+      v-model:visible="saveViewDialogVisible"
+      :filters="currentFilters"
+      @saved="handleViewSaved"
+    />
 
     <CrmCreateLeadDialog
       v-model:visible="createLeadDialogVisible"
@@ -138,17 +169,21 @@
 <script setup lang="ts">
 import { format, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
+import { PIPELINE_STAGES } from '~/types/crm'
+import type { NursingHomeLead, OpportunityStage, Priority } from '~/types/crm'
 
 definePageMeta({ layout: 'crm', middleware: 'auth' })
 
-const PIPELINE_STAGES = ['Unqualified', 'Qualified', 'Follow-up', 'Presentation', 'Email', 'Emergency', 'Won', 'Lost', 'Cancelled']
-
+const route = useRoute()
+const router = useRouter()
 const { leads, pagination, fetchLeads, fetchLeadCount, isLoading } = usePflegeheimLeads()
 const { smartViews, fetchSmartViews } = useSmartViews()
 
 const searchQuery = ref('')
-const stageFilter = ref<string | null>(null)
-const priorityFilter = ref<string | null>(null)
+const stageFilter = ref<OpportunityStage | null>(null)
+const priorityFilter = ref<Priority | null>(null)
+const followUpDue = ref(false)
+const noActivityDays = ref(0)
 const sortField = ref('date_updated')
 const sortOrder = ref<'asc' | 'desc'>('desc')
 const loading = ref(false)
@@ -156,8 +191,64 @@ const saveViewDialogVisible = ref(false)
 const createLeadDialogVisible = ref(false)
 
 const hasActiveFilters = computed(() =>
-  !!searchQuery.value || !!stageFilter.value || !!priorityFilter.value
+  !!searchQuery.value || !!stageFilter.value || !!priorityFilter.value || followUpDue.value || noActivityDays.value > 0
 )
+
+const currentFilters = computed(() => ({
+  search: searchQuery.value || undefined,
+  stage: stageFilter.value || undefined,
+  priority: priorityFilter.value || undefined,
+}))
+
+// Default smart views (matching SmartViewSidebar defaults)
+const defaultSmartViews = [
+  { id: '_hot', name: 'Heiße Leads', filters: { priority: 'high' }, icon: 'pi pi-bolt' },
+  { id: '_followup', name: 'Follow-up fällig', filters: { follow_up_due: true }, icon: 'pi pi-clock' },
+  { id: '_inactive', name: 'Ohne Aktivität', filters: { no_activity_days: 14 }, icon: 'pi pi-exclamation-triangle' },
+]
+
+const activeSmartView = computed(() => {
+  const viewId = route.query.view as string
+  if (!viewId) return null
+  // Check default views first
+  const defaultView = defaultSmartViews.find(v => v.id === viewId)
+  if (defaultView) return defaultView
+  return smartViews.value.find(v => v.id === viewId) || null
+})
+
+const clearSmartView = () => {
+  searchQuery.value = ''
+  stageFilter.value = null
+  priorityFilter.value = null
+  followUpDue.value = false
+  noActivityDays.value = 0
+  router.replace({ query: {} })
+  loadLeads(1)
+}
+
+const applySmartView = (view: any) => {
+  // Reset all filters first
+  searchQuery.value = ''
+  stageFilter.value = null
+  priorityFilter.value = null
+  followUpDue.value = false
+  noActivityDays.value = 0
+
+  if (view.filters?.search) searchQuery.value = view.filters.search
+  if (view.filters?.stage) stageFilter.value = view.filters.stage
+  if (view.filters?.priority) priorityFilter.value = view.filters.priority as Priority
+  if (view.filters?.follow_up_due) followUpDue.value = true
+  if (view.filters?.no_activity_days) noActivityDays.value = view.filters.no_activity_days
+  loadLeads(1)
+}
+
+const handleViewSaved = () => {
+  fetchSmartViews()
+}
+
+const handleLeadCreated = (leadId: string) => {
+  navigateTo(`/crm/leads/${leadId}`)
+}
 
 const columns = [
   { key: 'name', label: 'Pflegeheim', sortable: true, sortKey: 'nursing_home_id.name' },
@@ -172,23 +263,23 @@ const currentPage = computed(() => pagination.value.page)
 const totalCount = ref(0)
 const totalPages = computed(() => Math.ceil(totalCount.value / pagination.value.limit))
 
-const getNursingHomeName = (lead: any) => {
-  if (typeof lead.nursing_home_id === 'object' && lead.nursing_home_id) return lead.nursing_home_id.name || '-'
-  return '-'
+const getNursingHomeName = (lead: NursingHomeLead) => {
+  if (typeof lead.nursing_home_id === 'object' && lead.nursing_home_id) return lead.nursing_home_id.name || '–'
+  return '–'
 }
-const getNursingHomeLocation = (lead: any) => {
+const getNursingHomeLocation = (lead: NursingHomeLead) => {
   if (typeof lead.nursing_home_id === 'object' && lead.nursing_home_id) {
     return [lead.nursing_home_id.zip, lead.nursing_home_id.city].filter(Boolean).join(' ')
   }
   return ''
 }
-const getNursingHomeCapacity = (lead: any) => {
+const getNursingHomeCapacity = (lead: NursingHomeLead) => {
   if (typeof lead.nursing_home_id === 'object' && lead.nursing_home_id) return lead.nursing_home_id.total_capacity
   return null
 }
 const formatDate = (dateStr?: string) => {
-  if (!dateStr) return '-'
-  try { return format(parseISO(dateStr), 'dd.MM.yy', { locale: de }) } catch { return '-' }
+  if (!dateStr) return '–'
+  try { return format(parseISO(dateStr), 'dd.MM.yy', { locale: de }) } catch { return '–' }
 }
 
 const toggleSort = (field: string) => {
@@ -201,10 +292,17 @@ const sortIcon = (field: string) => {
   return sortOrder.value === 'asc' ? 'pi pi-sort-amount-up' : 'pi pi-sort-amount-down'
 }
 
+const changePageSize = (size: number) => {
+  pagination.value.limit = size
+  loadLeads(1)
+}
+
 const buildFilters = () => ({
   search: searchQuery.value || undefined,
   stage: stageFilter.value,
   priority: priorityFilter.value,
+  followUpDue: followUpDue.value || undefined,
+  noActivityDays: noActivityDays.value || undefined,
 })
 
 const loadLeads = async (page: number = 1) => {
@@ -222,13 +320,9 @@ const loadLeads = async (page: number = 1) => {
 let searchTimeout: ReturnType<typeof setTimeout>
 const debouncedSearch = () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => loadLeads(1), 300) }
 
-const handleLeadCreated = (leadId: string) => {
-  navigateTo(`/crm/leads/${leadId}`)
-}
-
 const exportCsv = () => {
   if (leads.value.length === 0) return
-  const headers = ['Pflegeheim', 'Stadt', 'PLZ', 'Stage', 'Prioritaet', 'Follow-up', 'Betten', 'Aktualisiert']
+  const headers = ['Pflegeheim', 'Stadt', 'PLZ', 'Stage', 'Priorität', 'Follow-up', 'Betten', 'Aktualisiert']
   const rows = leads.value.map(lead => [
     getNursingHomeName(lead),
     typeof lead.nursing_home_id === 'object' ? lead.nursing_home_id?.city || '' : '',
@@ -244,8 +338,34 @@ const exportCsv = () => {
   URL.revokeObjectURL(url)
 }
 
+// Watch for smart view changes (query param)
+watch(() => route.query.view, (viewId) => {
+  if (!viewId) {
+    // No view selected — clear filters
+    searchQuery.value = ''
+    stageFilter.value = null
+    priorityFilter.value = null
+    followUpDue.value = false
+    noActivityDays.value = 0
+    loadLeads(1)
+    return
+  }
+  const view = defaultSmartViews.find(v => v.id === viewId)
+    || smartViews.value.find(v => v.id === viewId)
+  if (view) applySmartView(view)
+})
+
 onMounted(async () => {
   try { await fetchSmartViews() } catch {}
+  // Apply smart view if specified in URL
+  if (route.query.view) {
+    const view = defaultSmartViews.find(v => v.id === route.query.view)
+      || smartViews.value.find(v => v.id === route.query.view)
+    if (view) {
+      applySmartView(view)
+      return
+    }
+  }
   loadLeads()
 })
 </script>
