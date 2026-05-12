@@ -184,7 +184,7 @@ const emit = defineEmits<{
   saved: [leadId: string]
 }>()
 
-const { createLead } = useLeads()
+const { createLead } = usePflegeheimLeads()
 const saving = ref(false)
 
 const defaultForm = () => ({

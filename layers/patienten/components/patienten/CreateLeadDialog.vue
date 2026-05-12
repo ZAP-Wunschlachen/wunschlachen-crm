@@ -84,7 +84,7 @@ const submit = async () => {
   saving.value = true
 
   try {
-    const { createLead } = useLeads()
+    const { createLead } = usePatientLeads()
     await createLead({
       first_name: form.first_name.trim(),
       last_name: form.last_name.trim(),

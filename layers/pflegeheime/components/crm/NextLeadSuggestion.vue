@@ -136,7 +136,7 @@ const props = defineProps<{
 }>()
 
 const { visitedIds, activeFilter, markVisited, resetQueue, setFilter } = useNextLeadQueue()
-const { leads: allLeadsRef, fetchLeads, pagination } = useLeads()
+const { leads: allLeadsRef, fetchLeads, pagination } = usePflegeheimLeads()
 const isOpen = ref(false)
 const skippedIds = ref<string[]>([])
 const loaded = ref(false)
