@@ -258,6 +258,38 @@
             @create="appointmentDialogVisible = true"
           />
 
+          <!-- HKP-Sub-State (nur bei status='hkp_sent', Plan v9 Phase E) -->
+          <div v-if="lead.status === 'hkp_sent'" class="bg-white rounded-lg p-4 border border-dental-blue--5">
+            <div class="flex items-start justify-between mb-2">
+              <h2 class="text-sm font-semibold text-dental-blue-0">HKP-Sub-Status</h2>
+              <span
+                v-if="lead.hkp_substate"
+                class="text-[10px] font-medium px-2 py-0.5 rounded-full"
+                :style="{
+                  color: HKP_SUBSTATE_CONFIG[lead.hkp_substate]?.color,
+                  backgroundColor: HKP_SUBSTATE_CONFIG[lead.hkp_substate]?.bgColor,
+                }"
+              >
+                {{ HKP_SUBSTATE_CONFIG[lead.hkp_substate]?.label }}
+              </span>
+            </div>
+            <select
+              :value="lead.hkp_substate || ''"
+              class="field-input bg-white"
+              @change="saveField('hkp_substate', ($event.target as HTMLSelectElement).value || null)"
+            >
+              <option value="">— Nicht gesetzt —</option>
+              <option v-for="(cfg, key) in HKP_SUBSTATE_CONFIG" :key="key" :value="key">{{ cfg.label }}</option>
+            </select>
+            <p v-if="lead.hkp_substate" class="text-[10px] text-dental-blue--3 mt-1.5">
+              <i class="pi pi-info-circle text-[9px] mr-0.5" />
+              {{ HKP_SUBSTATE_CONFIG[lead.hkp_substate]?.hint }}
+            </p>
+            <p v-if="lead.hkp_substate" class="text-[10px] text-dental-blue--3 mt-0.5">
+              Nachfass empfohlen in {{ HKP_SUBSTATE_CONFIG[lead.hkp_substate]?.followup_days }} Tagen
+            </p>
+          </div>
+
           <!-- Lost reason + Reactivation (cancelled only) -->
           <div v-if="lead.status === 'lost'" class="bg-white rounded-lg p-4 border border-dental-blue--5 space-y-3">
             <div>
@@ -344,6 +376,7 @@ import {
   LEAD_STATUS_CONFIG,
   LEAD_SOURCE_CONFIG,
   LOST_REASON_LABELS,
+  HKP_SUBSTATE_CONFIG,
   type Lead,
   type LeadActivityType,
   type LeadActivity,

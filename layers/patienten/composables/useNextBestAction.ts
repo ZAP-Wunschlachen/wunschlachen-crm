@@ -289,12 +289,82 @@ const rulesForConsultationDone = (lead: Lead, days: number): NextBestActionResul
 }
 
 const rulesForHkpSent = (lead: Lead, days: number): NextBestActionResult => {
+  // Plan v9 Phase E: hkp_substate-spezifische Empfehlungen
+  const sub = lead.hkp_substate
+  if (sub === 'ready_to_sign') {
+    return {
+      urgency: days >= 1 ? 'high' : 'medium',
+      reason: 'Patient ist unterschriftsbereit — Termin direkt verbindlich machen',
+      days_in_status: days,
+      actions: [
+        { type: 'call', label: 'Bestätigungs-Anruf + Termin fixieren', icon: 'pi pi-phone', primary: true },
+        { type: 'book_meeting', label: 'Unterschriftstermin buchen', icon: 'pi pi-calendar-plus' },
+      ],
+    }
+  }
+  if (sub === 'negotiating') {
+    return {
+      urgency: days >= 3 ? 'high' : 'medium',
+      reason: 'Preisverhandlung läuft — Finanzierung aktiv anbieten',
+      days_in_status: days,
+      actions: [
+        { type: 'send_financing_info', label: 'Finanzierungs-Optionen senden', icon: 'pi pi-euro', primary: true },
+        { type: 'call', label: 'Verhandlungs-Call', icon: 'pi pi-phone' },
+        { type: 'mark_lost', label: 'Verloren (Preis)', icon: 'pi pi-times' },
+      ],
+    }
+  }
+  if (sub === 'awaiting_insurance_response') {
+    if (days < 14) {
+      return {
+        urgency: 'low',
+        reason: 'Wartet auf Kasse — Geduld, Erstkontakt zur Kasse erst nach 14 Tagen',
+        days_in_status: days,
+        actions: [
+          { type: 'whatsapp', label: 'Höflicher Status-Check beim Patient', icon: 'pi pi-comments' },
+        ],
+      }
+    }
+    return {
+      urgency: 'high',
+      reason: `Kasse antwortet seit ${days} Tagen nicht — Patient aktivieren`,
+      days_in_status: days,
+      actions: [
+        { type: 'call', label: 'Patient anrufen — Stand bei Kasse', icon: 'pi pi-phone', primary: true },
+        { type: 'email', label: 'Erinnerungs-Mail mit Kassen-Brief-Vorlage', icon: 'pi pi-envelope', template_id: 'hkp-followup-second' },
+      ],
+    }
+  }
+  if (sub === 'awaiting_patient_review') {
+    if (days < 7) {
+      return {
+        urgency: 'medium',
+        reason: 'Patient prüft den HKP — geduldig sein, nach 7 Tagen nachfassen',
+        days_in_status: days,
+        actions: [
+          { type: 'whatsapp', label: 'Freundliche Erinnerung', icon: 'pi pi-comments' },
+        ],
+      }
+    }
+    return {
+      urgency: 'high',
+      reason: `Patient prüft seit ${days} Tagen — jetzt Klärungs-Call`,
+      days_in_status: days,
+      actions: [
+        { type: 'call', label: 'Klärungs-Anruf', icon: 'pi pi-phone', primary: true },
+        { type: 'email', label: 'HKP-Klärungs-Mail', icon: 'pi pi-envelope', template_id: 'hkp-followup' },
+      ],
+    }
+  }
+
+  // Default ohne Sub-State (Legacy-Verhalten)
   if (days < 3) {
     return {
       urgency: 'medium',
       reason: 'HKP versandt — Patient prüft, Brevo-Open-Status beobachten',
       days_in_status: days,
       actions: [
+        { type: 'status_change', label: 'Sub-Status setzen (genauer planen)', icon: 'pi pi-tag', primary: true },
         { type: 'whatsapp', label: 'Kurz nachfragen ob angekommen', icon: 'pi pi-comments', template_id: 'whatsapp-hkp-check' },
       ],
     }
@@ -306,7 +376,7 @@ const rulesForHkpSent = (lead: Lead, days: number): NextBestActionResult => {
       days_in_status: days,
       actions: [
         { type: 'call', label: 'Nachfass-Anruf', icon: 'pi pi-phone', primary: true, hint: 'Tonys-Beispiel: kritische Phase' },
-        { type: 'email', label: 'HKP-Erinnerung mit Klärungsangebot', icon: 'pi pi-envelope', template_id: 'pt-2' },
+        { type: 'email', label: 'HKP-Erinnerung mit Klärungsangebot', icon: 'pi pi-envelope', template_id: 'hkp-followup' },
         { type: 'send_financing_info', label: 'Finanzierungsoptionen senden', icon: 'pi pi-euro' },
       ],
     }

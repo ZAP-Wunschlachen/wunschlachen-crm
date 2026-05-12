@@ -158,6 +158,49 @@ export const LOST_REASON_LABELS: Record<LostReason, string> = {
   other:             'Sonstiges',
 }
 
+/**
+ * HKP-Sub-States (Plan v9 Phase E) — feingranulare Zustände innerhalb `hkp_sent`.
+ * Optional. Wird im Lead-Detail per Picker gesetzt, beeinflusst Nachfass-Empfehlung.
+ */
+export type HkpSubState =
+  | 'awaiting_patient_review'      // Patient prüft den HKP
+  | 'awaiting_insurance_response'  // Kasse prüft Kostenübernahme
+  | 'negotiating'                  // Preisverhandlung läuft
+  | 'ready_to_sign'                // Patient hat Bereitschaft signalisiert
+
+export const HKP_SUBSTATE_CONFIG: Record<HkpSubState, {
+  label: string
+  color: string
+  bgColor: string
+  followup_days: number
+  hint: string
+}> = {
+  awaiting_patient_review: {
+    label: 'Patient prüft',
+    color: '#fbbf24', bgColor: '#fffbeb',
+    followup_days: 7,
+    hint: 'Nachfass nach einer Woche, falls keine Rückmeldung',
+  },
+  awaiting_insurance_response: {
+    label: 'Wartet auf Kasse',
+    color: '#60a5fa', bgColor: '#eff6ff',
+    followup_days: 14,
+    hint: 'Kassen brauchen oft 2 Wochen; danach freundlicher Status-Check',
+  },
+  negotiating: {
+    label: 'In Verhandlung',
+    color: '#f97316', bgColor: '#ffedd5',
+    followup_days: 3,
+    hint: 'Kurze Schlagzahl bei Preisverhandlung — Finanzierungs-Angebot bereithalten',
+  },
+  ready_to_sign: {
+    label: 'Bereit zu unterschreiben',
+    color: '#22c55e', bgColor: '#dcfce7',
+    followup_days: 1,
+    hint: 'Letzter Push — Abschluss-Termin direkt anbieten',
+  },
+}
+
 export interface Lead {
   id: string
   first_name: string
@@ -178,6 +221,7 @@ export interface Lead {
   is_customer?: boolean                 // true sobald jemals 'completed' erreicht — Bestandspatient-Flag
   lost_reason?: LostReason              // nur gesetzt wenn status='lost'
   reactivation_due_at?: string          // ISO timestamp: wann re-engaged werden soll (lost + 90 T)
+  hkp_substate?: HkpSubState            // Plan v9 Phase E: nur gesetzt wenn status='hkp_sent'
 
   query_params?: Record<string, any> | Array<{ name: string; value: string; timestamp: string }>
   newsletter_accepted_time?: string
