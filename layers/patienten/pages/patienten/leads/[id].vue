@@ -215,7 +215,7 @@
           />
 
           <!-- Lost reason (cancelled only) -->
-          <div v-if="lead.status === 'cancelled'" class="bg-white rounded-lg p-4 border border-dental-blue--5">
+          <div v-if="lead.status === 'lost'" class="bg-white rounded-lg p-4 border border-dental-blue--5">
             <h2 class="text-sm font-semibold text-dental-blue-0 mb-2">Verlust-Grund</h2>
             <select
               :value="lead.lost_reason || ''"

@@ -1,38 +1,125 @@
 // Types for the Praxis CRM — maps to Directus "Leads" collection
+//
+// Status-Modell v2 (Plan v9, 2026-05-12):
+// 11 Status entlang des Dental-Implantat-Funnels + No-Show als Counter, nicht eigener Status.
+// State-Machine + erlaubte Übergänge in useLeadStatusTransitions.ts.
 
 export type LeadStatus =
-  | 'open'
-  | 'contacted'
-  | 'contacted_twice'
-  | 'scheduled'
-  | 'rescheduling'
-  | 'email_sendet'
-  | 'hkp_sended'
-  | 'done'
-  | 'cancelled'
+  // Phase 1 — Akquise
+  | 'new'                       // Lead frisch eingegangen, noch nicht kontaktiert
+  | 'contacting'                // Anruf-Versuche laufen (Counter: contact_attempts)
+  | 'contacted'                 // Erstgespräch erfolgt, Interesse-Check
+  // Phase 2 — Beratung
+  | 'consultation_scheduled'    // Erstuntersuchung (15 Min) terminiert
+  | 'consultation_done'         // Erstuntersuchung erfolgt, HKP wird erstellt
+  // Phase 3 — Angebot
+  | 'hkp_sent'                  // Heil- und Kostenplan versandt, Patient prüft
+  | 'hkp_signed'                // Patient hat HKP unterschrieben
+  // Phase 4 — Behandlung
+  | 'treatment_scheduled'       // Behandlungs-Termin gebucht
+  | 'treatment_in_progress'     // Behandlung läuft (1+ Sessions)
+  | 'completed'                 // Behandlung abgeschlossen — wird Bestandspatient
+  // Verloren
+  | 'lost'                      // verloren mit Reason (siehe LostReason)
 
 export const LEAD_STATUSES: LeadStatus[] = [
-  'open',
+  'new',
+  'contacting',
   'contacted',
-  'contacted_twice',
-  'scheduled',
-  'rescheduling',
-  'email_sendet',
-  'hkp_sended',
-  'done',
-  'cancelled',
+  'consultation_scheduled',
+  'consultation_done',
+  'hkp_sent',
+  'hkp_signed',
+  'treatment_scheduled',
+  'treatment_in_progress',
+  'completed',
+  'lost',
 ]
 
-export const LEAD_STATUS_CONFIG: Record<LeadStatus, { label: string; color: string; bgColor: string }> = {
-  open:             { label: 'Offen',              color: '#94a3b8', bgColor: '#f1f5f9' },
-  contacted:        { label: 'Kontaktiert',        color: '#60a5fa', bgColor: '#eff6ff' },
-  contacted_twice:  { label: '2x Kontaktiert',     color: '#3b82f6', bgColor: '#dbeafe' },
-  scheduled:        { label: 'Termin ausgemacht',   color: '#34d399', bgColor: '#ecfdf5' },
-  rescheduling:     { label: 'Rescheduling',        color: '#fbbf24', bgColor: '#fffbeb' },
-  email_sendet:     { label: 'Email versendet',     color: '#a78bfa', bgColor: '#f5f3ff' },
-  hkp_sended:       { label: 'HKP verschickt',     color: '#f97316', bgColor: '#fff7ed' },
-  done:             { label: 'Won',                 color: '#22c55e', bgColor: '#f0fdf4' },
-  cancelled:        { label: 'Lost',                color: '#f87171', bgColor: '#fef2f2' },
+/**
+ * Pipeline-Phasen für Kanban/Visualisierung (5 Spalten, "lost" außerhalb).
+ * Jeder Status gehört zu genau einer Phase.
+ */
+export type PipelinePhase = 'akquise' | 'beratung' | 'angebot' | 'behandlung' | 'abgeschlossen'
+
+export const STATUS_TO_PHASE: Record<LeadStatus, PipelinePhase | null> = {
+  new: 'akquise',
+  contacting: 'akquise',
+  contacted: 'akquise',
+  consultation_scheduled: 'beratung',
+  consultation_done: 'beratung',
+  hkp_sent: 'angebot',
+  hkp_signed: 'angebot',
+  treatment_scheduled: 'behandlung',
+  treatment_in_progress: 'behandlung',
+  completed: 'abgeschlossen',
+  lost: null, // wird in einer separaten Spalte oder als Filter dargestellt
+}
+
+export const PIPELINE_PHASE_CONFIG: Record<PipelinePhase, { label: string; color: string }> = {
+  akquise:       { label: 'Akquise',      color: '#94a3b8' },
+  beratung:      { label: 'Beratung',     color: '#60a5fa' },
+  angebot:       { label: 'Angebot',      color: '#fbbf24' },
+  behandlung:    { label: 'Behandlung',   color: '#3b82f6' },
+  abgeschlossen: { label: 'Abgeschlossen', color: '#22c55e' },
+}
+
+export const LEAD_STATUS_CONFIG: Record<LeadStatus, { label: string; color: string; bgColor: string; description?: string }> = {
+  new: {
+    label: 'Neu',
+    color: '#94a3b8', bgColor: '#f1f5f9',
+    description: 'Lead ist frisch eingegangen — Speed-to-Lead: in den nächsten Minuten kontaktieren',
+  },
+  contacting: {
+    label: 'In Erreichung',
+    color: '#fbbf24', bgColor: '#fffbeb',
+    description: 'Wir versuchen den Patienten zu erreichen (siehe contact_attempts)',
+  },
+  contacted: {
+    label: 'Erreicht',
+    color: '#60a5fa', bgColor: '#eff6ff',
+    description: 'Patient erreicht, Interesse besteht — Termin vorschlagen',
+  },
+  consultation_scheduled: {
+    label: 'Beratung geplant',
+    color: '#a78bfa', bgColor: '#f5f3ff',
+    description: 'Erstuntersuchung terminiert — Reminder + Anfahrt',
+  },
+  consultation_done: {
+    label: 'Beratung erfolgt',
+    color: '#22d3ee', bgColor: '#ecfeff',
+    description: 'Beratung war, HKP wird vorbereitet',
+  },
+  hkp_sent: {
+    label: 'HKP versandt',
+    color: '#f97316', bgColor: '#fff7ed',
+    description: 'Kostenvoranschlag draußen — kritische Phase, nachfassen!',
+  },
+  hkp_signed: {
+    label: 'HKP unterschrieben',
+    color: '#84cc16', bgColor: '#f7fee7',
+    description: 'Patient hat zugesagt — jetzt Behandlungstermin vereinbaren',
+  },
+  treatment_scheduled: {
+    label: 'Behandlung geplant',
+    color: '#3b82f6', bgColor: '#dbeafe',
+    description: 'Behandlungstermin steht — Reminder 24h+2h vorher',
+  },
+  treatment_in_progress: {
+    label: 'In Behandlung',
+    color: '#2563eb', bgColor: '#dbeafe',
+    description: 'Behandlung läuft (kann mehrere Sessions sein)',
+  },
+  completed: {
+    label: 'Abgeschlossen',
+    color: '#22c55e', bgColor: '#f0fdf4',
+    description: 'Behandlung fertig — Patient wird Bestandskunde, Bewertung anfragen',
+  },
+  lost: {
+    label: 'Verloren',
+    color: '#f87171', bgColor: '#fef2f2',
+    description: 'Lead verloren — Reaktivierung nach 90 Tagen prüfen',
+  },
 }
 
 export type LeadSource = 'tiktok' | 'facebook' | 'instagram' | 'google' | 'bing' | 'referral'
@@ -47,24 +134,28 @@ export const LEAD_SOURCE_CONFIG: Record<LeadSource, { label: string; icon: strin
 }
 
 export type LostReason =
+  | 'not_interested'
   | 'too_expensive'
   | 'no_budget'
-  | 'missing_trust'
+  | 'competitor'
+  | 'no_response'
   | 'distance_too_far'
+  | 'health_issue'
+  | 'language_barrier'
   | 'personal_reasons'
-  | 'other_dentist'
-  | 'no-contact-information'
-  | 'language-barrier'
+  | 'other'
 
 export const LOST_REASON_LABELS: Record<LostReason, string> = {
-  too_expensive: 'Zu teuer',
-  no_budget: 'Kein Kapital',
-  missing_trust: 'Fehlendes Vertrauen',
-  distance_too_far: 'Distanz zu weit',
-  personal_reasons: 'Persönliche Gründe',
-  other_dentist: 'Anderer Zahnarzt',
-  'no-contact-information': 'Keine Kontaktmöglichkeit',
-  'language-barrier': 'Sprachliche Barriere',
+  not_interested:    'Kein Interesse',
+  too_expensive:     'Zu teuer',
+  no_budget:         'Kein Budget / Finanzierung abgelehnt',
+  competitor:        'Anderer Anbieter gewählt',
+  no_response:       'Patient antwortet nicht mehr',
+  distance_too_far:  'Entfernung zu groß',
+  health_issue:      'Gesundheitliche Gründe',
+  language_barrier:  'Sprachliche Barriere',
+  personal_reasons:  'Persönliche Gründe',
+  other:             'Sonstiges',
 }
 
 export interface Lead {
@@ -78,7 +169,16 @@ export interface Lead {
   date_time?: string
   dental_service?: string | { id: string; name?: string }
   GDPR_accepted_at?: string
+
+  // Status-Modell v2
   status: LeadStatus
+  contact_attempts?: number             // Counter im Status 'contacting': wie oft probiert
+  missed_appointments?: number          // Counter: No-Shows insgesamt (Termine + Behandlungen)
+  last_status_change_at?: string        // ISO timestamp: wann der aktuelle Status begonnen hat
+  is_customer?: boolean                 // true sobald jemals 'completed' erreicht — Bestandspatient-Flag
+  lost_reason?: LostReason              // nur gesetzt wenn status='lost'
+  reactivation_due_at?: string          // ISO timestamp: wann re-engaged werden soll (lost + 90 T)
+
   query_params?: Record<string, any> | Array<{ name: string; value: string; timestamp: string }>
   newsletter_accepted_time?: string
   Tags?: string[] | null
@@ -86,8 +186,7 @@ export interface Lead {
   revenue?: number
   follow_up?: string
   lead_source?: LeadSource
-  missed_appointments?: number
-  lost_reason?: LostReason
+
   date_created: string
   date_updated: string
   user_created?: string
@@ -96,7 +195,7 @@ export interface Lead {
 
 // ─── Activities ───────────────────────────────────────────────
 
-export type LeadActivityType = 'note' | 'call' | 'email' | 'email_sent' | 'email_received' | 'sms' | 'whatsapp' | 'meeting' | 'task' | 'newsletter' | 'stage_change'
+export type LeadActivityType = 'note' | 'call' | 'email' | 'email_sent' | 'email_received' | 'sms' | 'whatsapp' | 'meeting' | 'task' | 'newsletter' | 'stage_change' | 'no_show'
 
 export type ActivityDirection = 'inbound' | 'outbound'
 export type ActivityOutcome = 'successful' | 'no_contact' | 'callback' | 'rejection'
@@ -113,6 +212,8 @@ export interface LeadActivity {
   metadata?: {
     meeting_date?: string
     meeting_time?: string
+    from_status?: LeadStatus      // bei type='stage_change'
+    to_status?: LeadStatus        // bei type='stage_change'
   }
   date_created: string    // ISO timestamp
   user_name: string       // Auto-populated from useAuth
@@ -129,7 +230,8 @@ export const ACTIVITY_TYPE_CONFIG: Record<LeadActivityType, { label: string; ico
   meeting:        { label: 'Termin',         icon: 'pi pi-calendar',     color: '#f97316', bgColor: '#fff7ed' },
   task:           { label: 'Aufgabe',        icon: 'pi pi-check-square', color: '#14b8a6', bgColor: '#f0fdfa' },
   newsletter:     { label: 'Newsletter',     icon: 'pi pi-megaphone',    color: '#ec4899', bgColor: '#fdf2f8' },
-  stage_change:   { label: 'Status',         icon: 'pi pi-arrows-h',    color: '#94a3b8', bgColor: '#f1f5f9' },
+  stage_change:   { label: 'Status-Wechsel', icon: 'pi pi-arrows-h',     color: '#94a3b8', bgColor: '#f1f5f9' },
+  no_show:        { label: 'Nicht erschienen', icon: 'pi pi-times-circle', color: '#ef4444', bgColor: '#fee2e2' },
 }
 
 export const ACTIVITY_DIRECTION_LABELS: Record<ActivityDirection, string> = {

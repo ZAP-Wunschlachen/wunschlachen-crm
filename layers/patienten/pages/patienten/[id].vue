@@ -201,7 +201,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Lead } from '~/types/crm'
+import { LEAD_STATUS_CONFIG, type Lead } from '~/types/crm'
 
 definePageMeta({ layout: 'crm', middleware: 'auth' })
 
@@ -280,19 +280,10 @@ const formatDate = (iso?: string) =>
 const formatDateTime = (iso: string) =>
   new Date(iso).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })
 
+// Nutzt zentrale LEAD_STATUS_CONFIG für Konsistenz
 const statusLabelLead = (status?: string) => {
-  const map: Record<string, string> = {
-    open: 'Offen',
-    contacted: 'Kontaktiert',
-    contacted_twice: '2x kontaktiert',
-    scheduled: 'Termin ausgemacht',
-    rescheduling: 'Termin verschoben',
-    email_sendet: 'E-Mail versandt',
-    hkp_sended: 'HKP versandt',
-    done: 'Abgeschlossen',
-    cancelled: 'Abgesagt',
-  }
-  return map[status || ''] || status || '—'
+  if (!status) return '—'
+  return LEAD_STATUS_CONFIG[status as keyof typeof LEAD_STATUS_CONFIG]?.label || status
 }
 const statusLabel = (s: string) => ({ scheduled: 'Geplant', attended: 'Erschienen', missed: 'Verpasst' }[s] || s)
 const statusBadgeClass = (s: string) =>

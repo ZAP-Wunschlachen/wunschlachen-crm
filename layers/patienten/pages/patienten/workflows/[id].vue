@@ -261,11 +261,11 @@ const selectedLeadIds = ref<string[]>([])
 const allLeads = ref<Lead[]>([])
 
 const activeLeads = computed(() =>
-  allLeads.value.filter(l => !['done', 'cancelled'].includes(l.status))
+  allLeads.value.filter(l => !['completed', 'lost'].includes(l.status))
 )
 
 const qualifiedLeads = computed(() =>
-  allLeads.value.filter(l => ['scheduled', 'rescheduling', 'email_sendet', 'hkp_sended'].includes(l.status))
+  allLeads.value.filter(l => ['consultation_scheduled', 'consultation_done', 'hkp_sent', 'hkp_signed', 'treatment_scheduled', 'treatment_in_progress'].includes(l.status))
 )
 
 const filteredLeads = computed(() => {

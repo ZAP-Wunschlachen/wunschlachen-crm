@@ -40,7 +40,7 @@ export const usePipelineAnalytics = () => {
    */
   const getPipelineValue = (leads: Lead[]): number => {
     return leads
-      .filter(l => !['done', 'cancelled'].includes(l.status))
+      .filter(l => !['completed', 'lost'].includes(l.status))
       .reduce((sum, l) => sum + (l.oportunity_value || 0), 0)
   }
 
@@ -62,7 +62,7 @@ export const usePipelineAnalytics = () => {
   const getRevenue = (leads: Lead[], range?: DateRange): number => {
     const r = range || dateRange.value
     return leads
-      .filter(l => l.status === 'done' && isInRange(l.date_created, r))
+      .filter(l => l.status === 'completed' && isInRange(l.date_created, r))
       .reduce((sum, l) => sum + (l.revenue || 0), 0)
   }
 
@@ -72,9 +72,9 @@ export const usePipelineAnalytics = () => {
   const getConversionRate = (leads: Lead[], range?: DateRange): { rate: number; won: number; total: number } => {
     const r = range || dateRange.value
     const filtered = leads.filter(l =>
-      ['done', 'cancelled'].includes(l.status) && isInRange(l.date_created, r)
+      ['completed', 'lost'].includes(l.status) && isInRange(l.date_created, r)
     )
-    const won = filtered.filter(l => l.status === 'done').length
+    const won = filtered.filter(l => l.status === 'completed').length
     const total = filtered.length
     return {
       rate: total > 0 ? Math.round((won / total) * 100) : 0,

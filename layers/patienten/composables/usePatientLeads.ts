@@ -90,7 +90,7 @@ export const usePatientLeads = () => {
     if (filters.followUpDue) {
       const today = new Date().toISOString().split('T')[0]
       filter.follow_up = { _lte: today }
-      filter.status = { _nin: ['done', 'cancelled'] }
+      filter.status = { _nin: ['completed', 'lost'] }
     }
 
     return Object.keys(filter).length > 0 ? filter : undefined
@@ -260,7 +260,7 @@ export const usePatientLeads = () => {
         (l: any) =>
           l.follow_up &&
           l.follow_up.slice(0, 10) <= today &&
-          !['done', 'cancelled'].includes(l.status),
+          !['completed', 'lost'].includes(l.status),
       )
     }
     const today = new Date().toISOString().split('T')[0]
@@ -271,7 +271,7 @@ export const usePatientLeads = () => {
           fields: LEAD_LIST_FIELDS,
           filter: {
             follow_up: { _lte: today },
-            status: { _nin: ['done', 'cancelled'] },
+            status: { _nin: ['completed', 'lost'] },
           },
           sort: ['follow_up'],
           limit: 50,

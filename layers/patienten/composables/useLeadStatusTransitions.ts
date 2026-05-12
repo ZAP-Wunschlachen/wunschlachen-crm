@@ -1,0 +1,138 @@
+/**
+ * useLeadStatusTransitions — State-Machine für Patient-Lead-Status
+ *
+ * Definiert erlaubte Übergänge zwischen Status laut Plan v9.
+ * Verhindert ungültige Wechsel (z.B. von 'new' direkt zu 'completed').
+ *
+ * No-Show ist KEIN Status, sondern ein Event:
+ * - missed_appointments Counter +1
+ * - Status springt zurück (siehe noShowFallback)
+ *
+ * Lost ist von jedem Status aus erreichbar (mit lost_reason).
+ *
+ * Reactivation: lost → contacting (nach 90 Tagen, mit Tag "reactivated")
+ */
+
+import type { LeadStatus, LostReason } from '~/types/crm'
+
+/**
+ * Erlaubte Vorwärts-Übergänge pro Status.
+ * 'lost' ist von ÜBERALL erreichbar (separat behandelt in canTransition).
+ */
+const ALLOWED_TRANSITIONS: Record<LeadStatus, LeadStatus[]> = {
+  new: ['contacting', 'contacted'],
+  contacting: ['contacted'],
+  contacted: ['consultation_scheduled'],
+  consultation_scheduled: ['consultation_done'],
+  consultation_done: ['hkp_sent', 'treatment_scheduled'], // direkter Sprung möglich wenn kein HKP nötig
+  hkp_sent: ['hkp_signed'],
+  hkp_signed: ['treatment_scheduled'],
+  treatment_scheduled: ['treatment_in_progress'],
+  treatment_in_progress: ['treatment_scheduled', 'completed'], // Folge-Sessions zurück zu scheduled
+  completed: [],
+  lost: ['contacting'], // Reactivation
+}
+
+/**
+ * No-Show-Fallback: bei verpasstem Termin springt Status zurück.
+ * Counter missed_appointments wird +1.
+ */
+const NO_SHOW_FALLBACK: Partial<Record<LeadStatus, LeadStatus>> = {
+  consultation_scheduled: 'contacted',
+  treatment_scheduled: 'hkp_signed',
+  treatment_in_progress: 'hkp_signed',
+}
+
+export const useLeadStatusTransitions = () => {
+  /**
+   * Prüft, ob ein Status-Übergang erlaubt ist.
+   * 'lost' ist von überall aus möglich (außer von 'completed').
+   * 'completed' ist final.
+   */
+  const canTransition = (from: LeadStatus, to: LeadStatus): boolean => {
+    if (from === to) return false
+    if (from === 'completed') return false // Bestandspatient bleibt
+    if (to === 'lost') return from !== 'completed'
+    return ALLOWED_TRANSITIONS[from]?.includes(to) ?? false
+  }
+
+  /**
+   * Liefert die erlaubten Folge-Status für einen aktuellen Status.
+   * Enthält 'lost' wo erlaubt.
+   */
+  const getNextStatuses = (from: LeadStatus): LeadStatus[] => {
+    const direct = [...(ALLOWED_TRANSITIONS[from] || [])]
+    if (from !== 'completed' && from !== 'lost') direct.push('lost')
+    return direct
+  }
+
+  /**
+   * Bei No-Show: passender Fallback-Status zurück (oder null wenn kein Fallback definiert).
+   */
+  const getNoShowFallback = (current: LeadStatus): LeadStatus | null => {
+    return NO_SHOW_FALLBACK[current] ?? null
+  }
+
+  /**
+   * Hilfs-Funktion: ist dieser Status ein „Termin-Status" wo No-Show möglich ist?
+   */
+  const canHaveNoShow = (status: LeadStatus): boolean => {
+    return status in NO_SHOW_FALLBACK
+  }
+
+  /**
+   * Hilfs-Funktion: ist Lead in der Akquise-Phase (für Speed-to-Lead-Logik)?
+   */
+  const isInAcquisition = (status: LeadStatus): boolean => {
+    return status === 'new' || status === 'contacting'
+  }
+
+  /**
+   * Hilfs-Funktion: ist Lead im aktiven Sales-Funnel (nicht lost/completed)?
+   */
+  const isActive = (status: LeadStatus): boolean => {
+    return status !== 'lost' && status !== 'completed'
+  }
+
+  /**
+   * Default-Reactivation-Datum: 90 Tage in der Zukunft.
+   */
+  const defaultReactivationDate = (): string => {
+    const d = new Date()
+    d.setDate(d.getDate() + 90)
+    return d.toISOString()
+  }
+
+  return {
+    canTransition,
+    getNextStatuses,
+    getNoShowFallback,
+    canHaveNoShow,
+    isInAcquisition,
+    isActive,
+    defaultReactivationDate,
+  }
+}
+
+/**
+ * Migration-Mapping: alter Status → neuer Status.
+ * Wird in mock-seed.client.ts angewendet bei v3→v4-Upgrade.
+ */
+export const LEGACY_STATUS_MAP: Record<string, LeadStatus> = {
+  open: 'new',
+  contacted: 'contacted',
+  contacted_twice: 'contacting', // mit contact_attempts=2
+  scheduled: 'consultation_scheduled',
+  rescheduling: 'contacted', // Termin neu vereinbaren → zurück zu contacted
+  email_sendet: 'contacted', // Email-Versand ist Activity, nicht Status; aktueller Status: contacted
+  hkp_sended: 'hkp_sent',
+  done: 'completed',
+  cancelled: 'lost',
+}
+
+/**
+ * Reverse-Lookup für Lost-Reason-Migration aus alten Status-Cancellations.
+ */
+export const LEGACY_CANCEL_REASON: Record<string, LostReason> = {
+  cancelled: 'other',
+}

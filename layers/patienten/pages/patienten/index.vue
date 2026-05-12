@@ -181,11 +181,16 @@ const displayLeads = computed(() => {
 })
 
 const statusFilters = {
-  open: { label: 'Offen' },
-  contacted: { label: 'Kontaktiert' },
-  scheduled: { label: 'Termin' },
-  done: { label: 'Won' },
-  cancelled: { label: 'Lost' },
+  new: { label: 'Neu' },
+  contacting: { label: 'In Erreichung' },
+  contacted: { label: 'Erreicht' },
+  consultation_scheduled: { label: 'Beratung geplant' },
+  hkp_sent: { label: 'HKP versandt' },
+  hkp_signed: { label: 'HKP unterschrieben' },
+  treatment_scheduled: { label: 'Behandlung geplant' },
+  treatment_in_progress: { label: 'In Behandlung' },
+  completed: { label: 'Abgeschlossen' },
+  lost: { label: 'Verloren' },
 }
 
 const toggleStatus = (status: LeadStatus) => {

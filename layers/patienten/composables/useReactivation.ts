@@ -62,7 +62,7 @@ export const useReactivation = () => {
       )
 
       const activeLeads = allLeads.filter(
-        (l: Lead) => !['done', 'cancelled'].includes(l.status),
+        (l: Lead) => !['completed', 'lost'].includes(l.status),
       )
 
       // Get all activities and build a map of lead_id -> latest activity date

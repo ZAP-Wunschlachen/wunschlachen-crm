@@ -92,7 +92,7 @@ const submit = async () => {
       mail: form.mail || undefined,
       lead_source: (form.lead_source || undefined) as LeadSource | undefined,
       message: form.message || undefined,
-      status: 'open',
+      status: 'new',
     })
     visible.value = false
     Object.assign(form, { first_name: '', last_name: '', phone: '', mail: '', lead_source: '', message: '' })
