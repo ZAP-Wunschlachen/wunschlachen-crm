@@ -85,11 +85,54 @@
       </div>
     </div>
 
+    <!-- Bulk-Action-Bar (Plan v9 Phase F) -->
+    <div
+      v-if="selectedIds.size > 0"
+      class="bg-dental-blue-0 text-white rounded-lg px-4 py-2 mb-2 flex items-center justify-between"
+    >
+      <div class="flex items-center gap-3">
+        <span class="text-xs font-medium">{{ selectedIds.size }} ausgewählt</span>
+        <button class="text-[11px] underline hover:no-underline" @click="clearSelection">Auswahl löschen</button>
+      </div>
+      <div class="flex items-center gap-2">
+        <select
+          v-model="bulkStatusTarget"
+          class="text-xs text-dental-blue-0 px-2 py-1 rounded outline-none border-none"
+        >
+          <option value="">— Status setzen —</option>
+          <option v-for="(cfg, key) in LEAD_STATUS_CONFIG" :key="key" :value="key">{{ cfg.label }}</option>
+        </select>
+        <button
+          class="text-xs px-3 py-1 bg-white text-dental-blue-0 rounded font-medium hover:bg-[#ededed] disabled:opacity-50"
+          :disabled="!bulkStatusTarget || bulkRunning"
+          @click="onBulkStatusChange"
+        >
+          <i v-if="bulkRunning" class="pi pi-spin pi-spinner text-[10px] mr-1" />
+          Anwenden
+        </button>
+        <button
+          class="text-xs px-3 py-1 border border-white rounded font-medium hover:bg-white hover:text-dental-blue-0"
+          @click="onBulkExport"
+        >
+          <i class="pi pi-download text-[10px] mr-1" />
+          Exportieren
+        </button>
+      </div>
+    </div>
+
     <!-- Table -->
     <div class="bg-white rounded-lg border border-dental-blue--5 overflow-hidden">
       <table class="w-full text-sm">
         <thead>
           <tr class="border-b border-dental-blue--5">
+            <th class="px-2 py-3 text-xs font-medium text-dental-blue--2 w-8">
+              <input
+                type="checkbox"
+                :checked="allSelected"
+                :indeterminate="someSelected"
+                @change="toggleSelectAll"
+              />
+            </th>
             <th class="text-left px-2 py-3 text-xs font-medium text-dental-blue--2">!</th>
             <th class="text-left px-4 py-3 text-xs font-medium text-dental-blue--2">Name</th>
             <th class="text-left px-4 py-3 text-xs font-medium text-dental-blue--2">Status</th>
@@ -97,15 +140,24 @@
             <th class="text-left px-4 py-3 text-xs font-medium text-dental-blue--2">Score</th>
             <th class="text-left px-4 py-3 text-xs font-medium text-dental-blue--2">Quelle</th>
             <th class="text-left px-4 py-3 text-xs font-medium text-dental-blue--2">Follow-up</th>
+            <th class="text-right px-4 py-3 text-xs font-medium text-dental-blue--2 w-40">Aktionen</th>
           </tr>
         </thead>
         <tbody>
           <tr
             v-for="lead in displayLeads"
             :key="lead.id"
-            class="border-b border-dental-blue--5 last:border-0 hover:bg-[#ededed] cursor-pointer transition-colors"
+            class="group border-b border-dental-blue--5 last:border-0 hover:bg-[#ededed] cursor-pointer transition-colors"
+            :class="selectedIds.has(lead.id) ? 'bg-dental-blue--5/40' : ''"
             @click="navigateTo(`/patienten/leads/${lead.id}`)"
           >
+            <td class="px-2 py-3" @click.stop>
+              <input
+                type="checkbox"
+                :checked="selectedIds.has(lead.id)"
+                @change="toggleOne(lead.id)"
+              />
+            </td>
             <td class="px-2 py-3">
               <span
                 class="inline-block w-2 h-2 rounded-full"
@@ -126,9 +178,17 @@
             <td class="px-4 py-3 text-xs" :class="isOverdue(lead) ? 'text-red-500 font-medium' : 'text-dental-blue--3'">
               {{ lead.follow_up ? formatDate(lead.follow_up) : '—' }}
             </td>
+            <td class="px-2 py-3 text-right opacity-0 group-hover:opacity-100 transition-opacity" @click.stop>
+              <PatientenQuickActionBar
+                :lead="lead"
+                compact
+                :only="['call', 'email', 'sms', 'whatsapp']"
+                @action="(a) => onQuickAction(lead, a)"
+              />
+            </td>
           </tr>
           <tr v-if="displayLeads.length === 0">
-            <td colspan="7" class="px-4 py-8 text-center text-dental-blue--3">Keine Leads gefunden</td>
+            <td colspan="9" class="px-4 py-8 text-center text-dental-blue--3">Keine Leads gefunden</td>
           </tr>
         </tbody>
       </table>
@@ -286,6 +346,108 @@ const loadLeads = async () => {
 
 const handleExport = () => {
   exportLeads(displayLeads.value, `leads-${new Date().toISOString().split('T')[0]}`)
+}
+
+// Plan v9 Phase F: Bulk-Actions
+const toast = useToast()
+const selectedIds = ref<Set<string>>(new Set())
+const bulkStatusTarget = ref<string>('')
+const bulkRunning = ref(false)
+
+const allSelected = computed(() =>
+  displayLeads.value.length > 0 && displayLeads.value.every((l) => selectedIds.value.has(l.id)),
+)
+const someSelected = computed(() =>
+  !allSelected.value && displayLeads.value.some((l) => selectedIds.value.has(l.id)),
+)
+
+const toggleOne = (id: string) => {
+  const next = new Set(selectedIds.value)
+  if (next.has(id)) next.delete(id)
+  else next.add(id)
+  selectedIds.value = next
+}
+
+const toggleSelectAll = () => {
+  if (allSelected.value) {
+    selectedIds.value = new Set()
+  } else {
+    selectedIds.value = new Set(displayLeads.value.map((l) => l.id))
+  }
+}
+
+const clearSelection = () => {
+  selectedIds.value = new Set()
+  bulkStatusTarget.value = ''
+}
+
+const onBulkStatusChange = async () => {
+  if (!bulkStatusTarget.value) return
+  const ids = Array.from(selectedIds.value)
+  if (!confirm(`${ids.length} Leads auf Status "${LEAD_STATUS_CONFIG[bulkStatusTarget.value as LeadStatus]?.label}" setzen?`)) return
+
+  bulkRunning.value = true
+  const { updateLead } = usePatientLeads()
+  const { canTransition } = useLeadStatusTransitions()
+  let ok = 0
+  let skipped = 0
+  let failed = 0
+
+  for (const id of ids) {
+    const lead = leads.value.find((l) => l.id === id)
+    if (!lead) { failed++; continue }
+    if (!canTransition(lead.status, bulkStatusTarget.value as LeadStatus)) {
+      skipped++
+      continue
+    }
+    try {
+      await updateLead(id, {
+        status: bulkStatusTarget.value as LeadStatus,
+        last_status_change_at: new Date().toISOString(),
+      })
+      ok++
+    } catch {
+      failed++
+    }
+  }
+
+  bulkRunning.value = false
+  toast.add({
+    severity: failed > 0 ? 'warn' : 'success',
+    summary: 'Bulk-Status-Wechsel',
+    detail: `${ok} ok · ${skipped} übersprungen (State-Machine) · ${failed} Fehler`,
+  })
+  clearSelection()
+  await loadLeads()
+}
+
+const onBulkExport = () => {
+  const selected = displayLeads.value.filter((l) => selectedIds.value.has(l.id))
+  exportLeads(selected, `leads-selection-${new Date().toISOString().split('T')[0]}`)
+  toast.add({ severity: 'success', summary: 'Export', detail: `${selected.length} Leads exportiert` })
+}
+
+// QuickActionBar in Listen-Zeile
+const onQuickAction = (lead: Lead, action: { type: string }) => {
+  switch (action.type) {
+    case 'call':
+      if (lead.phone) window.location.href = `tel:${lead.phone}`
+      break
+    case 'email':
+      if (lead.mail) window.location.href = `mailto:${lead.mail}`
+      break
+    case 'sms':
+      if (lead.phone) window.location.href = `sms:${lead.phone}`
+      break
+    case 'whatsapp':
+      if (lead.phone) {
+        const cleaned = lead.phone.replace(/[^0-9]/g, '')
+        window.open(`https://wa.me/${cleaned}`, '_blank')
+      }
+      break
+    default:
+      navigateTo(`/patienten/leads/${lead.id}`)
+  }
 }
 
 const goToPage = (p: number) => { page.value = p; loadLeads() }

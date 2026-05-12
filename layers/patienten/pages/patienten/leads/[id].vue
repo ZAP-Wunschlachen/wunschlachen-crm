@@ -258,17 +258,44 @@
             @create="appointmentDialogVisible = true"
           />
 
-          <!-- Lost reason (cancelled only) -->
-          <div v-if="lead.status === 'lost'" class="bg-white rounded-lg p-4 border border-dental-blue--5">
-            <h2 class="text-sm font-semibold text-dental-blue-0 mb-2">Verlust-Grund</h2>
-            <select
-              :value="lead.lost_reason || ''"
-              class="field-input bg-white"
-              @change="saveField('lost_reason', ($event.target as HTMLSelectElement).value || null)"
-            >
-              <option value="">— Auswählen —</option>
-              <option v-for="(label, key) in LOST_REASON_LABELS" :key="key" :value="key">{{ label }}</option>
-            </select>
+          <!-- Lost reason + Reactivation (cancelled only) -->
+          <div v-if="lead.status === 'lost'" class="bg-white rounded-lg p-4 border border-dental-blue--5 space-y-3">
+            <div>
+              <h2 class="text-sm font-semibold text-dental-blue-0 mb-2">Verlust-Grund</h2>
+              <select
+                :value="lead.lost_reason || ''"
+                class="field-input bg-white"
+                @change="saveField('lost_reason', ($event.target as HTMLSelectElement).value || null)"
+              >
+                <option value="">— Auswählen —</option>
+                <option v-for="(label, key) in LOST_REASON_LABELS" :key="key" :value="key">{{ label }}</option>
+              </select>
+            </div>
+
+            <!-- Reactivation-Strategie + Button -->
+            <div class="pt-3 border-t border-dental-blue--5">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <div>
+                  <h3 class="text-[12px] font-semibold text-dental-blue-0">Reaktivierung</h3>
+                  <p class="text-[11px] text-dental-blue--3 mt-0.5">
+                    Strategie: <strong>{{ reactivationStrategy.label }}</strong>
+                  </p>
+                  <p class="text-[10px] text-dental-blue--3 mt-0.5">{{ reactivationStrategy.approach }}</p>
+                  <p v-if="reactivationDueText" class="text-[10px] text-dental-blue--3 mt-1 italic">
+                    {{ reactivationDueText }}
+                  </p>
+                </div>
+              </div>
+              <button
+                class="w-full px-3 py-2 text-[12px] font-medium text-white bg-[#22c55e] rounded hover:bg-[#16a34a] transition-colors disabled:opacity-50"
+                :disabled="reactivationRunning"
+                @click="onReactivateNow"
+              >
+                <i v-if="reactivationRunning" class="pi pi-spin pi-spinner text-[11px] mr-1" />
+                <i v-else class="pi pi-refresh text-[11px] mr-1" />
+                Jetzt reaktivieren
+              </button>
+            </div>
           </div>
 
           <!-- Meta -->
@@ -346,6 +373,45 @@ const recommendation = computed(() => computeNBA(lead.value))
 // Aliasing für Timeline (gleiche Daten, expliziterer Name)
 const allLeadActivities = computed(() => activities.value)
 
+// Plan v9 Phase E: Lost-Lead-Reaktivierung
+const { getStrategy, reactivate } = useReactivationQueue()
+const reactivationRunning = ref(false)
+const reactivationStrategy = computed(() => {
+  if (!lead.value) return { label: '—', approach: '', template_id: '', reason: 'other' as const }
+  return getStrategy(lead.value)
+})
+const reactivationDueText = computed(() => {
+  if (!lead.value?.reactivation_due_at) return null
+  const due = new Date(lead.value.reactivation_due_at).getTime()
+  const days = Math.round((due - Date.now()) / (1000 * 60 * 60 * 24))
+  if (days > 0) return `Vorgesehen ab ${days} Tag${days === 1 ? '' : 'en'}`
+  if (days === 0) return 'Heute fällig'
+  return `Fällig seit ${Math.abs(days)} Tag${Math.abs(days) === 1 ? '' : 'en'}`
+})
+
+const onReactivateNow = async () => {
+  if (!lead.value || reactivationRunning.value) return
+  if (!confirm(`Lead ${lead.value.first_name} ${lead.value.last_name} jetzt reaktivieren?\nStatus springt zurück zu "contacting".`)) return
+  reactivationRunning.value = true
+  try {
+    const result = await reactivate(lead.value)
+    if (result) {
+      lead.value = result
+      await refreshActivities()
+      toast.add({
+        severity: 'success',
+        summary: 'Lead reaktiviert',
+        detail: `Strategie: ${reactivationStrategy.value.label}`,
+      })
+    }
+  } catch (e) {
+    console.error('Reactivation failed:', e)
+    toast.add({ severity: 'error', summary: 'Fehler', detail: 'Reaktivierung fehlgeschlagen' })
+  } finally {
+    reactivationRunning.value = false
+  }
+}
+
 // Action-Handler für Quick-Buttons in NextBestActionCard
 const onAction = (action: import('../../../composables/useNextBestAction').NextBestAction) => {
   switch (action.type) {
@@ -394,7 +460,7 @@ const onAction = (action: import('../../../composables/useNextBestAction').NextB
 }
 
 // Plan v9: State-Machine-validierte Folge-Status
-const { getNextStatuses, canTransition } = useLeadStatusTransitions()
+const { getNextStatuses, canTransition, defaultReactivationDate } = useLeadStatusTransitions()
 const { addActivity } = useLeadActivities()
 const allowedNextStatuses = computed(() => {
   if (!lead.value) return []
@@ -461,10 +527,15 @@ const onMarkLost = async () => {
     status: 'lost',
     lost_reason: reason as any,
     last_status_change_at: new Date().toISOString(),
+    reactivation_due_at: defaultReactivationDate(),
   })
   if (updated) {
     lead.value = { ...lead.value, ...updated }
-    toast.add({ severity: 'success', summary: 'Als verloren markiert', detail: reason })
+    toast.add({
+      severity: 'success',
+      summary: 'Als verloren markiert',
+      detail: `${reason} · Reaktivierung in 90 Tagen vorgemerkt`,
+    })
   }
 }
 
