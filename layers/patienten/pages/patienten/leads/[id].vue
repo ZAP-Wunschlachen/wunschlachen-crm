@@ -10,14 +10,41 @@
 
     <template v-else>
       <!-- Header -->
-      <div class="flex items-start justify-between mb-6">
-        <h1 class="text-2xl font-bold text-dental-blue-0">{{ lead.first_name }} {{ lead.last_name }}</h1>
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <h1 class="text-2xl font-bold text-dental-blue-0">{{ lead.first_name }} {{ lead.last_name }}</h1>
+          <p class="text-xs text-dental-blue--3 mt-0.5">
+            <NuxtLink :to="`/patienten/${lead.id}`" class="hover:underline">
+              <i class="pi pi-user text-[10px] mr-0.5" />Stammdaten
+            </NuxtLink>
+            <span class="mx-2">·</span>
+            <span class="font-medium">Sales-Detail</span>
+          </p>
+        </div>
         <PatientenLeadStatusBadge :status="lead.status" />
+      </div>
+
+      <!-- ⚡ Next Best Action (Plan v9 A4) -->
+      <div class="mb-4">
+        <PatientenNextBestActionCard :recommendation="recommendation" @action="onAction" />
+      </div>
+
+      <!-- 📊 Pipeline-Mini-Bar (Plan v9 A1) -->
+      <div class="mb-6">
+        <PatientenPipelineMiniBar
+          :current-status="lead.status"
+          :contact-attempts="lead.contact_attempts"
+          :missed-appointments="lead.missed_appointments"
+          :days-in-status="recommendation.days_in_status"
+        />
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- LEFT COLUMN -->
         <div class="lg:col-span-2 space-y-6">
+
+          <!-- 🕐 Communication Timeline (Plan v9 A3) -->
+          <PatientenCommunicationTimeline :activities="allLeadActivities" />
 
           <!-- Contact Card -->
           <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
@@ -294,6 +321,94 @@ const { getActivities, removeActivity } = useLeadActivities()
 const activities = ref<LeadActivity[]>([])
 const { scoreLead } = useLeadScoring()
 const { getResponseTime } = useResponseTime()
+
+// Plan v9 A2: Next-Best-Action Engine
+const { compute: computeNBA } = useNextBestAction()
+const recommendation = computed(() => computeNBA(lead.value))
+
+// Aliasing für Timeline (gleiche Daten, expliziterer Name)
+const allLeadActivities = computed(() => activities.value)
+
+// Action-Handler für Quick-Buttons in NextBestActionCard
+const onAction = (action: import('../../../composables/useNextBestAction').NextBestAction) => {
+  switch (action.type) {
+    case 'call':
+      // TODO Phase B: CloudTalk Click-to-Call
+      activityDialogType.value = 'call'
+      activityDialogVisible.value = true
+      break
+    case 'email':
+      emailDialogVisible.value = true
+      break
+    case 'sms':
+    case 'whatsapp':
+      activityDialogType.value = action.type
+      activityDialogVisible.value = true
+      break
+    case 'book_meeting':
+      appointmentDialogVisible.value = true
+      break
+    case 'send_hkp':
+      emailDialogVisible.value = true // TODO Phase B: eigener HKP-Versand-Dialog
+      toast.add({ severity: 'info', summary: 'HKP-Versand', detail: 'Öffnet E-Mail-Editor mit HKP-Template (Phase B)' })
+      break
+    case 'status_change':
+      // Status-Dropdown im Status-Card scrollen
+      document.getElementById('status-section')?.scrollIntoView({ behavior: 'smooth' })
+      break
+    case 'mark_no_show':
+      onNoShow()
+      break
+    case 'mark_lost':
+      onMarkLost()
+      break
+    case 'request_review':
+      toast.add({ severity: 'info', summary: 'Review-Anfrage', detail: 'Brevo-Template wird vorgeladen (Phase D)' })
+      break
+    case 'reactivation':
+      toast.add({ severity: 'info', summary: 'Reaktivierung', detail: 'Reactivation-Mail vorbereiten (Phase D)' })
+      break
+    case 'send_financing_info':
+      toast.add({ severity: 'info', summary: 'Finanzierungs-Info', detail: 'Finanzierungs-PDF + Erläuterung (Phase D)' })
+      break
+    default:
+      console.warn('Unhandled action type:', action.type)
+  }
+}
+
+// Plan v9 A5: No-Show-Handler
+const { markAsNoShow } = useNoShowAction()
+const onNoShow = async () => {
+  if (!lead.value) return
+  if (!confirm(`No-Show für ${lead.value.first_name} ${lead.value.last_name} markieren?\nDas verschiebt den Status zurück + erhöht den No-Show-Counter.`)) return
+  const updated = await markAsNoShow(lead.value)
+  if (updated) {
+    lead.value = updated
+    await loadActivities()
+    toast.add({ severity: 'success', summary: 'No-Show markiert', detail: `Status zurück zu "${updated.status}"` })
+  }
+}
+
+const { updateLead } = usePatientLeads()
+const onMarkLost = async () => {
+  if (!lead.value) return
+  const reason = prompt('Lost-Grund (z.B. too_expensive / no_response / competitor):', 'no_response')
+  if (!reason) return
+  const updated = await updateLead(lead.value.id, {
+    status: 'lost',
+    lost_reason: reason as any,
+    last_status_change_at: new Date().toISOString(),
+  })
+  if (updated) {
+    lead.value = { ...lead.value, ...updated }
+    toast.add({ severity: 'success', summary: 'Als verloren markiert', detail: reason })
+  }
+}
+
+const loadActivities = async () => {
+  if (!lead.value) return
+  activities.value = await getActivities(lead.value.id)
+}
 
 const leadScore = computed((): LeadScoreResult | null => {
   if (!lead.value) return null
