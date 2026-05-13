@@ -844,118 +844,53 @@ git commit -m "feat(sync): Lead-Detail reagiert auf appointment-sync-Updates"
 
 ---
 
-## Task 10: n8n-Workflows für beide Cron-Jobs
+## Task 10: n8n-Workflows aktivieren
 
-**Tech-Stack-Entscheidung 2026-05-13:** Statt GitHub Actions nutzen wir **n8n self-hosted** auf `https://workflows.wunschlachen.de` als zentrale Cron-Engine. Vorteile: sub-Minute-Auflösung, Visual-Editing, zentrale Logs, Patient-Daten bleiben auf eigenem Server, keine GitHub-Actions-Free-Tier-Limits. Welcome-Sequence-GitHub-Action wird in Folge-Iteration ebenfalls dorthin migriert (nicht Teil dieses Plans).
+**Stand 2026-05-13:** Beide Workflows sind **bereits angelegt** (deaktiviert), das Shared Secret ist in `~/.claude/wunschlachen-credentials.md` § n8n § "CRM-Workflows" dokumentiert. Dieser Task aktiviert die Workflows, sobald der CRM-Endpoint live ist.
 
-**Files:** keine im Repo — Workflows werden über die n8n-API angelegt.
+| Workflow | n8n-ID | Trigger | Endpoint |
+|---|---|---|---|
+| Appointment-Sync | `dAXviHpQXzqCXYv4` | alle 2 Min | POST /api/cron/appointment-sync |
+| Appointment-Reminder | `v8Tiuovdmu3fhibh` | Cron `30 6 * * *` (08:30 Berlin) | POST /api/cron/appointment-reminder |
+
+**Files:** keine im Repo. CRM-side muss `NUXT_APPOINTMENT_CRON_SECRET` env als gleicher Hex-Wert auf DigitalOcean App Platform gesetzt sein.
 
 **Auth:** `X-N8N-API-KEY` Header, Token aus `~/.claude/wunschlachen-credentials.md` § "n8n (Workflow Automation)". **NIEMALS den Token in einen Commit schreiben**; im Repo bleibt nur die Doku im Runbook (Task 11) mit Verweis auf Credentials-File.
 
-### Step 10.1: Sync-Workflow anlegen via n8n-REST-API
+### Step 10.1: Env-Variable in DigitalOcean App Platform setzen
 
-Das Subagent-Skript für POST `/api/v1/workflows`:
+App-Spec für `crm.wunschlachen.app` öffnen → Component Environment → neue Variable:
 
-```bash
-# Pfad zu den Credentials — der Subagent darf die NUR LESEN und den
-# Token in den HTTP-Header übergeben, NICHT in irgendeine Datei schreiben.
-N8N_KEY=$(grep -A1 "^## n8n (Workflow Automation)" ~/.claude/wunschlachen-credentials.md \
-  | tail -n +1 | grep "API Key" | sed 's/.*API Key:\*\* //')
-N8N_BASE="https://workflows.wunschlachen.de/api/v1"
-
-# Workflow-Definition als JSON
-SYNC_WF=$(cat <<'JSON'
-{
-  "name": "[CRM] Appointment-Sync alle 2 Minuten",
-  "nodes": [
-    {
-      "parameters": {
-        "rule": { "interval": [{ "field": "minutes", "minutesInterval": 2 }] }
-      },
-      "id": "trigger",
-      "name": "Schedule alle 2 Min",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [240, 300]
-    },
-    {
-      "parameters": {
-        "url": "https://crm.wunschlachen.app/api/cron/appointment-sync",
-        "options": { "timeout": 30000 },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "x-appointment-cron-secret", "value": "={{ $env.APPOINTMENT_CRON_SECRET }}" },
-            { "name": "content-type", "value": "application/json" }
-          ]
-        },
-        "method": "POST"
-      },
-      "id": "http",
-      "name": "CRM appointment-sync",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [460, 300]
-    }
-  ],
-  "connections": {
-    "Schedule alle 2 Min": { "main": [[{ "node": "CRM appointment-sync", "type": "main", "index": 0 }]] }
-  },
-  "settings": { "executionOrder": "v1" }
-}
-JSON
-)
-
-curl -sS -X POST "${N8N_BASE}/workflows" \
-  -H "X-N8N-API-KEY: ${N8N_KEY}" \
-  -H "Content-Type: application/json" \
-  -d "${SYNC_WF}" \
-  -w "\nHTTP %{http_code}\n" | tail -3
+```
+NUXT_APPOINTMENT_CRON_SECRET = <Wert aus ~/.claude/wunschlachen-credentials.md § n8n § CRM-Workflows>
 ```
 
-Erwartet HTTP 200 mit `{ "id": "...", "name": "[CRM] Appointment-Sync alle 2 Minuten", ... }`. Workflow-ID notieren.
-
-### Step 10.2: Reminder-Workflow anlegen
-
-Analog Step 10.1 mit:
-- Name: `[CRM] Appointment-Reminder täglich 08:30 Berlin`
-- Trigger: `cronExpression: "30 7 * * *"` (07:30 UTC = 08:30 Berlin in Sommerzeit)
-- URL: `https://crm.wunschlachen.app/api/cron/appointment-reminder`
-
-### Step 10.3: Workflows aktivieren
+Deploy triggern. Endpoint-Test:
 
 ```bash
-# pro Workflow-ID
-curl -sS -X POST "${N8N_BASE}/workflows/${WORKFLOW_ID}/activate" \
-  -H "X-N8N-API-KEY: ${N8N_KEY}" \
+curl -sS -X POST "https://crm.wunschlachen.app/api/cron/appointment-sync" \
+  -H "x-appointment-cron-secret: $SECRET" \
+  -H "content-type: application/json" \
   -w "\nHTTP %{http_code}\n"
 ```
 
-Erwartet HTTP 200.
+Erwartet HTTP 200 mit JSON `{ processed, status_changes, mails_sent, errors }`.
 
-### Step 10.4: APPOINTMENT_CRON_SECRET als n8n-Environment-Variable
-
-n8n liest `$env.APPOINTMENT_CRON_SECRET` aus dem Container-Environment. **Auf dem n8n-Droplet** im Docker-Compose oder System-Env eintragen:
+### Step 10.2: Beide Workflows aktivieren
 
 ```bash
-# z.B. auf dem DO-Droplet als root:
-echo "APPOINTMENT_CRON_SECRET=<random-hex>" >> /etc/environment
-# n8n-Container neu starten damit Env gelesen wird
-docker compose -f /opt/n8n/docker-compose.yml restart n8n
+N8N_KEY=$(grep -A4 "^## n8n" ~/.claude/wunschlachen-credentials.md | grep "API Key:" | sed 's/.*API Key:\*\* //')
+for WF in dAXviHpQXzqCXYv4 v8Tiuovdmu3fhibh; do
+  curl -sS -X POST "https://workflows.wunschlachen.de/api/v1/workflows/$WF/activate" \
+    -H "X-N8N-API-KEY: $N8N_KEY" -w "\nHTTP %{http_code}\n"
+done
 ```
 
-**Hinweis:** Wenn ein anderes Setup-Pattern auf dem Droplet existiert (z.B. `.env`-File im n8n-Verzeichnis), entsprechend dort eintragen. Im Runbook (Task 11) dokumentieren.
+Erwartet 2× HTTP 200.
 
-### Step 10.5: Smoke-Test im n8n-UI
+### Step 10.3: Smoke
 
-In `https://workflows.wunschlachen.de` einloggen, beide neuen Workflows in der Liste sichtbar prüfen. Für den Sync-Workflow „Execute Workflow" klicken — Response sollte HTTP 200 mit JSON `{ processed, status_changes, mails_sent, errors }` sein.
-
-### Step 10.6: Doc-Commit (keine Workflow-JSONs im Repo!)
-
-```bash
-# Keine Files im Repo, nur Runbook-Update in Task 11.
-# Die Workflow-IDs aus 10.1 + 10.2 in die docs/APPOINTMENT_SYNC_OPS.md eintragen.
-```
+In `https://workflows.wunschlachen.de` Workflow `dAXviHpQXzqCXYv4` öffnen → „Execute Workflow" → Execution-Log sollte HTTP 200 mit dem CRM-Response zeigen. Beim Reminder-Workflow den nächsten 08:30-Trigger abwarten oder einmal manuell ausführen.
 
 ---
 
