@@ -24,6 +24,22 @@
         <PatientenLeadStatusBadge :status="lead.status" />
       </div>
 
+      <!-- 💰 Revenue-Banner (Modul G) -->
+      <div v-if="lead.status === 'completed' && !lead.revenue" class="mb-4 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center gap-3">
+        <i class="pi pi-exclamation-triangle text-amber-600 text-lg" />
+        <div class="flex-1">
+          <p class="text-sm font-semibold text-amber-900">Behandlung abgeschlossen — bitte Umsatz eintragen</p>
+          <p class="text-[11px] text-amber-700">Für Reporting + Lead-Source-Analyse</p>
+        </div>
+        <input
+          :value="lead.revenue || ''"
+          type="number"
+          placeholder="0.00 €"
+          class="field-input w-32 bg-white"
+          @blur="saveField('revenue', Number(($event.target as HTMLInputElement).value) || null)"
+        />
+      </div>
+
       <!-- ⚡ Next Best Action (Plan v9 A4) -->
       <div class="mb-4">
         <PatientenNextBestActionCard :recommendation="recommendation" @action="onAction" />
