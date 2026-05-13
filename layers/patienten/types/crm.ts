@@ -330,6 +330,51 @@ export const ACTIVITY_TYPE_CONFIG: Record<LeadActivityType, { label: string; ico
   hkp_ingest:    { label: 'HKP eingegangen',   icon: 'pi pi-file-pdf',   color: '#16a34a', bgColor: '#f0fdf4' },
 }
 
+/**
+ * Activity-Types die User MANUELL über das Activity-Dialog anlegen können.
+ * System-Events (stage_change, no_show, reschedule, lost_rollback, hkp_ingest,
+ * email_sent/received) werden automatisch geschrieben und tauchen hier NICHT auf.
+ */
+export const MANUAL_ACTIVITY_TYPES: LeadActivityType[] = [
+  'note',
+  'call',
+  'email',
+  'sms',
+  'whatsapp',
+  'meeting',
+  'task',
+  'newsletter',
+]
+
+/**
+ * Feld-Sichtbarkeit pro Activity-Type für den Erfassungs-Dialog.
+ * Pure-Logic Helper — der Dialog zeigt nur Felder mit `true`.
+ */
+export const ACTIVITY_FIELDS: Record<LeadActivityType, {
+  subject: boolean
+  content: boolean
+  direction: boolean
+  outcome: boolean
+  meeting: boolean
+  duration: boolean
+}> = {
+  note:           { subject: true,  content: true,  direction: false, outcome: false, meeting: false, duration: false },
+  call:           { subject: true,  content: true,  direction: true,  outcome: true,  meeting: false, duration: true  },
+  email:          { subject: true,  content: true,  direction: true,  outcome: true,  meeting: false, duration: false },
+  email_sent:     { subject: true,  content: true,  direction: false, outcome: false, meeting: false, duration: false },
+  email_received: { subject: true,  content: true,  direction: false, outcome: false, meeting: false, duration: false },
+  sms:            { subject: true,  content: true,  direction: true,  outcome: true,  meeting: false, duration: false },
+  whatsapp:       { subject: true,  content: true,  direction: true,  outcome: true,  meeting: false, duration: false },
+  meeting:        { subject: true,  content: true,  direction: false, outcome: true,  meeting: true,  duration: true  },
+  task:           { subject: true,  content: true,  direction: false, outcome: false, meeting: false, duration: false },
+  newsletter:     { subject: true,  content: true,  direction: false, outcome: false, meeting: false, duration: false },
+  stage_change:   { subject: true,  content: true,  direction: false, outcome: false, meeting: false, duration: false },
+  no_show:        { subject: true,  content: true,  direction: false, outcome: false, meeting: false, duration: false },
+  reschedule:     { subject: true,  content: true,  direction: false, outcome: false, meeting: false, duration: false },
+  lost_rollback:  { subject: true,  content: true,  direction: false, outcome: false, meeting: false, duration: false },
+  hkp_ingest:     { subject: true,  content: true,  direction: false, outcome: false, meeting: false, duration: false },
+}
+
 export const ACTIVITY_DIRECTION_LABELS: Record<ActivityDirection, string> = {
   inbound: 'Eingehend',
   outbound: 'Ausgehend',
