@@ -260,6 +260,12 @@ export interface Lead {
   linked_appointment_id?: string         // ID des aktuell verknüpften Kalender-Termins
   last_appointment_synced_at?: string    // ISO timestamp: letztes verarbeitetes Sync-Event
 
+  // Speed-to-Lead + Smart-Callback (Plan v9 Modul B MVP)
+  successful_call_window?: 'morning' | 'midday' | 'evening'   // gelernter erfolgreicher Slot
+  last_call_attempt_at?: string                               // ISO timestamp
+  call_attempt_count?: number                                 // Anzahl Versuche im aktuellen Sub-Status
+  next_call_slot_at?: string                                  // Vorgeschlagener nächster Slot
+
   query_params?: Record<string, any> | Array<{ name: string; value: string; timestamp: string }>
   newsletter_accepted_time?: string
   Tags?: string[] | null
