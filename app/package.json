@@ -7,12 +7,17 @@
     "generate": "nuxt generate",
     "dev": "nuxt dev",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@wunschlachen/base": "workspace:*"
   },
   "devDependencies": {
-    "nuxt": "^3.6.5"
+    "happy-dom": "15",
+    "nuxt": "^3.6.5",
+    "vitest": "2",
+    "vue": "3"
   }
 }
