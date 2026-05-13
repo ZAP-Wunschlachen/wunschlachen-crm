@@ -339,6 +339,13 @@
             </p>
           </div>
 
+          <!-- HKP-Upload-Fallback (Modul F MVP) -->
+          <div v-if="lead.status === 'hkp_sent'" class="bg-white rounded-lg p-4 border border-dental-blue--5">
+            <h2 class="text-sm font-semibold text-dental-blue-0 mb-2">HKP unterschrieben hochladen</h2>
+            <input type="file" accept="application/pdf" class="text-[11px]" @change="onHkpUpload" />
+            <p class="text-[10px] text-dental-blue--3 mt-1">Fallback wenn die n8n-Postbox-Ingest nicht greift</p>
+          </div>
+
           <!-- Lost reason + Reactivation (cancelled only) -->
           <div v-if="lead.status === 'lost'" class="bg-white rounded-lg p-4 border border-dental-blue--5 space-y-3">
             <div>
@@ -1035,6 +1042,35 @@ const formatDate = (date: string) => {
 onMounted(async () => {
   await Promise.all([loadLead(), fetchLocations(), fetchDentalServices()])
 })
+
+// HKP-Upload-Fallback (Modul F MVP)
+const onHkpUpload = async (e: Event) => {
+  if (!lead.value) return
+  const file = (e.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = async () => {
+    const base64 = (reader.result as string).split(',')[1] || ''
+    try {
+      await $fetch('/api/leads/match-and-attach-hkp', {
+        method: 'POST',
+        headers: { 'x-hkp-ingest-secret': 'manual-upload-token' },
+        body: {
+          patient_number: lead.value?.patient_number,
+          sender_email: lead.value?.mail,
+          pdf_base64: base64,
+          pdf_filename: file.name,
+        },
+      })
+      toast.add({ severity: 'success', summary: 'HKP hochgeladen', detail: 'Status auf hkp_signed gesetzt' })
+      await loadLead()
+    }
+    catch (err: any) {
+      toast.add({ severity: 'error', summary: 'Upload fehlgeschlagen', detail: err?.message || String(err) })
+    }
+  }
+  reader.readAsDataURL(file)
+}
 </script>
 
 <style scoped>
