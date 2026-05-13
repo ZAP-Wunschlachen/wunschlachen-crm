@@ -3,13 +3,15 @@
  *
  * Hält den aktuellen Customer-Type ('all' | 'heimkunden' | 'patienten')
  * in einem useState, damit Tab-Auswahl beim Page-Wechsel erhalten bleibt.
- * Default 'all' für übergreifende Sicht.
+ * Default richtet sich nach `useUserRole.defaultPersona` — User mit nur einer
+ * zugänglichen Persona starten direkt dort.
  */
 
 import type { CustomerType } from '../components/CustomerTypeTabs.vue'
 
 export const useCustomerType = () => {
-  const customerType = useState<CustomerType>('app.customer-type', () => 'all')
+  const { defaultPersona } = useUserRole()
+  const customerType = useState<CustomerType>('app.customer-type', () => defaultPersona.value)
 
   const isAll = computed(() => customerType.value === 'all')
   const isHeimkunden = computed(() => customerType.value === 'heimkunden')

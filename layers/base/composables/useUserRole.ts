@@ -23,6 +23,11 @@ const DIRECTUS_ROLE_NAMES: Record<string, string> = {
 
 const NAMED_INTERNAL_ROLES = ['administrator', 'sales', 'crm_manager', 'pflege_manager', 'zahnarzt']
 
+// Plan v9: Rolle → erlaubte Personas (für Sidebar/Tab-Visibility)
+const MULTI_ACCESS_ROLES = ['administrator', 'crm_manager']    // sehen beide Personas
+const CRM_ONLY_ROLES     = ['sales', 'pflege_manager']         // nur B2B-Heimkunden
+const PATIENT_ONLY_ROLES = ['zahnarzt']                        // nur B2C-Patienten
+
 const resolveRoleName = (rawRole: string | undefined): string => {
   if (!rawRole) return ''
   if (DIRECTUS_ROLE_NAMES[rawRole]) return DIRECTUS_ROLE_NAMES[rawRole]
@@ -45,20 +50,41 @@ export const useUserRole = () => {
     () => !!user.value?.nursing_home && !NAMED_INTERNAL_ROLES.includes(role.value),
   )
 
-  const hasCrmAccess = computed(
-    () => isInternal.value || ['crm_manager', 'sales', 'administrator'].includes(role.value),
+  const hasCrmAccess = computed(() => {
+    const r = role.value
+    if (MULTI_ACCESS_ROLES.includes(r) || CRM_ONLY_ROLES.includes(r)) return true
+    if (PATIENT_ONLY_ROLES.includes(r)) return false
+    // Fallback (Dev-Bypass / unbekannte Rolle): interner User sieht alles
+    return isInternal.value
+  })
+
+  const hasPatientenAccess = computed(() => {
+    const r = role.value
+    if (MULTI_ACCESS_ROLES.includes(r) || PATIENT_ONLY_ROLES.includes(r)) return true
+    if (CRM_ONLY_ROLES.includes(r)) return false
+    return isInternal.value
+  })
+
+  /** Sieht beide Personas → "Alle"-Tab nur dann anzeigen. */
+  const hasMultiPersonaAccess = computed(
+    () => hasCrmAccess.value && hasPatientenAccess.value,
   )
-  const hasPflegeheimeAccess = computed(
-    () => isInternal.value || ['pflege_manager'].includes(role.value),
-  )
-  const hasPatientenAccess = computed(
-    () => isInternal.value || ['zahnarzt'].includes(role.value),
-  )
+
+  /** Default-Persona bei Layout-Mount, wenn nur eine zugänglich ist. */
+  const defaultPersona = computed<'all' | 'heimkunden' | 'patienten'>(() => {
+    if (hasMultiPersonaAccess.value) return 'all'
+    if (hasCrmAccess.value) return 'heimkunden'
+    if (hasPatientenAccess.value) return 'patienten'
+    return 'all'
+  })
+
+  const hasPflegeheimeAccess = computed(() => hasCrmAccess.value)
   const hasPraxenAccess = computed(() => isInternal.value)
   const hasCustomerAccess = computed(() => isCustomer.value || role.value === 'administrator')
 
   const defaultPath = computed(() => {
     if (hasCrmAccess.value) return '/dashboard'
+    if (hasPatientenAccess.value) return '/dashboard'
     if (hasCustomerAccess.value) return '/dash'
     return '/dashboard'
   })
@@ -70,8 +96,10 @@ export const useUserRole = () => {
     hasCrmAccess,
     hasPflegeheimeAccess,
     hasPatientenAccess,
+    hasMultiPersonaAccess,
     hasPraxenAccess,
     hasCustomerAccess,
+    defaultPersona,
     defaultPath,
   }
 }

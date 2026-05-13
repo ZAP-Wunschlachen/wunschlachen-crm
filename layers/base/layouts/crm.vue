@@ -30,27 +30,27 @@
 
         <SidebarSection label="Sales" :collapsed="collapsed" />
         <SidebarLink
-          :paths="{ heimkunden: '/crm/pipeline', patienten: '/patienten/pipeline', all: '/crm/pipeline' }"
+          :paths="salesPaths('pipeline')"
           label="Pipeline"
           icon="pi pi-bars"
           :collapsed="collapsed"
         />
         <SidebarLink
-          :paths="{ heimkunden: '/crm/leads', patienten: '/patienten/leads', all: '/crm/leads' }"
+          :paths="salesPaths('leads')"
           label="Leads"
           icon="pi pi-user-plus"
           :collapsed="collapsed"
         />
-        <!-- Entity-Stammdaten: Heime nur in B2B/Alle, Patienten nur in B2C/Alle -->
+        <!-- Entity-Stammdaten: nur sichtbar wenn User-Rolle Persona zugänglich + Tab passt -->
         <SidebarLink
-          v-if="customerType !== 'patienten'"
+          v-if="hasCrmAccess && customerType !== 'patienten'"
           path="/crm/heime"
           label="Heime"
           icon="pi pi-building"
           :collapsed="collapsed"
         />
         <SidebarLink
-          v-if="customerType !== 'heimkunden'"
+          v-if="hasPatientenAccess && customerType !== 'heimkunden'"
           path="/patienten"
           label="Patienten"
           icon="pi pi-user"
@@ -59,7 +59,7 @@
         />
         <!-- Kontakte = Ansprechpartner im Pflegeheim (B2B-spezifisch) -->
         <SidebarLink
-          v-if="customerType !== 'patienten'"
+          v-if="hasCrmAccess && customerType !== 'patienten'"
           path="/crm/kontakte"
           label="Kontakte"
           icon="pi pi-id-card"
@@ -68,7 +68,7 @@
 
         <SidebarSection label="Engagement" :collapsed="collapsed" />
         <SidebarLink
-          :paths="{ heimkunden: '/crm/termine', patienten: '/patienten/termine', all: '/crm/termine' }"
+          :paths="termineRoutes"
           label="Termine"
           icon="pi pi-calendar"
           :collapsed="collapsed"
@@ -76,24 +76,42 @@
         <SidebarLink path="/crm/aktivitaeten" label="Aktivitäten" icon="pi pi-history" :collapsed="collapsed" />
         <SidebarLink path="/crm/aufgaben" label="Aufgaben" icon="pi pi-check-square" :collapsed="collapsed" />
 
-        <SidebarSection label="Marketing" :collapsed="collapsed" />
+        <SidebarSection v-if="hasCrmAccess || hasPatientenAccess" label="Marketing" :collapsed="collapsed" />
         <SidebarLink
-          :paths="{ heimkunden: '/crm/workflows', patienten: '/patienten/workflows', all: '/crm/workflows' }"
+          :paths="workflowPaths"
           label="Workflows"
           icon="pi pi-sitemap"
           :collapsed="collapsed"
         />
-        <SidebarLink path="/patienten/marketing" label="Kampagnen" icon="pi pi-megaphone" :collapsed="collapsed" />
-        <SidebarLink path="/patienten/voice-ai" label="Voice-AI" icon="pi pi-microphone" :collapsed="collapsed" />
+        <SidebarLink
+          v-if="hasPatientenAccess"
+          path="/patienten/marketing"
+          label="Kampagnen"
+          icon="pi pi-megaphone"
+          :collapsed="collapsed"
+        />
+        <SidebarLink
+          v-if="hasPatientenAccess"
+          path="/patienten/voice-ai"
+          label="Voice-AI"
+          icon="pi pi-microphone"
+          :collapsed="collapsed"
+        />
 
         <SidebarSection label="Insights" :collapsed="collapsed" />
-        <SidebarLink path="/patienten/bewertungen" label="Bewertungen" icon="pi pi-star" :collapsed="collapsed" />
+        <SidebarLink
+          v-if="hasPatientenAccess"
+          path="/patienten/bewertungen"
+          label="Bewertungen"
+          icon="pi pi-star"
+          :collapsed="collapsed"
+        />
         <SidebarLink path="/crm/statistiken" label="Berichte" icon="pi pi-chart-line" :collapsed="collapsed" />
 
         <!-- Einstellungen -->
         <div class="h-px bg-white/[0.12] my-2" />
         <SidebarLink
-          :paths="{ heimkunden: '/crm/einstellungen', patienten: '/patienten/einstellungen', all: '/crm/einstellungen' }"
+          :paths="settingsPaths"
           label="Einstellungen"
           icon="pi pi-cog"
           :collapsed="collapsed"
@@ -182,8 +200,38 @@ const route = useRoute()
 const router = useRouter()
 const { user, redirectToLogout } = useAuth()
 const { customerType } = useCustomerType()
+const { hasCrmAccess, hasPatientenAccess, hasMultiPersonaAccess, defaultPersona } = useUserRole()
 
 const collapsed = ref(false)
+
+// Plan v9 Issue #5: Sales-Routen je nach erlaubter Persona auflösen.
+// Wenn User nur CRM darf → patienten-Route fällt auf crm-Route zurück (und v.v.).
+type SalesKey = 'pipeline' | 'leads'
+const SALES_BASE: Record<SalesKey, { crm: string; patienten: string }> = {
+  pipeline: { crm: '/crm/pipeline', patienten: '/patienten/pipeline' },
+  leads: { crm: '/crm/leads', patienten: '/patienten/leads' },
+}
+const salesPaths = (key: SalesKey) => {
+  const b = SALES_BASE[key]
+  const crm = hasCrmAccess.value ? b.crm : b.patienten
+  const patienten = hasPatientenAccess.value ? b.patienten : b.crm
+  return { heimkunden: crm, patienten, all: hasCrmAccess.value ? b.crm : b.patienten }
+}
+const termineRoutes = computed(() => ({
+  heimkunden: hasCrmAccess.value ? '/crm/termine' : '/patienten/termine',
+  patienten: hasPatientenAccess.value ? '/patienten/termine' : '/crm/termine',
+  all: hasCrmAccess.value ? '/crm/termine' : '/patienten/termine',
+}))
+const workflowPaths = computed(() => ({
+  heimkunden: hasCrmAccess.value ? '/crm/workflows' : '/patienten/workflows',
+  patienten: hasPatientenAccess.value ? '/patienten/workflows' : '/crm/workflows',
+  all: hasCrmAccess.value ? '/crm/workflows' : '/patienten/workflows',
+}))
+const settingsPaths = computed(() => ({
+  heimkunden: hasCrmAccess.value ? '/crm/einstellungen' : '/patienten/einstellungen',
+  patienten: hasPatientenAccess.value ? '/patienten/einstellungen' : '/crm/einstellungen',
+  all: hasCrmAccess.value ? '/crm/einstellungen' : '/patienten/einstellungen',
+}))
 
 const userName = computed(() => {
   if (!user.value) return ''
@@ -201,12 +249,20 @@ const handleLogout = () => {
   redirectToLogout()
 }
 
-// Persona-Tabs in der Top-Bar
-const personaTabs: { value: CustomerType; label: string; icon: string }[] = [
+// Persona-Tabs in der Top-Bar — gefiltert nach User-Access (Plan v9 Issue #5)
+const ALL_PERSONA_TABS: { value: CustomerType; label: string; icon: string }[] = [
   { value: 'all', label: 'Alle', icon: 'pi pi-th-large' },
   { value: 'heimkunden', label: 'Heimkunden', icon: 'pi pi-building' },
   { value: 'patienten', label: 'Patienten', icon: 'pi pi-user' },
 ]
+const personaTabs = computed(() => {
+  return ALL_PERSONA_TABS.filter((t) => {
+    if (t.value === 'all') return hasMultiPersonaAccess.value
+    if (t.value === 'heimkunden') return hasCrmAccess.value
+    if (t.value === 'patienten') return hasPatientenAccess.value
+    return false
+  })
+})
 
 // Mapping: aktuelle Route → korrespondierende Route in der anderen Persona
 // Entity-spezifische B2B-Pages (heime, kontakte) haben keine direkte B2C-Entsprechung;
@@ -221,8 +277,9 @@ const personaRouteMap: { heimkunden: string; patienten: string }[] = [
   { heimkunden: '/crm/einstellungen', patienten: '/patienten/einstellungen' },
 ]
 
-// Zeige Persona-Tabs nur wenn aktuelle Route persona-sensitive ist
+// Zeige Persona-Tabs nur wenn aktuelle Route persona-sensitive ist UND User Zugriff auf >1 Persona hat
 const showPersonaTabs = computed(() => {
+  if (personaTabs.value.length < 2) return false
   return personaRouteMap.some(
     (m) => route.path.startsWith(m.heimkunden) || route.path.startsWith(m.patienten),
   )
@@ -254,9 +311,38 @@ watch(
     } else if (newPath.startsWith('/patienten/') && customerType.value === 'heimkunden') {
       customerType.value = 'patienten'
     }
+
+    // Plan v9 Issue #5: Redirect wenn User auf nicht-erlaubte Persona-Route landet
+    if (newPath.startsWith('/crm/') && !hasCrmAccess.value && hasPatientenAccess.value) {
+      const counterpart = personaRouteMap.find((m) => newPath.startsWith(m.heimkunden))
+      if (counterpart) {
+        router.replace(counterpart.patienten)
+      } else {
+        router.replace('/dashboard')
+      }
+    } else if (newPath.startsWith('/patienten/') && !hasPatientenAccess.value && hasCrmAccess.value) {
+      const counterpart = personaRouteMap.find((m) => newPath.startsWith(m.patienten))
+      if (counterpart) {
+        router.replace(counterpart.heimkunden)
+      } else {
+        router.replace('/dashboard')
+      }
+    }
   },
   { immediate: true },
 )
+
+// Beim ersten Mount: wenn User in einer "nicht-erlaubten" Persona steht (vom Storage übernommen)
+// → auf erlaubte Persona umstellen.
+onMounted(() => {
+  if (customerType.value === 'heimkunden' && !hasCrmAccess.value) {
+    customerType.value = defaultPersona.value
+  } else if (customerType.value === 'patienten' && !hasPatientenAccess.value) {
+    customerType.value = defaultPersona.value
+  } else if (customerType.value === 'all' && !hasMultiPersonaAccess.value) {
+    customerType.value = defaultPersona.value
+  }
+})
 
 // Page-Title
 const titleMap: Record<string, string> = {
