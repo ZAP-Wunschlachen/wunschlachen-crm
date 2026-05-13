@@ -57,5 +57,52 @@
       { "id": "t5s4", "type": "wait", "label": "14 Tage warten", "config": { "days": 14 } },
       { "id": "t5s5", "type": "task", "label": "Persönlicher Anruf", "config": { "description": "Lead persönlich anrufen — Lead Nurturing abschließen" } }
     ]
+  },
+  {
+    "name": "Welcome-Sequenz (Modul A MVP)",
+    "description": "6 Mails über 14 Tage: Tag 0, +1, +3, +7, +10, +14. Pausiert wenn DSGVO fehlt, unsubscribed, status > contacted, oder lost. Hinweis: Diese Sequenz läuft via Cron-Endpoint, NICHT via Workflow-Engine — Wait-Steps werden client-side übersprungen.",
+    "trigger_type": "new_lead",
+    "steps": [
+      { "id": "welc-1", "type": "email", "label": "Welcome Tag 0 — Bestätigung", "config": { "template_id": "welcome-day-0-cta" } },
+      { "id": "welc-2", "type": "wait", "label": "1 Tag warten", "config": { "days": 1 } },
+      { "id": "welc-3", "type": "email", "label": "Welcome Tag 1 — Vertrauen", "config": { "template_id": "welcome-day-1-trust" } },
+      { "id": "welc-4", "type": "wait", "label": "2 Tage warten", "config": { "days": 2 } },
+      { "id": "welc-5", "type": "email", "label": "Welcome Tag 3 — Mythen", "config": { "template_id": "welcome-day-3-mythen" } },
+      { "id": "welc-6", "type": "wait", "label": "4 Tage warten", "config": { "days": 4 } },
+      { "id": "welc-7", "type": "email", "label": "Welcome Tag 7 — Schmerz", "config": { "template_id": "welcome-day-7-pain" } },
+      { "id": "welc-8", "type": "wait", "label": "3 Tage warten", "config": { "days": 3 } },
+      { "id": "welc-9", "type": "email", "label": "Welcome Tag 10 — Kosten", "config": { "template_id": "welcome-day-10-cost" } },
+      { "id": "welc-10", "type": "wait", "label": "4 Tage warten", "config": { "days": 4 } },
+      { "id": "welc-11", "type": "email", "label": "Welcome Tag 14 — Last Call", "config": { "template_id": "welcome-day-14-last-call" } }
+    ]
+  },
+  {
+    "name": "Steady-State 6 Monate (Stub)",
+    "description": "2× wöchentlich über 6 Monate (Wochen 3–20): Mittwoch Content-Mail + Sonntag Booking-CTA. Stub — wird ausgebaut wenn Welcome-Sequenz live ist.",
+    "trigger_type": "manual",
+    "steps": [
+      { "id": "ss-1", "type": "wait", "label": "3 Wochen warten (nach Welcome)", "config": { "days": 7 } },
+      { "id": "ss-2", "type": "email", "label": "SS W3 Mi — Behandlungsablauf", "config": { "template_id": "ss-w3-mi-ablauf" } },
+      { "id": "ss-3", "type": "wait", "label": "4 Tage warten", "config": { "days": 4 } },
+      { "id": "ss-4", "type": "email", "label": "SS W3 So — Booking-CTA", "config": { "template_id": "ss-w3-so-cta" } },
+      { "id": "ss-5", "type": "wait", "label": "7 Tage warten", "config": { "days": 7 } },
+      { "id": "ss-6", "type": "email", "label": "SS W4 Mi — Ästhetik", "config": { "template_id": "ss-w4-mi-optik" } },
+      { "id": "ss-7", "type": "task", "label": "Weitere Steady-State-Mails (W4–W20 ausbauen)", "config": { "description": "Stub: 32 weitere Steady-State-Slots W4–W20 hier ergänzen." } }
+    ]
+  },
+  {
+    "name": "Re-Engagement Lost-Lead (Stub)",
+    "description": "3-Touch-Reaktivierung nach 90 Tagen Lost-Status. Sensibel: kein Druck, kein Vorwurf. Stub — wird ausgebaut nach Fertigstellung der Steady-State-Sequenz.",
+    "trigger_type": "stage_change",
+    "trigger_config": { "to_status": "lost" },
+    "steps": [
+      { "id": "re-1", "type": "wait", "label": "90 Tage warten", "config": { "days": 90 } },
+      { "id": "re-2", "type": "email", "label": "Re-Engagement Touch 1 — Sanfte Rückmeldung", "config": { "template_id": "reengagement-day-90" } },
+      { "id": "re-3", "type": "wait", "label": "15 Tage warten", "config": { "days": 15 } },
+      { "id": "re-4", "type": "email", "label": "Re-Engagement Touch 2 — Medizinischer Hinweis", "config": { "template_id": "reengagement-day-105" } },
+      { "id": "re-5", "type": "wait", "label": "15 Tage warten", "config": { "days": 15 } },
+      { "id": "re-6", "type": "email", "label": "Re-Engagement Touch 3 — Abschluss / Letzte Nachricht", "config": { "template_id": "reengagement-day-120-final" } },
+      { "id": "re-7", "type": "task", "label": "Lead in dauerhaften Lost-Status setzen", "config": { "description": "Kein weiteres automatisches Mail nach Touch 3 — Sales-Agent kann manuell reaktivieren." } }
+    ]
   }
 ]
