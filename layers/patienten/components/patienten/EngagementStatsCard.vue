@@ -65,15 +65,37 @@
     <div v-if="stats.total_emails > 0" class="mt-3 pt-3 border-t border-dental-blue--6">
       <p class="text-[11px] text-dental-blue--3 italic">{{ interpretation }}</p>
     </div>
+
+    <div v-if="lead?.welcome_sequence_position != null" class="mt-3 pt-3 border-t border-dental-blue--5">
+      <h3 class="text-[11px] font-semibold text-dental-blue-0 mb-1">Welcome-Sequenz</h3>
+      <p class="text-[11px] text-dental-blue--3">
+        Mail {{ lead.welcome_sequence_position }} / 6
+        <span v-if="welcomeStatus" class="ml-2 italic">({{ welcomeStatus }})</span>
+      </p>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { LeadActivity } from '~/types/crm'
+import type { Lead, LeadActivity } from '~/types/crm'
+import { useWelcomeSequence } from '../../composables/useWelcomeSequence'
 
 const props = defineProps<{
   activities: LeadActivity[]
+  lead?: Lead
 }>()
+
+const { shouldPauseFor } = useWelcomeSequence()
+const welcomeStatus = computed(() => {
+  if (!props.lead) return null
+  const reason = shouldPauseFor(props.lead)
+  if (reason === 'unsubscribed') return 'abgemeldet'
+  if (reason === 'lost') return 'pausiert (lost)'
+  if (reason === 'status_advanced') return 'pausiert (Termin steht)'
+  if (reason === 'no_gdpr_consent') return 'fehlende DSGVO-Einwilligung'
+  if ((props.lead.welcome_sequence_position ?? 0) >= 6) return 'abgeschlossen'
+  return null
+})
 
 const { getEngagementStats } = useEmailEvents()
 

@@ -254,7 +254,7 @@
           </div>
 
           <!-- E-Mail-Engagement (Brevo-Tracking) -->
-          <PatientenEngagementStatsCard :activities="activities" />
+          <PatientenEngagementStatsCard :activities="activities" :lead="lead" />
 
           <!-- Lead Score -->
           <PatientenLeadScoreBreakdown v-if="leadScore" :result="leadScore" />
