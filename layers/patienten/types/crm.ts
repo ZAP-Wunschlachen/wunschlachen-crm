@@ -260,6 +260,10 @@ export interface Lead {
   linked_appointment_id?: string         // ID des aktuell verknüpften Kalender-Termins
   last_appointment_synced_at?: string    // ISO timestamp: letztes verarbeitetes Sync-Event
 
+  // HKP-Signed via Dampsoft-Postbox (Plan v9 Modul F MVP)
+  hkp_signed_pdf_id?: string             // Directus-File-ID der eingegangenen PDF
+  hkp_signed_received_at?: string        // ISO timestamp
+
   // Speed-to-Lead + Smart-Callback (Plan v9 Modul B MVP)
   successful_call_window?: 'morning' | 'midday' | 'evening'   // gelernter erfolgreicher Slot
   last_call_attempt_at?: string                               // ISO timestamp
@@ -282,7 +286,7 @@ export interface Lead {
 
 // ─── Activities ───────────────────────────────────────────────
 
-export type LeadActivityType = 'note' | 'call' | 'email' | 'email_sent' | 'email_received' | 'sms' | 'whatsapp' | 'meeting' | 'task' | 'newsletter' | 'stage_change' | 'no_show' | 'reschedule' | 'lost_rollback'
+export type LeadActivityType = 'note' | 'call' | 'email' | 'email_sent' | 'email_received' | 'sms' | 'whatsapp' | 'meeting' | 'task' | 'newsletter' | 'stage_change' | 'no_show' | 'reschedule' | 'lost_rollback' | 'hkp_ingest'
 
 export type ActivityDirection = 'inbound' | 'outbound'
 export type ActivityOutcome = 'successful' | 'no_contact' | 'callback' | 'rejection'
@@ -323,6 +327,7 @@ export const ACTIVITY_TYPE_CONFIG: Record<LeadActivityType, { label: string; ico
   no_show:        { label: 'Nicht erschienen', icon: 'pi pi-times-circle', color: '#ef4444', bgColor: '#fee2e2' },
   reschedule:     { label: 'Termin verschoben', icon: 'pi pi-clock',     color: '#f59e0b', bgColor: '#fef3c7' },
   lost_rollback:  { label: 'Lead zurückgeholt', icon: 'pi pi-undo',       color: '#22c55e', bgColor: '#f0fdf4' },
+  hkp_ingest:    { label: 'HKP eingegangen',   icon: 'pi pi-file-pdf',   color: '#16a34a', bgColor: '#f0fdf4' },
 }
 
 export const ACTIVITY_DIRECTION_LABELS: Record<ActivityDirection, string> = {
