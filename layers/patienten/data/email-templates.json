@@ -6,8 +6,15 @@
     "subject": "Willkommen bei Wunschlachen, {{ patient.first_name }}!",
     "body_html": "<p>Hallo {{ patient.first_name }} {{ patient.last_name }},</p>\n<p>vielen Dank für Ihr Interesse an unserer Praxis {{ location.name }}.</p>\n<p>Wir freuen uns, Sie bald bei uns begrüßen zu dürfen. Gerne vereinbaren wir einen ersten Beratungstermin mit Ihnen.</p>\n<p>Haben Sie Fragen? Antworten Sie einfach auf diese E-Mail oder rufen Sie uns an.</p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
     "category": "erstansprache",
-    "variables": ["patient.first_name", "patient.last_name", "location.name"],
-    "for_status": ["new", "contacting"],
+    "variables": [
+      "patient.first_name",
+      "patient.last_name",
+      "location.name"
+    ],
+    "for_status": [
+      "new",
+      "contacting"
+    ],
     "is_active": true
   },
   {
@@ -17,8 +24,12 @@
     "subject": "Nachfrage zu Ihrem Beratungsgespräch",
     "body_html": "<p>Hallo {{ patient.first_name }},</p>\n<p>ich wollte mich nochmals bezüglich Ihres Beratungsgesprächs melden. Haben Sie bereits eine Entscheidung getroffen?</p>\n<p>Falls Sie noch Fragen haben oder weitere Informationen benötigen, stehe ich Ihnen gerne zur Verfügung.</p>\n<p>Beste Grüße<br/>Ihr Wunschlachen-Team</p>",
     "category": "follow_up",
-    "variables": ["patient.first_name"],
-    "for_status": ["consultation_done"],
+    "variables": [
+      "patient.first_name"
+    ],
+    "for_status": [
+      "consultation_done"
+    ],
     "is_active": true
   },
   {
@@ -28,8 +39,13 @@
     "subject": "Terminvorschlag für {{ patient.first_name }} {{ patient.last_name }}",
     "body_html": "<p>Liebe/r {{ patient.first_name }},</p>\n<p>ich melde mich nochmals bezüglich Ihrer Behandlung. Gerne würde ich einen Termin mit Ihnen vereinbaren.</p>\n<p>Wären folgende Zeiten möglich?</p>\n<ul>\n<li>[Termin 1]</li>\n<li>[Termin 2]</li>\n</ul>\n<p>Ich freue mich auf Ihre Rückmeldung.</p>\n<p>Mit freundlichen Grüßen<br/>Ihr Wunschlachen-Team</p>",
     "category": "follow_up",
-    "variables": ["patient.first_name", "patient.last_name"],
-    "for_status": ["contacted"],
+    "variables": [
+      "patient.first_name",
+      "patient.last_name"
+    ],
+    "for_status": [
+      "contacted"
+    ],
     "is_active": true
   },
   {
@@ -39,8 +55,14 @@
     "subject": "Erinnerung: Ihr Termin morgen",
     "body_html": "<p>Hallo {{ patient.first_name }},</p>\n<p>dies ist eine freundliche Erinnerung an Ihren Termin morgen in unserer Praxis {{ location.name }}.</p>\n<p>Bitte bringen Sie Ihre Versichertenkarte mit. Falls Sie den Termin nicht wahrnehmen können, sagen Sie bitte rechtzeitig ab.</p>\n<p>Wir freuen uns auf Sie!</p>\n<p>Ihr Wunschlachen-Team</p>",
     "category": "termin_erinnerung",
-    "variables": ["patient.first_name", "location.name"],
-    "for_status": ["consultation_scheduled", "treatment_scheduled"],
+    "variables": [
+      "patient.first_name",
+      "location.name"
+    ],
+    "for_status": [
+      "consultation_scheduled",
+      "treatment_scheduled"
+    ],
     "is_active": true
   },
   {
@@ -50,8 +72,12 @@
     "subject": "Ihr Heil- und Kostenplan — Haben Sie noch Fragen?",
     "body_html": "<p>Hallo {{ patient.first_name }},</p>\n<p>vor einigen Tagen haben wir Ihnen den Heil- und Kostenplan zugesandt. Ich wollte mich kurz erkundigen, ob Sie alle Unterlagen erhalten haben und ob noch Fragen offen sind.</p>\n<p>Gerne bespreche ich den Plan in einem kurzen Anruf mit Ihnen oder beantworte Ihre Rückfragen per E-Mail.</p>\n<p>Mit freundlichen Grüßen<br/>Ihr Wunschlachen-Team</p>",
     "category": "hkp",
-    "variables": ["patient.first_name"],
-    "for_status": ["hkp_sent"],
+    "variables": [
+      "patient.first_name"
+    ],
+    "for_status": [
+      "hkp_sent"
+    ],
     "is_active": true
   },
   {
@@ -61,8 +87,12 @@
     "subject": "HKP-Klärung — können wir Sie unterstützen?",
     "body_html": "<p>Hallo {{ patient.first_name }},</p>\n<p>vor einer Woche haben wir Ihnen den Heil- und Kostenplan gesendet. Falls Punkte unklar sind oder Sie eine Finanzierung wünschen, finden wir gerne eine Lösung.</p>\n<p>Antworten Sie kurz oder rufen Sie uns an — wir nehmen uns Zeit.</p>\n<p>Mit freundlichen Grüßen<br/>Ihr Wunschlachen-Team</p>",
     "category": "hkp",
-    "variables": ["patient.first_name"],
-    "for_status": ["hkp_sent"],
+    "variables": [
+      "patient.first_name"
+    ],
+    "for_status": [
+      "hkp_sent"
+    ],
     "is_active": true
   },
   {
@@ -72,8 +102,12 @@
     "subject": "Neue Finanzierungsoptionen für Ihre Behandlung",
     "body_html": "<p>Hallo {{ patient.first_name }},</p>\n<p>vor einigen Monaten hatten Sie sich für eine Implantat-Behandlung interessiert. Wir haben inzwischen erweiterte Finanzierungsoptionen mit niedrigen Monatsraten, die Ihre Behandlung erschwinglicher machen.</p>\n<p>Wenn Sie mehr erfahren möchten, melden Sie sich kurz — ich stelle Ihnen die Optionen unverbindlich vor.</p>\n<p>Beste Grüße<br/>Ihr Wunschlachen-Team</p>",
     "category": "reactivation",
-    "variables": ["patient.first_name"],
-    "for_status": ["lost"],
+    "variables": [
+      "patient.first_name"
+    ],
+    "for_status": [
+      "lost"
+    ],
     "is_active": true
   },
   {
@@ -83,8 +117,12 @@
     "subject": "Wie geht es Ihnen, {{ patient.first_name }}?",
     "body_html": "<p>Hallo {{ patient.first_name }},</p>\n<p>vor einiger Zeit hatten Sie sich bei uns gemeldet. Ich wollte mich nur kurz erkundigen, wie es Ihnen geht und ob das Thema Implantat-Behandlung für Sie wieder aktuell ist.</p>\n<p>Falls ja, bin ich gerne für Sie da — ohne Verpflichtung.</p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
     "category": "reactivation",
-    "variables": ["patient.first_name"],
-    "for_status": ["lost"],
+    "variables": [
+      "patient.first_name"
+    ],
+    "for_status": [
+      "lost"
+    ],
     "is_active": true
   },
   {
@@ -94,8 +132,12 @@
     "subject": "Kurzes Feedback — wie war Ihre Erfahrung?",
     "body_html": "<p>Hallo {{ patient.first_name }},</p>\n<p>Sie hatten sich für eine Alternative entschieden. Damit wir uns weiterentwickeln, würde mich Ihre Erfahrung interessieren: Was hat den Ausschlag gegeben? Was würden Sie sich von uns wünschen?</p>\n<p>Auch wenn Sie nicht mehr bei uns sind — Ihre Antwort hilft uns. Vielen Dank!</p>\n<p>Beste Grüße<br/>Ihr Wunschlachen-Team</p>",
     "category": "reactivation",
-    "variables": ["patient.first_name"],
-    "for_status": ["lost"],
+    "variables": [
+      "patient.first_name"
+    ],
+    "for_status": [
+      "lost"
+    ],
     "is_active": true
   },
   {
@@ -105,8 +147,13 @@
     "subject": "Wie war Ihre Behandlung bei uns?",
     "body_html": "<p>Hallo {{ patient.first_name }},</p>\n<p>wir hoffen, Sie sind mit Ihrer Behandlung zufrieden. Wenn Sie kurz Zeit haben, würden wir uns sehr über eine Google-Bewertung freuen — sie hilft anderen Patientinnen und Patienten bei der Wahl.</p>\n<p><a href=\"{{ practice.review_url }}\">Hier zur Bewertung →</a></p>\n<p>Herzlichen Dank!<br/>Ihr Wunschlachen-Team</p>",
     "category": "review_request",
-    "variables": ["patient.first_name", "practice.review_url"],
-    "for_status": ["completed"],
+    "variables": [
+      "patient.first_name",
+      "practice.review_url"
+    ],
+    "for_status": [
+      "completed"
+    ],
     "is_active": true
   },
   {
@@ -116,8 +163,12 @@
     "subject": "Wie geht es Ihnen nach der Behandlung?",
     "body_html": "<p>Hallo {{ patient.first_name }},</p>\n<p>wir hoffen, dass es Ihnen nach der Behandlung gut geht. Falls Sie Beschwerden haben oder Fragen aufkommen, zögern Sie nicht, uns zu kontaktieren.</p>\n<p>Wir empfehlen einen Kontrolltermin in [X] Wochen. Gerne können wir diesen direkt für Sie vereinbaren.</p>\n<p>Beste Grüße<br/>Ihr Wunschlachen-Team</p>",
     "category": "nachsorge",
-    "variables": ["patient.first_name"],
-    "for_status": ["completed"],
+    "variables": [
+      "patient.first_name"
+    ],
+    "for_status": [
+      "completed"
+    ],
     "is_active": true
   },
   {
@@ -127,7 +178,677 @@
     "subject": "",
     "body_html": "<p>Sehr geehrte/r {{ patient.first_name }} {{ patient.last_name }},</p>\n<p></p>\n<p>Mit freundlichen Grüßen<br/>Ihr Wunschlachen-Team</p>",
     "category": "allgemein",
-    "variables": ["patient.first_name", "patient.last_name"],
+    "variables": [
+      "patient.first_name",
+      "patient.last_name"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "welcome-day-0-cta",
+    "key": "welcome-day-0-cta",
+    "name": "Welcome Tag 0 — Bestätigung & Buchungs-CTA",
+    "subject": "Re: Ihre Anfrage zu Zahnimplantaten bei Wunschlachen",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>wir haben Ihre Nachricht erhalten und freuen uns, von Ihnen zu hören.</p>\n<p>Was passiert jetzt? Ein Mitarbeiter meldet sich innerhalb von 1 Werktag telefonisch bei Ihnen. In der Zwischenzeit können Sie vorab mehr über unsere Praxis erfahren.</p>\n<p>Wenn Sie nicht warten möchten, buchen Sie direkt einen kostenfreien Beratungstermin:</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Beratungstermin buchen &rarr;</a></p>\n<p>Oder rufen Sie uns an: <a href=\"tel:+49XXXXXXXXXX\">+49 XX XXXXXXXX</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>\n<!-- TODO: Marketing-Team: Praxis-Adresse, Öffnungszeiten und Ansprechpartner einfügen -->",
+    "category": "welcome",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "welcome-day-1-trust",
+    "key": "welcome-day-1-trust",
+    "name": "Welcome Tag 1 — Team-Vorstellung",
+    "subject": "Das Wunschlachen-Team — wer behandelt Sie?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>bevor Sie zu uns kommen, möchten wir Ihnen sagen, wer Sie empfängt.</p>\n<p><!-- TODO: Marketing-Team: Kurze Vorstellung der behandelnden Ärzte (Ausbildung, Spezialisierung, ein persönlicher Satz) einfügen --></p>\n<ul>\n<li>Spezialisierung auf Implantologie</li>\n<li>Kontinuierliche Behandler-Beziehung von Erstberatung bis Nachkontrolle</li>\n<li>Deutsches Haftungsrecht &amp; volle PKV/GKV-Abrechnung</li>\n</ul>\n<p>Wir freuen uns darauf, Sie persönlich kennenzulernen.</p>\n<p><a href=\"https://wunschlachen.app/team\">Unser Team kennenlernen &rarr;</a> | <a href=\"https://wunschlachen.app/buchen\">Termin buchen</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "welcome",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "welcome-day-3-mythen",
+    "key": "welcome-day-3-mythen",
+    "name": "Welcome Tag 3 — Mythen-Aufklärung",
+    "subject": "Mythen über Zahnimplantate — was wirklich stimmt, {{firstName}}",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>fast jeder Patient kommt zu uns mit mindestens einem dieser Missverständnisse.</p>\n<p><strong>Mythos 1: Implantate sieht man sofort</strong><br/>Die Keramik-Krone wird individuell für Ihren Mund angefertigt — in Farbe und Form nicht von echten Zähnen zu unterscheiden.</p>\n<p><strong>Mythos 2: Das tut sehr weh</strong><br/>Lokal-Anästhesie macht den Eingriff schmerzfrei. Viele Patienten beschreiben es als weniger unangenehm als eine einfache Zahnfüllung.</p>\n<p><strong>Mythos 3: Das ist zu teuer</strong><br/>GKV-Festzuschuss reduziert Ihre Kosten. Zusätzlich bieten wir Finanzierungsoptionen an.</p>\n<p><strong>Mythos 4: Zu alt für Implantate</strong><br/>Es gibt kein Alterslimit nach oben — nur die Knochensubstanz ist relevant, die wir vorab prüfen.</p>\n<p><strong>Mythos 5: Implantate halten nicht lange</strong><br/>Langzeit-Daten zeigen sehr hohe Erfolgsraten bei richtiger Pflege.</p>\n<p>Haben Sie weitere Fragen? Im Beratungsgespräch beantworten wir sie alle — ohne Zeitdruck.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Beratungstermin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "welcome",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "welcome-day-7-pain",
+    "key": "welcome-day-7-pain",
+    "name": "Welcome Tag 7 — Schmerzfreiheit",
+    "subject": "Schmerzfrei zum neuen Lächeln — wie das bei Wunschlachen funktioniert",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>die häufigste Frage unserer Patienten: Tut das weh?</p>\n<p>Die ehrliche Antwort: Mit moderner Lokal-Anästhesie ist der Eingriff für die allermeisten Patienten überraschend unkompliziert. Für Patienten mit Zahnarztangst bieten wir zusätzlich Sedierungsoptionen an.</p>\n<p>Was Sie in der Behandlung erwartet:</p>\n<ul>\n<li>Ausführliches Vorgespräch über Ihre Bedenken</li>\n<li>Lokal-Anästhesie — Sie spüren keinen Schmerz, nur gelegentlich leichten Druck</li>\n<li>Schonung am Tag des Eingriffs empfohlen, danach meist Alltag möglich</li>\n<li>Leichte Schwellung 1–2 Tage normal — wir informieren Sie, wann Sie uns anrufen sollten</li>\n</ul>\n<p><!-- TODO: Marketing-Team: Anonymisiertes Patienten-Zitat zu Zahnarztangst einfügen --></p>\n<p>Sie können Angst ansprechen — unser Team hört zu.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Beratung vereinbaren &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "welcome",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "welcome-day-10-cost",
+    "key": "welcome-day-10-cost",
+    "name": "Welcome Tag 10 — Kosten & Transparenz",
+    "subject": "Zahnimplantate bei Wunschlachen — was kostet das wirklich?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>die Kostenfrage ist die ehrlichste Frage — und sie verdient eine ehrliche Antwort.</p>\n<p><strong>Wie funktioniert der Heil- und Kostenplan (HKP)?</strong><br/>Vor jeder Behandlung erhalten Sie einen verbindlichen Kostenplan. Keine versteckten Aufpreise, keine Überraschungen.</p>\n<p><strong>Was zahlt Ihre Krankenkasse?</strong><br/>GKV-Versicherte erhalten einen Festzuschuss für Zahnersatz. Mit einem gepflegten Bonusheft erhöht sich dieser Anteil. PKV-Versicherte haben je nach Tarif höhere Erstattungen.</p>\n<p><strong>Finanzierungsoptionen</strong><br/>Wir bieten Ratenzahlung an — sprechen Sie uns an.</p>\n<p><!-- TODO: Marketing-Team: Finanzierungspartner und Konditionen einfügen --></p>\n<p>Der erste Schritt ist kostenlos: Erstberatung mit persönlichem Kostenvoranschlag.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Kostenfreie Erstberatung buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "welcome",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "welcome-day-14-last-call",
+    "key": "welcome-day-14-last-call",
+    "name": "Welcome Tag 14 — Last Call",
+    "subject": "{{firstName}}, wann ist der richtige Moment für Ihren ersten Schritt?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>wir haben Ihnen in den letzten zwei Wochen viel geschrieben.</p>\n<p>Kurze Zusammenfassung:</p>\n<ul>\n<li>Die Behandlung ist schmerzfrei durch moderne Anästhesie</li>\n<li>Die Kosten sind transparent — mit GKV-Zuschuss und Finanzierungsoptionen</li>\n<li>Unser Team behandelt Sie von der Erstberatung bis zur Nachkontrolle</li>\n<li>Implantate halten langfristig bei richtiger Pflege</li>\n<li>Die Erstberatung ist kostenlos und unverbindlich</li>\n</ul>\n<p>Der nächste Schritt ist ein kostenfreies Gespräch. Kein Kaufzwang, keine Verbindlichkeit.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a> | <a href=\"tel:+49XXXXXXXXXX\">Uns anrufen</a></p>\n<p>Wir freuen uns auf Sie — wann auch immer Sie bereit sind.</p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "welcome",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w3-mi-ablauf",
+    "key": "ss-w3-mi-ablauf",
+    "name": "Steady-State W3 Mi — Behandlungsablauf",
+    "subject": "Wie läuft eine Erstberatung bei Wunschlachen ab?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>viele Patienten kommen mit einer Frage im Gepäck: Was passiert eigentlich beim ersten Termin?</p>\n<ul>\n<li>Anamnese-Gespräch (~15 Min): Ihre Vorgeschichte, Wünsche, offene Fragen</li>\n<li>Digitales Röntgen: Beurteilung der Knochensubstanz</li>\n<li>Persönlicher Behandlungsplan und HKP-Entwurf</li>\n<li>Zeit für alle Ihre Fragen — ohne Zeitdruck</li>\n</ul>\n<p><!-- TODO: Marketing-Team: Body ausformulieren --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w3-so-cta",
+    "key": "ss-w3-so-cta",
+    "name": "Steady-State W3 So — Online-Buchungs-CTA",
+    "subject": "Ihr Beratungstermin: jetzt in 2 Minuten buchen",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>die Online-Buchung dauert 2 Minuten: Slot wählen, Name eingeben, fertig.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Online-Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w4-mi-optik",
+    "key": "ss-w4-mi-optik",
+    "name": "Steady-State W4 Mi — Ästhetik & Optik",
+    "subject": "Sieht man denn nicht, dass das künstlich ist?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>eine der häufigsten Fragen: Sieht man, dass es ein Implantat ist?</p>\n<p>Die kurze Antwort: Nein — wenn es gut gemacht ist. Die Keramik-Krone wird individuell in Farbe und Form auf Ihre natürlichen Zähne abgestimmt. Selbst ein Zahnarzt kann ein hochwertiges Implantat ohne Röntgenbild nicht von einem echten Zahn unterscheiden.</p>\n<p><!-- TODO: Marketing-Team: Bildbeispiel oder Patientenreferenz einfügen --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Beratung buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w4-so-cta",
+    "key": "ss-w4-so-cta",
+    "name": "Steady-State W4 So — Slot sichern",
+    "subject": "{{firstName}}, der nächste freie Beratungs-Slot ist für Sie",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>gute Beratungsplätze vergehen schnell — frühzeitige Planung lohnt sich, besonders wenn eine Behandlung noch in diesem Quartal starten soll.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin sichern &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w5-mi-zeitplan",
+    "key": "ss-w5-mi-zeitplan",
+    "name": "Steady-State W5 Mi — Behandlungsdauer",
+    "subject": "Wie lange dauert die Implantat-Behandlung insgesamt?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>eine Frage die viele stellen, aber selten laut aussprechen: Wie lange dauert das alles?</p>\n<ul>\n<li>Einzelimplantat: Einsetzen + Einheilung (3–6 Monate) + Krone = ca. 4–8 Monate gesamt</li>\n<li>Vollversorgung: Planung + Chirurgie + Einheilung + Aufbau = 6–12 Monate</li>\n<li>Abweichungen möglich — wir planen Ihren individuellen Zeitrahmen in der Erstberatung</li>\n</ul>\n<p><!-- TODO: Marketing-Team: Body ausformulieren --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Individuelle Zeitplanung besprechen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w5-so-cta",
+    "key": "ss-w5-so-cta",
+    "name": "Steady-State W5 So — Zeitplan-CTA",
+    "subject": "Heute Termin buchen — schon nächsten Monat lächeln?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>je früher die Planung beginnt, desto früher das Ergebnis. Wir schauen gemeinsam, was in Ihrem Zeitrahmen realistisch ist.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin jetzt buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w6-mi-gkv",
+    "key": "ss-w6-mi-gkv",
+    "name": "Steady-State W6 Mi — GKV & Krankenkasse",
+    "subject": "GKV und Zahnimplantate — was zahlt Ihre Krankenkasse wirklich?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>viele glauben: Die GKV zahlt bei Implantaten sowieso nichts. Das ist ein Irrtum.</p>\n<p><strong>Festzuschuss:</strong> Gesetzlich Versicherte erhalten einen Zuschuss für Zahnersatz — auch für Implantate als Grundlage.</p>\n<p><strong>Bonus-Heft:</strong> Wer regelmäßig zur Kontrolle geht und das Bonus-Heft pflegt, erhöht seinen GKV-Anteil um bis zu 30 %.</p>\n<p><strong>PKV:</strong> Je nach Tarif werden Implantate zu 80–100 % erstattet.</p>\n<p><!-- TODO: Marketing-Team: Body ausformulieren, konkrete Zahlen prüfen --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Kostencheck anfragen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w6-so-cta",
+    "key": "ss-w6-so-cta",
+    "name": "Steady-State W6 So — Kostenrechner-CTA",
+    "subject": "Was würde Ihr Implantat bei Wunschlachen kosten?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>jetzt kostenfrei berechnen — ohne Verbindlichkeit.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Kostenrechner nutzen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w7-mi-referenzen",
+    "key": "ss-w7-mi-referenzen",
+    "name": "Steady-State W7 Mi — Patientenreferenzen",
+    "subject": "Unsere Patienten erzählen — Erfahrungsberichte",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>manchmal überzeugt eine ehrliche Erfahrung mehr als jede Erklärung.</p>\n<p><!-- TODO: Marketing-Team: Anonymisiertes oder eingewilligtes Patienten-Zitat + Kontext einfügen (Wer war der Patient, was war das Problem, was ist das Ergebnis) --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Beratung buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w7-so-cta",
+    "key": "ss-w7-so-cta",
+    "name": "Steady-State W7 So — Standard-CTA",
+    "subject": "Jetzt Termin buchen: {{firstName}}, Ihr Lächeln wartet",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>drei Klicks zum Beratungstermin — ohne Warteschleife.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w8-mi-lifestyle",
+    "key": "ss-w8-mi-lifestyle",
+    "name": "Steady-State W8 Mi — Lifestyle-Veränderungen",
+    "subject": "Wie feste Zähne Ihr Alltagsleben verändern — 5 echte Beispiele",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>was Patienten nach dem Implantat berichten:</p>\n<ul>\n<li>Wieder ohne Nachdenken kauen können</li>\n<li>Klarer sprechen ohne Prothesen-Einschränkungen</li>\n<li>Mehr Selbstbewusstsein im Alltag und beim Lächeln</li>\n<li>Sport treiben ohne Angst vor dem Zahnersatz</li>\n<li>Besser schlafen ohne Prothese im Glas</li>\n</ul>\n<p><!-- TODO: Marketing-Team: Body ausformulieren --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Beratung buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w8-so-cta",
+    "key": "ss-w8-so-cta",
+    "name": "Steady-State W8 So — Erinnerungs-CTA",
+    "subject": "{{firstName}}, wann buchen Sie Ihren Termin?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>die Erstberatung ist kostenlos und unverbindlich. Keine Verpflichtung, nur Informationen.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w9-mi-alter",
+    "key": "ss-w9-mi-alter",
+    "name": "Steady-State W9 Mi — Alter & Voraussetzungen",
+    "subject": "Zahnimplantate im Alter — ab wann ist es zu spät?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>eine Patientenfrage, die uns oft überrascht: Bin ich zu alt für Implantate?</p>\n<p>Die Antwort überrascht viele: Es gibt kein Oberlimit. Entscheidend ist die Knochensubstanz — nicht das Alter. Patienten über 70 Jahren erhalten erfolgreich Implantate, sofern die Knochendichte stimmt und keine schwerwiegenden Kontraindikationen vorliegen.</p>\n<p>Was wir in der Erstberatung prüfen: Knochenqualität via 3D-Röntgen, Allgemeingesundheit, Medikamente.</p>\n<p><!-- TODO: Marketing-Team: Body ausformulieren --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Individuelle Prüfung anfragen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w9-so-cta",
+    "key": "ss-w9-so-cta",
+    "name": "Steady-State W9 So — Individuell-CTA",
+    "subject": "Individuelle Beratung: Was geht bei Ihnen?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>jeder Fall ist anders — deshalb gibt es die kostenfreie Erstberatung. Der Arzt prüft bei Ihnen genau, was möglich ist.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w10-mi-finanzierung",
+    "key": "ss-w10-mi-finanzierung",
+    "name": "Steady-State W10 Mi — Finanzierung",
+    "subject": "Zahnimplantate auf Raten — wie funktioniert das?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>müssen Sie wirklich sofort alles zahlen? Nein.</p>\n<p>Wir bieten Ratenzahlung über etablierte Finanzierungspartner an. Laufzeiten und Konditionen besprechen wir in der Erstberatung.</p>\n<p><!-- TODO: Marketing-Team: Finanzierungspartner und Konditionen einfügen --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Finanzierungsoptionen anfragen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w10-so-cta",
+    "key": "ss-w10-so-cta",
+    "name": "Steady-State W10 So — Unverbindlich-CTA",
+    "subject": "Ihr Beratungstermin — kostenlos, unverbindlich, informativ",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>kein Termin bedeutet keine Verpflichtung. Nur Informationen und ein persönlicher Behandlungsplan.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w11-mi-behind",
+    "key": "ss-w11-mi-behind",
+    "name": "Steady-State W11 Mi — Behind the Scenes",
+    "subject": "Hinter den Kulissen: So arbeitet das Wunschlachen-Team",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>was man in einer Zahnarztpraxis normalerweise nicht sieht — ein Einblick in unseren Behandlungsalltag:</p>\n<ul>\n<li>Sterilisations- und Hygiene-Standards nach aktueller Norm</li>\n<li>Materialwahl: nur zugelassene Implantate renommierter Hersteller</li>\n<li>Teamkultur: Weiterbildung, Austausch, gemeinsame Qualitätsziele</li>\n</ul>\n<p><!-- TODO: Marketing-Team: Body ausformulieren --></p>\n<p><a href=\"https://wunschlachen.app/team\">Team-Seite besuchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w11-so-cta",
+    "key": "ss-w11-so-cta",
+    "name": "Steady-State W11 So — Knappheits-CTA",
+    "subject": "Noch heute Termin sichern, {{firstName}}",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>freie Erstberatungs-Slots sind begrenzt — das ist keine Marketing-Phrase, sondern Alltag einer spezialisierten Praxis.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w12-mi-faq",
+    "key": "ss-w12-mi-faq",
+    "name": "Steady-State W12 Mi — FAQ Top 10",
+    "subject": "Die 10 häufigsten Fragen zu Zahnimplantaten — beantwortet",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>hier sind die 10 Fragen, die uns wirklich am häufigsten gestellt werden:</p>\n<ol>\n<li>Tut das weh?</li>\n<li>Wie lange hält ein Implantat?</li>\n<li>Was kostet es wirklich?</li>\n<li>Zahlt die GKV etwas dazu?</li>\n<li>Wie lange bin ich arbeitsunfähig?</li>\n<li>Kann ich zu alt sein?</li>\n<li>Sieht man es?</li>\n<li>Was passiert wenn das Implantat nicht einheilt?</li>\n<li>Wie pflege ich ein Implantat?</li>\n<li>Was ist der Unterschied zu einer Brücke?</li>\n</ol>\n<p><!-- TODO: Marketing-Team: Antworten ausformulieren --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Alle Fragen persönlich klären &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w12-so-3monate",
+    "key": "ss-w12-so-3monate",
+    "name": "Steady-State W12 So — 3-Monats-Milestone",
+    "subject": "{{firstName}}: 3 Monate nach Ihrer Anfrage — wie steht es?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>vor drei Monaten haben Sie sich bei uns gemeldet. Viele Patienten, die jetzt in Behandlung sind, haben damals ähnlich gezögert.</p>\n<p>Kein Druck — aber wenn sich etwas geändert hat und Sie bereit sind: Wir sind da.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w13-mi-angst",
+    "key": "ss-w13-mi-angst",
+    "name": "Steady-State W13 Mi — Zahnarztangst",
+    "subject": "Angst vor dem Zahnarzt — Sie sind nicht allein",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>Zahnarztangst ist weit verbreitet — und kein Grund zur Scham.</p>\n<p>Wie wir damit umgehen:</p>\n<ul>\n<li>Offene Kommunikation vor und während des Eingriffs</li>\n<li>Stopp-Signal: Sie können jederzeit Pause signalisieren</li>\n<li>Sedierungsoptionen für Patienten mit starker Angst</li>\n</ul>\n<p>Sie können Angst ansprechen — unser Team hört zu und nimmt das ernst.</p>\n<p><!-- TODO: Marketing-Team: Body ausformulieren --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Beratung buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w13-so-telefon",
+    "key": "ss-w13-so-telefon",
+    "name": "Steady-State W13 So — Telefon-CTA",
+    "subject": "Telefonische Beratung: jetzt sofort kostenfrei",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>10 Minuten am Telefon klären mehr als 10 E-Mails. Wir rufen zurück, wenn es Ihnen passt.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Rückruf anfragen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w14-mi-karriere",
+    "key": "ss-w14-mi-karriere",
+    "name": "Steady-State W14 Mi — Lächeln & Selbstbewusstsein",
+    "subject": "Lächeln und Karriere — was Studien zeigen",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>kein Verkaufsgespräch — nur ein interessanter Forschungshinweis.</p>\n<p>Studien zeigen, dass Menschen, die selbstbewusst lächeln, in sozialen und beruflichen Situationen positiver wahrgenommen werden. Was Menschen nach einem Implantat berichten: weniger Selbstbewusstsein-Bremse, mehr Spontaneität.</p>\n<p><!-- TODO: Marketing-Team: Forschungsreferenz einfügen (Quellenhinweis, nicht reißerisch) --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Beratung buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w14-so-cta",
+    "key": "ss-w14-so-cta",
+    "name": "Steady-State W14 So — Barrier-CTA",
+    "subject": "Bereit für den ersten Schritt, {{firstName}}?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>die Erstberatung kostet Sie nichts — nur 45 Minuten. Das Ergebnis: ein persönlicher Behandlungsplan und Antworten auf alle Ihre Fragen.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w15-mi-qualitaet",
+    "key": "ss-w15-mi-qualitaet",
+    "name": "Steady-State W15 Mi — Qualitätsstandards DE",
+    "subject": "Implantologie in Deutschland — welche Qualitätsstandards gelten?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>was unterscheidet einen deutschen Implantologen?</p>\n<ul>\n<li>Deutsche Approbation und strenge Facharztausbildung</li>\n<li>Fortbildungspflicht und DGI/DGZMK-Mitgliedschaft</li>\n<li>Deutsches Haftungsrecht — im Schadensfall zuständig und erreichbar</li>\n<li>GOZ/BEMA-Abrechnung — transparent und rechtlich geregelt</li>\n</ul>\n<p><!-- TODO: Marketing-Team: Body ausformulieren, Mitgliedschaften ergänzen --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Beratung buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w15-so-cta",
+    "key": "ss-w15-so-cta",
+    "name": "Steady-State W15 So — Standard-CTA",
+    "subject": "{{firstName}}, buchen Sie noch heute",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>noch 3–4 Werktage Vorlauf für einen Termin im nächsten Monat. Jetzt wäre ein guter Moment.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w16-mi-haltbarkeit",
+    "key": "ss-w16-mi-haltbarkeit",
+    "name": "Steady-State W16 Mi — Haltbarkeit",
+    "subject": "Implantate halten lebenslang — Mythos oder Wahrheit?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>Langzeit-Daten zeigen Erfolgsraten von über 95 % nach 10 Jahren bei gesunden Patienten. Entscheidend sind: regelmäßige Prophylaxe, keine unkontrollierte Parodontitis, kein starkes Rauchen.</p>\n<p>Ein gut gepflegtes Implantat hält typischerweise sehr lange — das ist keine Übertreibung, aber auch kein Selbstläufer.</p>\n<p><!-- TODO: Marketing-Team: Studienreferenz einfügen --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Nachfragen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w16-so-cta",
+    "key": "ss-w16-so-cta",
+    "name": "Steady-State W16 So — Persönlich-CTA",
+    "subject": "Ihr Implantat — wann starten wir, {{firstName}}?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>wir sind bereit, wenn Sie es sind.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w17-mi-zusatzversicherung",
+    "key": "ss-w17-mi-zusatzversicherung",
+    "name": "Steady-State W17 Mi — Zusatzversicherung",
+    "subject": "Wie viel zahlt eine Zusatzversicherung bei Implantaten?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>was Zahnzusatzversicherungen typischerweise leisten:</p>\n<ul>\n<li>Erstattung 50–80 % der Restkosten nach GKV-Zuschuss</li>\n<li>Wichtig: Wartezeiten beachten (oft 3–8 Monate nach Abschluss)</li>\n<li>Jahreshöchstgrenzen — vor Behandlungsstart prüfen</li>\n</ul>\n<p>Unser Tipp: Klären Sie Ihre Versicherungskonditionen vor dem HKP — wir unterstützen dabei.</p>\n<p><!-- TODO: Marketing-Team: Body ausformulieren --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Beratung buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w17-so-cta",
+    "key": "ss-w17-so-cta",
+    "name": "Steady-State W17 So — Einfach-CTA",
+    "subject": "Heute ist ein guter Tag für Ihren ersten Schritt",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>die Online-Buchung dauert 90 Sekunden.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w18-mi-essen",
+    "key": "ss-w18-mi-essen",
+    "name": "Steady-State W18 Mi — Essen & Kauen",
+    "subject": "Essen, was Sie wollen — was das bedeutet",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>Kauproblemen schränken mehr ein als man bewusst wahrnimmt — man passt sich langsam an, vermeidet bestimmte Speisen, ändert Gewohnheiten. Nach einem Implantat berichten viele Patienten, dass sie erst dann merken, wie eingeschränkt sie vorher waren.</p>\n<p><!-- TODO: Marketing-Team: Patientengeschichte einfügen (nicht reißerisch) --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Beratung buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w18-so-cta",
+    "key": "ss-w18-so-cta",
+    "name": "Steady-State W18 So — Knappheits-CTA",
+    "subject": "{{firstName}}, Ihr letzter Beratungsplatz diesen Monat",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>die nächsten freien Slots sind knapp. Jetzt wäre der richtige Moment.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w19-mi-komplikationen",
+    "key": "ss-w19-mi-komplikationen",
+    "name": "Steady-State W19 Mi — Komplikationen (Transparenz)",
+    "subject": "Was passiert bei Komplikationen nach dem Implantat?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>ein Thema, das selten angesprochen wird — aber ehrlich beantwortet werden sollte: Was wenn etwas schiefläuft?</p>\n<p>Komplikationen sind selten, aber möglich. Die wissenschaftliche Datenlage zeigt eine Komplikationsrate von unter 5 % in den ersten Jahren — meist Einheilungsprobleme, kaum strukturelle Fehler.</p>\n<p>Was bei Wunschlachen im Problemfall passiert:</p>\n<ul>\n<li>Direkte Erreichbarkeit — kein Callcenter</li>\n<li>Nachbehandlung in derselben Praxis, durch denselben Arzt</li>\n<li>Kein Flug, kein Fremdarzt, kein Sprachproblem</li>\n</ul>\n<p><!-- TODO: Marketing-Team: Body ausformulieren --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Vertrauen aufbauen — Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w19-so-cta",
+    "key": "ss-w19-so-cta",
+    "name": "Steady-State W19 So — Telefon-CTA",
+    "subject": "5 Monate Infos — jetzt ein konkretes Gespräch",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>was wir in 20 Minuten am Telefon oder beim Termin klären: Ihre konkreten Fragen, Ihr Knochenstand, Ihre Kosten, Ihr Zeitplan.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Rückruf anfragen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w20-mi-vergleich",
+    "key": "ss-w20-mi-vergleich",
+    "name": "Steady-State W20 Mi — Implantat vs. Alternativen",
+    "subject": "Implantat vs. Brücke vs. Prothese — was ist für Sie das Richtige?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>ehrlicher Vergleich ohne Verkaufsabsicht: Es gibt Fälle, wo ein Implantat nicht die beste Option ist.</p>\n<ul>\n<li><strong>Implantat:</strong> Ideal wenn Knochensubstanz gut, einzelne oder mehrere Zähne fehlen, langfristige Lösung gewünscht</li>\n<li><strong>Brücke:</strong> Sinnvoll wenn Nachbarzähne ohnehin behandlungsbedürftig; schneller, günstiger</li>\n<li><strong>Prothese:</strong> Bei vielen fehlenden Zähnen, wenn Knochensubstanz unzureichend oder Kontraindikationen vorliegen</li>\n</ul>\n<p>Was für Sie sinnvoll ist, hängt von Ihrer individuellen Situation ab — das klären wir in der Erstberatung.</p>\n<p><!-- TODO: Marketing-Team: Body ausformulieren --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Individuelle Beratung &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "ss-w20-so-6monate",
+    "key": "ss-w20-so-6monate",
+    "name": "Steady-State W20 So — 6-Monats-Abschluss",
+    "subject": "{{firstName}} — ein halbes Jahr nach Ihrer Anfrage",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>Ihr Lächeln hat auf Sie gewartet. Wir auch.</p>\n<p>Das ist unser letzter regulärer Hinweis. Wenn Sie möchten, sind wir jederzeit für Sie da — kein Verfallsdatum, keine Verbindlichkeit.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "steady_state",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "saison-sommer",
+    "key": "saison-sommer",
+    "name": "Saison — Sommer-Lächeln",
+    "subject": "Strahlendes Lächeln im Sommer — jetzt planen",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>der Sommer kommt schneller als man denkt. Wer jetzt mit der Behandlungsplanung beginnt, kann bis Sommerbeginn erste Ergebnisse sehen.</p>\n<p>Realistischer Zeitplan für ein Einzelimplantat: Erstberatung heute → Einsetzen in 4–6 Wochen → Einheilung 3–4 Monate → fertige Krone zum Sommer.</p>\n<p><!-- TODO: Marketing-Team: Body ausformulieren --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin jetzt buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "season",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "saison-weihnachten",
+    "key": "saison-weihnachten",
+    "name": "Saison — Jahresende & Kassenbudget",
+    "subject": "Mit welchem Lächeln gehen Sie ins neue Jahr?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>das Jahresende ist ein natürlicher Moment für Entscheidungen. Und ein praktischer: Restliche GKV-Jahresleistungen und Bonusheft-Einträge verfallen zum 31.12.</p>\n<p>Eine Beratung noch dieses Jahr kostet nichts — aber sie zeigt Ihnen, welche Leistungen Sie noch ausschöpfen können.</p>\n<p><!-- TODO: Marketing-Team: Body ausformulieren --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Beratung noch dieses Jahr &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "season",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "saison-neujahr",
+    "key": "saison-neujahr",
+    "name": "Saison — Neujahr & Vorsätze",
+    "subject": "Ihr Vorsatz für {{year}}: in Ihre Zahngesundheit investieren",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>Vorsätze brauchen einen ersten konkreten Schritt — sonst bleiben sie Vorsätze.</p>\n<p>Ein Implantat ist kein Luxus, sondern eine Gesundheitsinvestition. Fehlende Zähne führen langfristig zu Knochenschwund und Fehlbelastung der Nachbarzähne. Je früher die Behandlung, desto einfacher und günstiger.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Kostenlosen Ersttermin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "season",
+    "variables": [
+      "firstName",
+      "year"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "saison-sport-event",
+    "key": "saison-sport-event",
+    "name": "Saison — Sport-Event (EM/WM)",
+    "subject": "{{firstName}}, Ihr Lächeln verdient einen Platz im Finale",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>Turnier-Momente erinnern uns daran: Energie für Veränderungen kommt in Wellen. Manchmal ist das der Anstoß, den man gebraucht hat.</p>\n<p><!-- TODO: Marketing-Team: Nur in EM/WM-Jahren aktiv schalten. Ton: leicht, nicht reißerisch --></p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin buchen &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "season",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": false
+  },
+  {
+    "id": "reengagement-day-90",
+    "key": "reengagement-day-90",
+    "name": "Re-Engagement Touch 1 (Tag 90)",
+    "subject": "{{firstName}}, haben sich Ihre Wünsche verändert?",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>vor einigen Monaten haben Sie sich bei uns gemeldet. Wir wollten nicht aufdringlich sein und haben Abstand gehalten.</p>\n<p>Falls sich etwas geändert hat — Ihre Situation, Ihre Fragen, Ihre Bereitschaft — sind wir gern für Sie da.</p>\n<p>Wenn Sie möchten, können Sie hier einen neuen Termin vereinbaren. Wenn nicht, ist das vollständig in Ordnung.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin vereinbaren &rarr;</a></p>\n<p>Mit herzlichen Grüßen<br/>Ihr Wunschlachen-Team</p>",
+    "category": "reactivation",
+    "variables": [
+      "firstName"
+    ],
+    "for_status": [
+      "lost"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "reengagement-day-105",
+    "key": "reengagement-day-105",
+    "name": "Re-Engagement Touch 2 (Tag 105)",
+    "subject": "Zahngesundheit — ein kurzer Hinweis für {{firstName}}",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>ein nützlicher medizinischer Hinweis: Ein fehlender Zahn führt langfristig zu Knochenschwund im Kieferbereich. Das passiert schleichend — und macht eine spätere Behandlung aufwändiger.</p>\n<p>Falls wir helfen können — wir sind erreichbar.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin vereinbaren &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "reactivation",
+    "variables": [
+      "firstName"
+    ],
+    "for_status": [
+      "lost"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "reengagement-day-120-final",
+    "key": "reengagement-day-120-final",
+    "name": "Re-Engagement Touch 3 — Abschluss (Tag 120)",
+    "subject": "Letzte Nachricht von uns, {{firstName}}",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>das ist unsere letzte Nachricht, wenn wir nichts von Ihnen hören.</p>\n<p>Falls Sie jemals eine Erstberatung möchten — unsere Türen stehen offen. Kein Druck, kein Verfallsdatum.</p>\n<p><a href=\"https://wunschlachen.app/buchen\">Termin vereinbaren &rarr;</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "reactivation",
+    "variables": [
+      "firstName"
+    ],
+    "for_status": [
+      "lost"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "transactional-appt-confirmation",
+    "key": "transactional-appt-confirmation",
+    "name": "Termin-Bestätigung (Transaktional)",
+    "subject": "Ihr Beratungstermin bei Wunschlachen — Bestätigung",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>Ihr Beratungstermin ist bestätigt:</p>\n<ul>\n<li><strong>Datum:</strong> {{appointmentDate}}</li>\n<li><strong>Uhrzeit:</strong> {{appointmentTime}} Uhr</li>\n<li><strong>Behandler:</strong> {{doctorName}}</li>\n</ul>\n<p><strong>Was mitbringen:</strong> Krankenversicherungskarte, Bonusheft (falls vorhanden), vorhandene Röntgenbilder.</p>\n<p><!-- TODO: Marketing-Team: Praxis-Adresse mit Google-Maps-Link einfügen --></p>\n<p>Fragen oder Stornierung: <a href=\"tel:+49XXXXXXXXXX\">+49 XX XXXXXXXX</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "transactional",
+    "variables": [
+      "firstName",
+      "appointmentDate",
+      "appointmentTime",
+      "doctorName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "transactional-appt-reminder-24h",
+    "key": "transactional-appt-reminder-24h",
+    "name": "Termin-Reminder 24h (Transaktional)",
+    "subject": "Erinnerung: Ihr Termin bei Wunschlachen morgen um {{appointmentTime}} Uhr",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>Ihr Termin ist morgen:</p>\n<ul>\n<li><strong>Datum:</strong> {{appointmentDate}}</li>\n<li><strong>Uhrzeit:</strong> {{appointmentTime}} Uhr</li>\n</ul>\n<p><strong>Was mitbringen:</strong> Versicherungskarte, Bonusheft, Röntgenbilder.</p>\n<p>Wenn Sie absagen müssen, bitte bis 24h vorher melden: <a href=\"tel:+49XXXXXXXXXX\">+49 XX XXXXXXXX</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "transactional",
+    "variables": [
+      "firstName",
+      "appointmentDate",
+      "appointmentTime"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "transactional-post-consultation",
+    "key": "transactional-post-consultation",
+    "name": "Nach-Beratung-Mail / HKP-Erläuterung (Transaktional)",
+    "subject": "Nach Ihrer Beratung bei Wunschlachen — Ihre nächsten Schritte",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>vielen Dank für Ihren Besuch heute. Wir freuen uns, Sie kennengelernt zu haben.</p>\n<p>Sie erhalten in den nächsten Tagen Ihren Heil- und Kostenplan (HKP). Was das bedeutet: Der HKP ist ein verbindlicher Kostenvoranschlag — keine versteckten Aufpreise danach.</p>\n<p><strong>Nächste Schritte:</strong></p>\n<ul>\n<li>HKP prüfen — bei Fragen melden Sie sich direkt bei uns</li>\n<li>HKP bei Ihrer Krankenkasse einreichen (wir helfen dabei)</li>\n<li>Wenn Sie bereit sind: Behandlungstermin festlegen</li>\n</ul>\n<p>Kontakt: <a href=\"tel:+49XXXXXXXXXX\">+49 XX XXXXXXXX</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "transactional",
+    "variables": [
+      "firstName"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "transactional-pre-treatment",
+    "key": "transactional-pre-treatment",
+    "name": "Vor-Behandlung-Mail / Vorbereitung (Transaktional)",
+    "subject": "Ihr Behandlungstermin bei Wunschlachen — Vorbereitung",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>Ihr Behandlungstermin ist {{appointmentDate}} um {{appointmentTime}} Uhr.</p>\n<p><strong>Vorbereitung:</strong></p>\n<ul>\n<li>Falls Sedierung geplant: nüchtern erscheinen (Details vom Arzt)</li>\n<li>Leichte Mahlzeit vorher bei lokaler Anästhesie empfohlen</li>\n<li>Keine aufwendigen Verpflichtungen direkt nach dem Eingriff planen</li>\n<li>Versicherungskarte und unterschriebenen HKP mitbringen</li>\n</ul>\n<p>Fragen: <a href=\"tel:+49XXXXXXXXXX\">+49 XX XXXXXXXX</a></p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "transactional",
+    "variables": [
+      "firstName",
+      "appointmentDate",
+      "appointmentTime"
+    ],
+    "is_active": true
+  },
+  {
+    "id": "transactional-post-treatment",
+    "key": "transactional-post-treatment",
+    "name": "Nach-Behandlung-Mail / Pflege & Review (Transaktional)",
+    "subject": "Nach Ihrer Behandlung bei Wunschlachen — Pflege-Tipps",
+    "body_html": "<p>Hallo {{firstName}},</p>\n<p>die Behandlung ist abgeschlossen — herzlichen Glückwunsch zum ersten Schritt.</p>\n<p><strong>Pflege in der Einheilungsphase:</strong></p>\n<ul>\n<li>Sanfte Mundhygiene — nicht direkt am Implantat schrubben</li>\n<li>Weiche Kost für die ersten Tage</li>\n<li>Kein Rauchen in den ersten Wochen (verlangsamt Einheilung)</li>\n<li>Leichte Schwellung die ersten 1–2 Tage ist normal</li>\n</ul>\n<p><strong>Wann anrufen:</strong> Blutung die nicht aufhört, starke Schwellung nach Tag 3, Fieber. <a href=\"tel:+49XXXXXXXXXX\">+49 XX XXXXXXXX</a></p>\n<p>Ihr nächster Termin: Nachkontrolle in {{followupWeeks}} Wochen — wir melden uns zur Terminvereinbarung.</p>\n<p>Falls Sie zufrieden sind und anderen helfen möchten: <a href=\"{{reviewUrl}}\">Kurze Google-Bewertung &rarr;</a> (freiwillig, kein Druck)</p>\n<p>Herzliche Grüße<br/>Ihr Wunschlachen-Team</p>",
+    "category": "transactional",
+    "variables": [
+      "firstName",
+      "followupWeeks",
+      "reviewUrl"
+    ],
     "is_active": true
   }
 ]

@@ -9,13 +9,21 @@ export type EmailTemplateCategory =
   | 'hkp'
   | 'review_request'
   | 'allgemein'
+  | 'welcome'
+  | 'steady_state'
+  | 'season'
+  | 'transactional'
 
 export const EMAIL_TEMPLATE_CATEGORIES: { value: EmailTemplateCategory; label: string }[] = [
+  { value: 'welcome', label: 'Welcome-Sequenz' },
+  { value: 'steady_state', label: 'Steady-State (Woche 3–26)' },
+  { value: 'season', label: 'Saison-Specials' },
+  { value: 'reactivation', label: 'Reaktivierung / Re-Engagement' },
+  { value: 'transactional', label: 'Transaktional (Termin)' },
   { value: 'erstansprache', label: 'Erstansprache' },
   { value: 'follow_up', label: 'Follow-up' },
   { value: 'termin_erinnerung', label: 'Termin-Erinnerung' },
   { value: 'hkp', label: 'HKP / Heil- und Kostenplan' },
-  { value: 'reactivation', label: 'Reaktivierung' },
   { value: 'review_request', label: 'Bewertungs-Anfrage' },
   { value: 'nachsorge', label: 'Nachsorge' },
   { value: 'allgemein', label: 'Allgemein' },
