@@ -82,6 +82,16 @@
           <i class="pi pi-sort-amount-down text-[10px] mr-1" />
           Score
         </button>
+        <button
+          class="px-2 py-1 rounded-2xl text-[10px] transition-colors"
+          :class="sortMode === 'callqueue'
+            ? 'bg-green-600 text-white'
+            : 'bg-white text-dental-blue-0 hover:bg-[#ededed] border border-dental-blue--5'"
+          @click="sortMode = sortMode === 'callqueue' ? 'default' : 'callqueue'"
+          title="Anruf-Schlange: new/contacting/contacted sortiert nach Dringlichkeit"
+        >
+          📞 Anruf-Schlange
+        </button>
       </div>
     </div>
 
@@ -223,8 +233,10 @@ const search = ref('')
 const activeStatus = ref<LeadStatus | null>(null)
 const activeSource = ref<LeadSource | null>(null)
 const showCreate = ref(false)
-type SortMode = 'default' | 'urgency' | 'score'
+type SortMode = 'default' | 'urgency' | 'score' | 'callqueue'
 const sortMode = ref<SortMode>('default')
+
+const { urgencyScore } = useCallbackScheduler()
 
 const limit = 25
 const totalPages = computed(() => Math.ceil(total.value / limit))
@@ -294,6 +306,12 @@ const displayLeads = computed(() => {
     return [...leads.value].sort(
       (a, b) => getNbaForLead(a).urgencyRank - getNbaForLead(b).urgencyRank,
     )
+  }
+  if (sortMode.value === 'callqueue') {
+    const now = new Date()
+    return [...leads.value]
+      .filter((l) => l.status === 'new' || l.status === 'contacting' || l.status === 'contacted')
+      .sort((a, b) => urgencyScore(b, now) - urgencyScore(a, now))
   }
   return leads.value
 })
