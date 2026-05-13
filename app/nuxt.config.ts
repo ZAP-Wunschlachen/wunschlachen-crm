@@ -23,4 +23,11 @@ export default defineNuxtConfig({
       hmr: { clientPort: 3000 },
     },
   },
+
+  runtimeConfig: {
+    // Welcome-Sequenz-Cron
+    welcomeCronSecret: '',    // env: NUXT_WELCOME_CRON_SECRET
+    directusUrl: '',          // env: NUXT_DIRECTUS_URL (server-side fetch, ggf. interne URL)
+    directusServiceToken: '', // env: NUXT_DIRECTUS_SERVICE_TOKEN
+  },
 })
