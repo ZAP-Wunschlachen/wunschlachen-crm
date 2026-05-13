@@ -844,52 +844,117 @@ git commit -m "feat(sync): Lead-Detail reagiert auf appointment-sync-Updates"
 
 ---
 
-## Task 10: GitHub-Actions für beide Cron-Jobs
+## Task 10: n8n-Workflows für beide Cron-Jobs
 
-**Files:** `.github/workflows/appointment-cron.yml`
+**Tech-Stack-Entscheidung 2026-05-13:** Statt GitHub Actions nutzen wir **n8n self-hosted** auf `https://workflows.wunschlachen.de` als zentrale Cron-Engine. Vorteile: sub-Minute-Auflösung, Visual-Editing, zentrale Logs, Patient-Daten bleiben auf eigenem Server, keine GitHub-Actions-Free-Tier-Limits. Welcome-Sequence-GitHub-Action wird in Folge-Iteration ebenfalls dorthin migriert (nicht Teil dieses Plans).
 
-```yaml
-name: Appointment Sync & Reminder
+**Files:** keine im Repo — Workflows werden über die n8n-API angelegt.
 
-on:
-  schedule:
-    - cron: '*/2 * * * *'    # Sync alle 2 Min
-    - cron: '0 8 * * *'       # Reminder täglich 09:00 Berlin
-  workflow_dispatch:
+**Auth:** `X-N8N-API-KEY` Header, Token aus `~/.claude/wunschlachen-credentials.md` § "n8n (Workflow Automation)". **NIEMALS den Token in einen Commit schreiben**; im Repo bleibt nur die Doku im Runbook (Task 11) mit Verweis auf Credentials-File.
 
-jobs:
-  sync:
-    if: github.event.schedule == '*/2 * * * *' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - name: appointment-sync
-        run: |
-          curl -sS -o /tmp/body -w "%{http_code}" \
-            -X POST "${{ secrets.CRM_BASE_URL }}/api/cron/appointment-sync" \
-            -H "x-appointment-cron-secret: ${{ secrets.APPOINTMENT_CRON_SECRET }}" \
-            -H "content-type: application/json"
-          cat /tmp/body
+### Step 10.1: Sync-Workflow anlegen via n8n-REST-API
 
-  reminder:
-    if: github.event.schedule == '0 8 * * *'
-    runs-on: ubuntu-latest
-    steps:
-      - name: appointment-reminder
-        run: |
-          curl -sS -o /tmp/body -w "%{http_code}" \
-            -X POST "${{ secrets.CRM_BASE_URL }}/api/cron/appointment-reminder" \
-            -H "x-appointment-cron-secret: ${{ secrets.APPOINTMENT_CRON_SECRET }}" \
-            -H "content-type: application/json"
-          cat /tmp/body
-```
-
-**Hinweis:** GitHub-Actions garantiert keine sub-Minute-Auflösung; ~2-5 Min Latenz ist realistisch. Für „binnen 5 Sek" aus Spec greift der WebSocket im Browser. Cron ist Safety-Net.
-
-Commit:
+Das Subagent-Skript für POST `/api/v1/workflows`:
 
 ```bash
-git add .github/workflows/appointment-cron.yml
-git commit -m "ci(sync): GitHub Actions für appointment-sync (alle 2 Min) + reminder (täglich)"
+# Pfad zu den Credentials — der Subagent darf die NUR LESEN und den
+# Token in den HTTP-Header übergeben, NICHT in irgendeine Datei schreiben.
+N8N_KEY=$(grep -A1 "^## n8n (Workflow Automation)" ~/.claude/wunschlachen-credentials.md \
+  | tail -n +1 | grep "API Key" | sed 's/.*API Key:\*\* //')
+N8N_BASE="https://workflows.wunschlachen.de/api/v1"
+
+# Workflow-Definition als JSON
+SYNC_WF=$(cat <<'JSON'
+{
+  "name": "[CRM] Appointment-Sync alle 2 Minuten",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "minutes", "minutesInterval": 2 }] }
+      },
+      "id": "trigger",
+      "name": "Schedule alle 2 Min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://crm.wunschlachen.app/api/cron/appointment-sync",
+        "options": { "timeout": 30000 },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-appointment-cron-secret", "value": "={{ $env.APPOINTMENT_CRON_SECRET }}" },
+            { "name": "content-type", "value": "application/json" }
+          ]
+        },
+        "method": "POST"
+      },
+      "id": "http",
+      "name": "CRM appointment-sync",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 300]
+    }
+  ],
+  "connections": {
+    "Schedule alle 2 Min": { "main": [[{ "node": "CRM appointment-sync", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }
+}
+JSON
+)
+
+curl -sS -X POST "${N8N_BASE}/workflows" \
+  -H "X-N8N-API-KEY: ${N8N_KEY}" \
+  -H "Content-Type: application/json" \
+  -d "${SYNC_WF}" \
+  -w "\nHTTP %{http_code}\n" | tail -3
+```
+
+Erwartet HTTP 200 mit `{ "id": "...", "name": "[CRM] Appointment-Sync alle 2 Minuten", ... }`. Workflow-ID notieren.
+
+### Step 10.2: Reminder-Workflow anlegen
+
+Analog Step 10.1 mit:
+- Name: `[CRM] Appointment-Reminder täglich 08:30 Berlin`
+- Trigger: `cronExpression: "30 7 * * *"` (07:30 UTC = 08:30 Berlin in Sommerzeit)
+- URL: `https://crm.wunschlachen.app/api/cron/appointment-reminder`
+
+### Step 10.3: Workflows aktivieren
+
+```bash
+# pro Workflow-ID
+curl -sS -X POST "${N8N_BASE}/workflows/${WORKFLOW_ID}/activate" \
+  -H "X-N8N-API-KEY: ${N8N_KEY}" \
+  -w "\nHTTP %{http_code}\n"
+```
+
+Erwartet HTTP 200.
+
+### Step 10.4: APPOINTMENT_CRON_SECRET als n8n-Environment-Variable
+
+n8n liest `$env.APPOINTMENT_CRON_SECRET` aus dem Container-Environment. **Auf dem n8n-Droplet** im Docker-Compose oder System-Env eintragen:
+
+```bash
+# z.B. auf dem DO-Droplet als root:
+echo "APPOINTMENT_CRON_SECRET=<random-hex>" >> /etc/environment
+# n8n-Container neu starten damit Env gelesen wird
+docker compose -f /opt/n8n/docker-compose.yml restart n8n
+```
+
+**Hinweis:** Wenn ein anderes Setup-Pattern auf dem Droplet existiert (z.B. `.env`-File im n8n-Verzeichnis), entsprechend dort eintragen. Im Runbook (Task 11) dokumentieren.
+
+### Step 10.5: Smoke-Test im n8n-UI
+
+In `https://workflows.wunschlachen.de` einloggen, beide neuen Workflows in der Liste sichtbar prüfen. Für den Sync-Workflow „Execute Workflow" klicken — Response sollte HTTP 200 mit JSON `{ processed, status_changes, mails_sent, errors }` sein.
+
+### Step 10.6: Doc-Commit (keine Workflow-JSONs im Repo!)
+
+```bash
+# Keine Files im Repo, nur Runbook-Update in Task 11.
+# Die Workflow-IDs aus 10.1 + 10.2 in die docs/APPOINTMENT_SYNC_OPS.md eintragen.
 ```
 
 ---
@@ -898,10 +963,10 @@ git commit -m "ci(sync): GitHub Actions für appointment-sync (alle 2 Min) + rem
 
 Analog `WELCOME_SEQUENCE_OPS.md`. Inhalt:
 - Was es macht
-- Env-Vars (`NUXT_APPOINTMENT_CRON_SECRET`)
-- GitHub-Secrets (`APPOINTMENT_CRON_SECRET`)
+- CRM-Env-Vars (`NUXT_APPOINTMENT_CRON_SECRET`)
+- **n8n-Setup**: zwei Workflow-IDs (aus Task 10.1 + 10.2), Verweis auf `~/.claude/wunschlachen-credentials.md` für API-Key, Env-Variable `APPOINTMENT_CRON_SECRET` auf dem n8n-Droplet, Aktivierungs-Status
 - Brevo-Template-IDs (2001, 2002, 2003)
-- Troubleshooting: WebSocket disconnected, doppelte Mails, Bestandspatient-Mismatches
+- Troubleshooting: WebSocket disconnected, doppelte Mails, Bestandspatient-Mismatches, n8n-Workflow-Errors (Execution-Log im n8n-UI)
 - DSGVO: nur Lead-zugeordnete Termine werden verarbeitet
 
 Commit:
