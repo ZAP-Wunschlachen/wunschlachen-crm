@@ -184,9 +184,13 @@ Sieben unabhängige Liefer-Pakete. **MVP-Schnitt: A + B + C + D** (markiert mit 
 | UPDATE `appointments` | `treatment_finished_date != null` und `treatment.category = behandlung` | Trigger Modul G (Behandlung-Done) |
 | INSERT `appointments` | `treatment.category = behandlung` | `lead.status = treatment_scheduled` + Mail |
 
-**Daten-Match (entschieden 2026-05-13):**
-- **Hybrid-Mapping**: erst `lead.patient_number === appointment.patient.patient_number`, wenn null/no-match dann `lead.mail === appointment.patient.email` (case-insensitive trim).
-- **Bestandspatient ohne Lead → ignorieren** (kein Auto-Create-Stub). CRM kümmert sich nur um B2C-Funnel-Leads; Termine ohne matching Lead werden nicht ans CRM weitergereicht. Bei Modul G (Behandlung-Done) muss daher beim ersten Lead-Match die Lead-Patient-Verknüpfung manuell vom Sales-MA gepflegt sein.
+**Daten-Match (entschieden 2026-05-13, korrigiert 2026-05-13):**
+- **Reale Bedingung:** Leads haben **keine** `patient_number`, bis sie das erste Mal in der Praxis waren — die Nummer wird erst in Dampsoft bei Erst-Termin vergeben. Mail ist also der primäre Identifier für Pre-Visit-Leads.
+- **Hybrid-Mapping mit Mail-Priorität:**
+  1. **Primär**: `lead.mail === appointment.patient.email` (case-insensitive trim)
+  2. **Sekundär**: `lead.patient_number === appointment.patient.patient_number` (nur falls Lead bereits eine Nummer hat → post-visit-Match)
+- **Backfill-Logik**: bei Mail-Match und gleichzeitig vorhandener `appointment.patient.patient_number` schreibt das CRM die Nummer auf den Lead (`lead.patient_number := patient.patient_number`). Ab da ist der Lead auch per Nummer matchbar — robuster bei Folge-Terminen oder Mail-Änderung.
+- **Bestandspatient ohne Lead → ignorieren** (kein Auto-Create-Stub). CRM kümmert sich nur um B2C-Funnel-Leads. Wenn ein Patient seit Jahren in Dampsoft ist und einen Wartungs-Termin bucht, taucht er nicht im CRM auf.
 - Match-Logik in eigenem Composable `useAppointmentLeadMatch.ts` (testbar isoliert).
 
 **Edge-Cases:**

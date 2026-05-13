@@ -6,7 +6,7 @@
 
 **Architecture:**
 - **Hybrid-Sync**: Browser-WebSocket-Subscription (Directus-Realtime) für Live-UX im offenen CRM, plus Server-Cron `POST /api/cron/appointment-sync` alle 60s als Safety-Net für Status-Wechsel wenn niemand zuschaut. Ohne den Cron würden Status-Trigger verloren gehen, wenn das CRM-Tab geschlossen ist.
-- **Patient ↔ Lead Mapping**: Hybrid via `patient_number` primär, `mail` als Fallback. Isoliert testbar in `useAppointmentLeadMatch.ts`.
+- **Patient ↔ Lead Mapping**: Hybrid via `mail` **primär** (Pre-Visit-Realität — Leads haben keine `patient_number` bis Erst-Termin), `patient_number` als sekundärer Match-Pfad für Post-Visit-Leads. Plus **Backfill**: bei Mail-Match wird `appointment.patient.patient_number` automatisch auf den Lead geschrieben. Isoliert testbar in `useAppointmentLeadMatch.ts`.
 - **Bestandspatient-Termine**: stillschweigend ignoriert (kein Auto-Lead-Stub).
 - **Bestätigungs-Mail**: getriggert beim ersten Match (Status `consultation_scheduled` oder `treatment_scheduled`) via Brevo-Server-Proxy. 24h-Reminder via täglicher Cron.
 - **Idempotenz**: jeder verarbeitete Appointment-Event bekommt eine `last_synced_at`-Markierung auf dem Lead (Composite-Key `lead_id + appointment_id + event_hash`).
@@ -110,9 +110,12 @@ Edit-Tool. Nach den `welcome_sequence_*`-Feldern im Lead-Interface:
 
 ```ts
   // Appointment-Sync (Plan v9 Modul C MVP)
+  patient_number?: string                // Backfill aus Kalender-Termin nach Erst-Visit
   linked_appointment_id?: string         // ID des aktuell verknüpften Kalender-Termins
   last_appointment_synced_at?: string    // ISO timestamp: letztes verarbeitetes Sync-Event
 ```
+
+**Warum hier?** Leads haben bei Anlage keine `patient_number` — die kommt erst aus Dampsoft, wenn der Patient vor Ort war. Beim ersten Kalender-Termin matchen wir per Mail und schreiben die Nummer per Backfill. Ab da ist der Lead auch per Nummer matchbar.
 
 - [ ] **Step 1.2: Commit**
 
@@ -147,49 +150,66 @@ type ApptPatient = { patient_number?: string; email?: string }
 describe('matchAppointmentToLead', () => {
   const { matchAppointmentToLead } = useAppointmentLeadMatch()
 
-  it('matched per patient_number (primär)', () => {
-    const leads = [mkLead({ id: 'l-1', patient_number: 'P-12345', mail: 'other@x.de' })]
-    const result = matchAppointmentToLead({ patient_number: 'P-12345' }, leads)
-    expect(result?.id).toBe('l-1')
+  it('matched per mail (primär für Pre-Visit-Leads)', () => {
+    const leads = [mkLead({ id: 'l-1', mail: 'maria@example.de' })]
+    const result = matchAppointmentToLead({ email: 'maria@example.de' }, leads)
+    expect(result.lead?.id).toBe('l-1')
+    expect(result.matched_by).toBe('mail')
   })
 
-  it('matched per mail wenn patient_number fehlt', () => {
-    const leads = [mkLead({ id: 'l-2', mail: 'maria@example.de' })]
-    const result = matchAppointmentToLead({ email: 'maria@example.de' }, leads)
-    expect(result?.id).toBe('l-2')
+  it('matched per patient_number als sekundärer Pfad (Post-Visit-Leads)', () => {
+    const leads = [mkLead({ id: 'l-2', patient_number: 'P-12345', mail: 'old-mail@x.de' })]
+    const result = matchAppointmentToLead({ patient_number: 'P-12345', email: 'new-mail@x.de' }, leads)
+    expect(result.lead?.id).toBe('l-2')
+    expect(result.matched_by).toBe('patient_number')
   })
 
   it('mail-match ist case-insensitive', () => {
     const leads = [mkLead({ id: 'l-3', mail: 'Maria@Example.DE' })]
     const result = matchAppointmentToLead({ email: 'maria@example.de' }, leads)
-    expect(result?.id).toBe('l-3')
+    expect(result.lead?.id).toBe('l-3')
   })
 
-  it('patient_number hat Vorrang vor mail', () => {
+  it('mail hat Vorrang vor patient_number — gleiches Match-Subjekt', () => {
     const leads = [
-      mkLead({ id: 'l-a', patient_number: 'P-1', mail: 'wrong@x.de' }),
-      mkLead({ id: 'l-b', mail: 'maria@example.de' }),
+      mkLead({ id: 'l-a', mail: 'maria@example.de' }),
+      mkLead({ id: 'l-b', patient_number: 'P-1' }),
     ]
     const result = matchAppointmentToLead({ patient_number: 'P-1', email: 'maria@example.de' }, leads)
-    expect(result?.id).toBe('l-a')
+    expect(result.lead?.id).toBe('l-a')
+    expect(result.matched_by).toBe('mail')
   })
 
-  it('returns null wenn weder patient_number noch mail matchen', () => {
-    const leads = [mkLead({ id: 'l-1', patient_number: 'P-999', mail: 'x@y.de' })]
-    const result = matchAppointmentToLead({ patient_number: 'P-1', email: 'a@b.de' }, leads)
-    expect(result).toBeNull()
+  it('backfill-Flag: matched per mail + appointment hat patient_number → backfill empfehlen', () => {
+    const leads = [mkLead({ id: 'l-1', mail: 'maria@example.de' /* keine patient_number */ })]
+    const result = matchAppointmentToLead({ email: 'maria@example.de', patient_number: 'P-NEW-42' }, leads)
+    expect(result.lead?.id).toBe('l-1')
+    expect(result.backfill_patient_number).toBe('P-NEW-42')
+  })
+
+  it('kein backfill wenn Lead bereits patient_number hat', () => {
+    const leads = [mkLead({ id: 'l-1', mail: 'maria@example.de', patient_number: 'P-OLD-1' })]
+    const result = matchAppointmentToLead({ email: 'maria@example.de', patient_number: 'P-NEW-42' }, leads)
+    expect(result.backfill_patient_number).toBeUndefined()
+  })
+
+  it('returns null wenn weder mail noch patient_number matchen', () => {
+    const leads = [mkLead({ id: 'l-1', mail: 'x@y.de' })]
+    const result = matchAppointmentToLead({ email: 'a@b.de', patient_number: 'P-9' }, leads)
+    expect(result.lead).toBeNull()
+    expect(result.matched_by).toBe('none')
   })
 
   it('returns null wenn appointment.patient leer ist', () => {
-    const leads = [mkLead({ id: 'l-1', patient_number: 'P-1' })]
-    expect(matchAppointmentToLead({}, leads)).toBeNull()
-    expect(matchAppointmentToLead(null as any, leads)).toBeNull()
+    const leads = [mkLead({ id: 'l-1', mail: 'maria@example.de' })]
+    expect(matchAppointmentToLead({}, leads).lead).toBeNull()
+    expect(matchAppointmentToLead(null as any, leads).lead).toBeNull()
   })
 
   it('matched mail auch bei trim/whitespace', () => {
     const leads = [mkLead({ id: 'l-1', mail: 'maria@example.de' })]
     const result = matchAppointmentToLead({ email: '  maria@example.de  ' }, leads)
-    expect(result?.id).toBe('l-1')
+    expect(result.lead?.id).toBe('l-1')
   })
 })
 ```
@@ -206,12 +226,16 @@ Expected: Fail mit "Cannot find module './useAppointmentLeadMatch'".
 
 ```ts
 /**
- * useAppointmentLeadMatch — Hybrid-Match zwischen Kalender-Termin und CRM-Lead.
+ * useAppointmentLeadMatch — Hybrid-Match Kalender-Termin ↔ CRM-Lead.
  *
- * Strategie (Plan v9 Modul C, entschieden 2026-05-13):
- *  1. patient_number exact match
- *  2. mail case-insensitive + trim
- *  3. sonst null (Bestandspatient ohne Lead, wird ignoriert)
+ * Pre-Visit-Realität: Leads haben keine `patient_number` bis Erst-Termin.
+ * Daher:
+ *  1. Mail-Match (case-insensitive trim) — primärer Pfad für Pre-Visit-Leads
+ *  2. patient_number-Match — sekundär, nur greifend wenn Lead bereits eine
+ *     Nummer hat (Post-Visit, evtl. nach Backfill)
+ *  3. Backfill: bei Mail-Match + leerem lead.patient_number wird die
+ *     appointment-seitige Nummer empfohlen — der Caller schreibt sie auf den
+ *     Lead, damit Folge-Events robust auch per Nummer matchbar sind.
  */
 
 import type { Lead } from '~/types/crm'
@@ -221,44 +245,53 @@ interface AppointmentPatientInfo {
   email?: string | null
 }
 
+export interface MatchResult {
+  lead: Lead | null
+  matched_by: 'mail' | 'patient_number' | 'none'
+  backfill_patient_number?: string
+}
+
 const normalizeMail = (m?: string | null): string => (m || '').trim().toLowerCase()
 
 export const useAppointmentLeadMatch = () => {
   const matchAppointmentToLead = (
     patient: AppointmentPatientInfo | null | undefined,
     leads: Lead[],
-  ): Lead | null => {
-    if (!patient) return null
+  ): MatchResult => {
+    if (!patient) return { lead: null, matched_by: 'none' }
 
-    // Primär: patient_number
-    if (patient.patient_number) {
-      const found = leads.find((l) => l.patient_number === patient.patient_number)
-      if (found) return found
-    }
-
-    // Fallback: mail (case-insensitive, trim)
+    // 1. Primär: Mail
     if (patient.email) {
       const target = normalizeMail(patient.email)
-      const found = leads.find((l) => normalizeMail(l.mail) === target && target.length > 0)
-      if (found) return found
+      if (target.length > 0) {
+        const found = leads.find((l) => normalizeMail(l.mail) === target)
+        if (found) {
+          const result: MatchResult = { lead: found, matched_by: 'mail' }
+          if (patient.patient_number && !found.patient_number) {
+            result.backfill_patient_number = patient.patient_number
+          }
+          return result
+        }
+      }
     }
 
-    return null
+    // 2. Sekundär: patient_number (für Post-Visit-Leads die schon eine Nummer haben)
+    if (patient.patient_number) {
+      const found = leads.find((l) => l.patient_number === patient.patient_number)
+      if (found) return { lead: found, matched_by: 'patient_number' }
+    }
+
+    return { lead: null, matched_by: 'none' }
   }
 
   return { matchAppointmentToLead }
 }
 ```
 
-**Wichtig:** `Lead.patient_number` muss als Type-Feld existieren. Falls noch nicht: in Task 1 erweitern. Bitte vor dem Test prüfen:
+**Hinweis:** `Lead.patient_number` ist aktuell **nicht** im Type-Interface. Die Backfill-Logik schreibt dort hinein, sobald der Patient seine erste Praxis-Nummer bekommt. Erweiterung daher in **Task 1** zusätzlich zu `linked_appointment_id` + `last_appointment_synced_at`:
 
-```bash
-grep -n "patient_number" layers/patienten/types/crm.ts
-```
-
-Erwartet: ein Match. Wenn nicht da: ergänzen im `Lead`-Interface bei Task 1 (nach `id`):
 ```ts
-  patient_number?: string  // optional FK zum Praxis-System (Dampsoft)
+  patient_number?: string  // wird via Backfill aus Kalender-Termin gesetzt sobald Erst-Termin stattfand
 ```
 
 - [ ] **Step 2.4: Tests grün**
