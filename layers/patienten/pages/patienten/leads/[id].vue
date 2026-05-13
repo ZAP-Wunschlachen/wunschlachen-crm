@@ -225,6 +225,20 @@
               class="text-[11px] text-dental-blue--3 mt-1.5 leading-tight">
               {{ LEAD_STATUS_CONFIG[lead.status].description }}
             </p>
+
+            <!-- Termin verschoben — separat zu „Verloren", damit Krankheits-Absage nicht zum Lost-Status führt -->
+            <button
+              v-if="canRescheduleStatus"
+              type="button"
+              class="mt-2 w-full px-3 py-1.5 text-[11px] font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded transition-colors"
+              @click="openRescheduleDialog"
+            >
+              <i class="pi pi-clock text-[10px] mr-1" />
+              Termin verschoben (statt Verloren)
+            </button>
+            <p v-if="lead.reschedule_count && lead.reschedule_count > 0" class="text-[10px] text-dental-blue--3 mt-1">
+              Verschoben: {{ lead.reschedule_count }}× · letzter Grund: {{ lead.last_reschedule_reason ? RESCHEDULE_REASON_LABELS[lead.last_reschedule_reason] : '—' }}
+            </p>
           </div>
 
           <!-- Follow-up -->
@@ -328,6 +342,23 @@
                 Jetzt reaktivieren
               </button>
             </div>
+
+            <!-- Lead zurückholen — Fehlklicks rückgängig machen (springt zum Status vor Lost zurück) -->
+            <div v-if="rollbackTarget" class="pt-3 border-t border-dental-blue--5">
+              <button
+                type="button"
+                class="w-full px-3 py-1.5 text-[11px] font-medium text-dental-blue-0 bg-white hover:bg-dental-blue--5 border border-dental-blue--4 rounded transition-colors disabled:opacity-50"
+                :disabled="rollbackRunning"
+                @click="onRollbackFromLost"
+              >
+                <i v-if="rollbackRunning" class="pi pi-spin pi-spinner text-[10px] mr-1" />
+                <i v-else class="pi pi-undo text-[10px] mr-1" />
+                Lead zurückholen → {{ LEAD_STATUS_CONFIG[rollbackTarget]?.label }}
+              </button>
+              <p class="text-[10px] text-dental-blue--3 mt-1 italic">
+                Macht den letzten „Verloren"-Wechsel rückgängig (Fehlklick-Rettung).
+              </p>
+            </div>
           </div>
 
           <!-- Meta -->
@@ -364,6 +395,63 @@
       @saved="onAppointmentSaved"
     />
 
+    <!-- Reschedule-Dialog -->
+    <div
+      v-if="rescheduleDialogVisible"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      role="dialog"
+      aria-modal="true"
+      @click.self="closeRescheduleDialog"
+    >
+      <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-5 space-y-4">
+        <div>
+          <h3 class="text-base font-semibold text-dental-blue-0 flex items-center gap-2">
+            <i class="pi pi-clock text-amber-500" />
+            Termin verschoben
+          </h3>
+          <p class="text-[11px] text-dental-blue--3 mt-1" v-if="lead">
+            Status springt zurück: <strong>{{ LEAD_STATUS_CONFIG[lead.status]?.label }}</strong>
+            → <strong>{{ rescheduleFallbackLabel }}</strong>. Lead bleibt im Funnel.
+          </p>
+        </div>
+        <div>
+          <label class="text-[11px] font-medium text-dental-blue-0 mb-1 block">Grund</label>
+          <select v-model="rescheduleReason" class="field-input bg-white">
+            <option v-for="(label, key) in RESCHEDULE_REASON_LABELS" :key="key" :value="key">{{ label }}</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-[11px] font-medium text-dental-blue-0 mb-1 block">Wiedervorlage in (Tagen)</label>
+          <input v-model.number="rescheduleDays" type="number" min="1" max="90" class="field-input bg-white" />
+          <p class="text-[10px] text-dental-blue--3 mt-1">Setzt Follow-up-Datum auf {{ rescheduleFollowupPreview }}.</p>
+        </div>
+        <div>
+          <label class="text-[11px] font-medium text-dental-blue-0 mb-1 block">Notiz (optional)</label>
+          <textarea v-model="rescheduleNote" rows="2" class="field-input bg-white" placeholder="z.B. Patient ruft selbst zurück sobald genesen" />
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button
+            type="button"
+            class="flex-1 px-3 py-2 text-[12px] font-medium text-dental-blue-0 bg-white hover:bg-dental-blue--5 border border-dental-blue--4 rounded transition-colors"
+            :disabled="rescheduleRunning"
+            @click="closeRescheduleDialog"
+          >
+            Abbrechen
+          </button>
+          <button
+            type="button"
+            class="flex-1 px-3 py-2 text-[12px] font-medium text-white bg-amber-500 hover:bg-amber-600 rounded transition-colors disabled:opacity-50"
+            :disabled="rescheduleRunning"
+            @click="confirmReschedule"
+          >
+            <i v-if="rescheduleRunning" class="pi pi-spin pi-spinner text-[11px] mr-1" />
+            <i v-else class="pi pi-check text-[11px] mr-1" />
+            Bestätigen
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Toast -->
     <Toast position="bottom-right" />
   </div>
@@ -376,10 +464,12 @@ import {
   LEAD_STATUS_CONFIG,
   LEAD_SOURCE_CONFIG,
   LOST_REASON_LABELS,
+  RESCHEDULE_REASON_LABELS,
   HKP_SUBSTATE_CONFIG,
   type Lead,
   type LeadActivityType,
   type LeadActivity,
+  type RescheduleReason,
 } from '~/types/crm'
 import type { LeadScoreResult, ResponseTimeResult } from '~/types/analytics'
 
@@ -493,11 +583,31 @@ const onAction = (action: import('../../../composables/useNextBestAction').NextB
 }
 
 // Plan v9: State-Machine-validierte Folge-Status
-const { getNextStatuses, canTransition, defaultReactivationDate } = useLeadStatusTransitions()
+const {
+  getNextStatuses,
+  canTransition,
+  defaultReactivationDate,
+  canReschedule,
+  getRescheduleFallback,
+  getRollbackTargetFromActivities,
+} = useLeadStatusTransitions()
 const { addActivity } = useLeadActivities()
 const allowedNextStatuses = computed(() => {
   if (!lead.value) return []
   return getNextStatuses(lead.value.status).filter((s) => s !== lead.value!.status)
+})
+
+const canRescheduleStatus = computed(() => !!lead.value && canReschedule(lead.value.status))
+const rescheduleFallbackLabel = computed(() => {
+  if (!lead.value) return ''
+  const fb = getRescheduleFallback(lead.value.status)
+  return fb ? LEAD_STATUS_CONFIG[fb]?.label || fb : ''
+})
+
+// Rollback-Ziel aus Activity-Log (für „Lead zurückholen" wenn status='lost')
+const rollbackTarget = computed(() => {
+  if (!lead.value || lead.value.status !== 'lost') return null
+  return getRollbackTargetFromActivities(activities.value as any)
 })
 
 const onStatusChange = async (newStatus: string) => {
@@ -536,6 +646,107 @@ const getCurrentUserNameForActivity = (): string => {
   const u = useState<any>('auth.user').value
   if (!u) return 'System'
   return `${u.first_name || ''} ${u.last_name || ''}`.trim() || 'System'
+}
+
+// Plan v9 Iter2: Reschedule-Handler — Termin proaktiv verschoben (≠ Lost)
+const { markAsRescheduled } = useRescheduleAction()
+const rescheduleDialogVisible = ref(false)
+const rescheduleReason = ref<RescheduleReason>('illness')
+const rescheduleDays = ref(14)
+const rescheduleNote = ref('')
+const rescheduleRunning = ref(false)
+const rescheduleFollowupPreview = computed(() => {
+  const days = Math.max(1, Math.min(90, rescheduleDays.value || 14))
+  const d = new Date()
+  d.setDate(d.getDate() + days)
+  return d.toLocaleDateString('de-DE')
+})
+
+const openRescheduleDialog = () => {
+  rescheduleReason.value = 'illness'
+  rescheduleDays.value = 14
+  rescheduleNote.value = ''
+  rescheduleDialogVisible.value = true
+}
+const closeRescheduleDialog = () => {
+  if (rescheduleRunning.value) return
+  rescheduleDialogVisible.value = false
+}
+const confirmReschedule = async () => {
+  if (!lead.value || rescheduleRunning.value) return
+  rescheduleRunning.value = true
+  try {
+    const updated = await markAsRescheduled(lead.value, rescheduleReason.value, {
+      followUpDays: rescheduleDays.value,
+      note: rescheduleNote.value || undefined,
+    })
+    if (updated) {
+      lead.value = { ...lead.value, ...updated }
+      await loadActivities()
+      toast.add({
+        severity: 'success',
+        summary: 'Termin verschoben',
+        detail: `Status zurück zu "${LEAD_STATUS_CONFIG[updated.status]?.label}" · Follow-up gesetzt`,
+      })
+      rescheduleDialogVisible.value = false
+    } else {
+      toast.add({
+        severity: 'warn',
+        summary: 'Verschiebung nicht möglich',
+        detail: 'Dieser Status erlaubt keine Termin-Verschiebung',
+      })
+    }
+  } catch (e) {
+    console.error('[reschedule] failed:', e)
+    toast.add({ severity: 'error', summary: 'Fehler', detail: 'Verschiebung fehlgeschlagen' })
+  } finally {
+    rescheduleRunning.value = false
+  }
+}
+
+// Plan v9 Iter2: Lead aus 'lost' zurückholen (Fehlklick-Rettung)
+const rollbackRunning = ref(false)
+const onRollbackFromLost = async () => {
+  if (!lead.value || rollbackRunning.value) return
+  const target = rollbackTarget.value
+  if (!target) return
+  if (!confirm(`Lead "${lead.value.first_name} ${lead.value.last_name}" zurückholen?\nStatus springt von "Verloren" zurück auf "${LEAD_STATUS_CONFIG[target]?.label}".`)) return
+  rollbackRunning.value = true
+  try {
+    const now = new Date().toISOString()
+    const updated = await updateLead(lead.value.id, {
+      status: target,
+      lost_reason: null as any,
+      reactivation_due_at: null as any,
+      last_status_change_at: now,
+    })
+    if (updated) {
+      lead.value = { ...lead.value, ...updated }
+      try {
+        await addActivity({
+          lead_id: lead.value.id,
+          type: 'lost_rollback',
+          subject: `Lead zurückgeholt: Verloren → ${LEAD_STATUS_CONFIG[target]?.label}`,
+          content: `Manuell durch ${getCurrentUserNameForActivity()} — Fehlklick-Rettung`,
+          metadata: { from_status: 'lost', to_status: target },
+          date_created: now,
+        } as any)
+        await loadActivities()
+      } catch (e) {
+        console.warn('Rollback-Activity-Log fehlgeschlagen:', e)
+      }
+      toast.add({
+        severity: 'success',
+        summary: 'Lead zurückgeholt',
+        detail: `Status: ${LEAD_STATUS_CONFIG[target]?.label}`,
+      })
+    }
+  } catch (e) {
+    console.error('[lost-rollback] failed:', e)
+    toast.add({ severity: 'error', summary: 'Fehler', detail: 'Rückholen fehlgeschlagen' })
+  } finally {
+    rollbackRunning.value = false
+  }
 }
 
 // Plan v9 A5: No-Show-Handler

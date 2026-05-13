@@ -57,11 +57,11 @@ const STRATEGIES: Record<LostReason, ReactivationStrategy> = {
     template_id: 'reactivation-mobile',
     approach: 'Hinweis auf mobile/regionale Optionen',
   },
-  health_issue: {
-    reason: 'health_issue',
+  health_unfit: {
+    reason: 'health_unfit',
     label: 'Sensible Wieder-Annäherung',
     template_id: 'reactivation-health',
-    approach: 'Genesungs-Wünsche + offene Tür für später',
+    approach: 'Genesungs-Wünsche + offene Tür für später (nur falls medizinische Situation sich geändert hat)',
   },
   language_barrier: {
     reason: 'language_barrier',

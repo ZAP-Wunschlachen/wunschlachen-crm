@@ -133,6 +133,11 @@ export const LEAD_SOURCE_CONFIG: Record<LeadSource, { label: string; icon: strin
   referral:  { label: 'Empfehlung', icon: 'pi pi-users' },
 }
 
+/**
+ * Endgültige Lost-Reasons — Patient ist final raus.
+ * Für temporäre Verhinderungen (Krankheit, Termin-Konflikt) → RescheduleReason +
+ * markAsRescheduled (Status springt zurück statt auf 'lost').
+ */
 export type LostReason =
   | 'not_interested'
   | 'too_expensive'
@@ -140,7 +145,7 @@ export type LostReason =
   | 'competitor'
   | 'no_response'
   | 'distance_too_far'
-  | 'health_issue'
+  | 'health_unfit'         // medizinisch nicht (mehr) geeignet — final
   | 'language_barrier'
   | 'personal_reasons'
   | 'other'
@@ -152,10 +157,30 @@ export const LOST_REASON_LABELS: Record<LostReason, string> = {
   competitor:        'Anderer Anbieter gewählt',
   no_response:       'Patient antwortet nicht mehr',
   distance_too_far:  'Entfernung zu groß',
-  health_issue:      'Gesundheitliche Gründe',
+  health_unfit:      'Medizinisch nicht geeignet',
   language_barrier:  'Sprachliche Barriere',
   personal_reasons:  'Persönliche Gründe',
   other:             'Sonstiges',
+}
+
+/**
+ * Reschedule-Reasons (Plan v9, Iteration 2):
+ * Patient ist temporär verhindert, Lead bleibt im Funnel. Status springt zurück
+ * auf NO_SHOW_FALLBACK + reschedule_count +1 + follow_up wird gesetzt.
+ */
+export type RescheduleReason =
+  | 'illness'
+  | 'work_conflict'
+  | 'personal'
+  | 'short_notice'
+  | 'other'
+
+export const RESCHEDULE_REASON_LABELS: Record<RescheduleReason, string> = {
+  illness:       'Krankheit',
+  work_conflict: 'Beruflich verhindert',
+  personal:      'Privater Grund',
+  short_notice:  'Zu kurzfristig — anderer Termin gewünscht',
+  other:         'Sonstiges',
 }
 
 /**
@@ -222,6 +247,8 @@ export interface Lead {
   lost_reason?: LostReason              // nur gesetzt wenn status='lost'
   reactivation_due_at?: string          // ISO timestamp: wann re-engaged werden soll (lost + 90 T)
   hkp_substate?: HkpSubState            // Plan v9 Phase E: nur gesetzt wenn status='hkp_sent'
+  reschedule_count?: number             // Counter: Patient hat Termin proaktiv verschoben (≠ no_show)
+  last_reschedule_reason?: RescheduleReason // letzter Grund für Termin-Verschiebung
 
   query_params?: Record<string, any> | Array<{ name: string; value: string; timestamp: string }>
   newsletter_accepted_time?: string
@@ -239,7 +266,7 @@ export interface Lead {
 
 // ─── Activities ───────────────────────────────────────────────
 
-export type LeadActivityType = 'note' | 'call' | 'email' | 'email_sent' | 'email_received' | 'sms' | 'whatsapp' | 'meeting' | 'task' | 'newsletter' | 'stage_change' | 'no_show'
+export type LeadActivityType = 'note' | 'call' | 'email' | 'email_sent' | 'email_received' | 'sms' | 'whatsapp' | 'meeting' | 'task' | 'newsletter' | 'stage_change' | 'no_show' | 'reschedule' | 'lost_rollback'
 
 export type ActivityDirection = 'inbound' | 'outbound'
 export type ActivityOutcome = 'successful' | 'no_contact' | 'callback' | 'rejection'
@@ -256,8 +283,10 @@ export interface LeadActivity {
   metadata?: {
     meeting_date?: string
     meeting_time?: string
-    from_status?: LeadStatus      // bei type='stage_change'
-    to_status?: LeadStatus        // bei type='stage_change'
+    from_status?: LeadStatus      // bei type='stage_change' | 'reschedule' | 'lost_rollback'
+    to_status?: LeadStatus        // bei type='stage_change' | 'reschedule' | 'lost_rollback'
+    reschedule_reason?: RescheduleReason // bei type='reschedule'
+    follow_up_at?: string         // bei type='reschedule' — vorgemerktes Wiedervorlage-Datum
   }
   date_created: string    // ISO timestamp
   user_name: string       // Auto-populated from useAuth
@@ -276,6 +305,8 @@ export const ACTIVITY_TYPE_CONFIG: Record<LeadActivityType, { label: string; ico
   newsletter:     { label: 'Newsletter',     icon: 'pi pi-megaphone',    color: '#ec4899', bgColor: '#fdf2f8' },
   stage_change:   { label: 'Status-Wechsel', icon: 'pi pi-arrows-h',     color: '#94a3b8', bgColor: '#f1f5f9' },
   no_show:        { label: 'Nicht erschienen', icon: 'pi pi-times-circle', color: '#ef4444', bgColor: '#fee2e2' },
+  reschedule:     { label: 'Termin verschoben', icon: 'pi pi-clock',     color: '#f59e0b', bgColor: '#fef3c7' },
+  lost_rollback:  { label: 'Lead zurückgeholt', icon: 'pi pi-undo',       color: '#22c55e', bgColor: '#f0fdf4' },
 }
 
 export const ACTIVITY_DIRECTION_LABELS: Record<ActivityDirection, string> = {

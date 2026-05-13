@@ -81,6 +81,15 @@ export const useLeadStatusTransitions = () => {
   }
 
   /**
+   * Termin-Verschiebung (Plan v9, Iteration 2):
+   * Patient sagt Termin proaktiv ab (z.B. Krankheit). Status springt zurück
+   * wie bei No-Show, aber separat als 'reschedule' geloggt — reschedule_count
+   * statt missed_appointments. Erlaubt für genau die Termin-Status.
+   */
+  const canReschedule = (status: LeadStatus): boolean => canHaveNoShow(status)
+  const getRescheduleFallback = (current: LeadStatus): LeadStatus | null => getNoShowFallback(current)
+
+  /**
    * Hilfs-Funktion: ist Lead in der Akquise-Phase (für Speed-to-Lead-Logik)?
    */
   const isInAcquisition = (status: LeadStatus): boolean => {
@@ -103,14 +112,37 @@ export const useLeadStatusTransitions = () => {
     return d.toISOString()
   }
 
+  /**
+   * Lead zurückholen aus 'lost': rekonstruiert den Status vor dem
+   * stage_change zu 'lost' aus dem Activity-Log.
+   * Returns null wenn kein Audit-Eintrag mit from_status≠'lost' gefunden wird.
+   */
+  const getRollbackTargetFromActivities = (
+    activities: { type: string; metadata?: { from_status?: LeadStatus; to_status?: LeadStatus }; date_created: string }[],
+  ): LeadStatus | null => {
+    if (!activities?.length) return null
+    // Activities nach Datum absteigend sortieren, dann jüngsten stage_change-Eintrag finden,
+    // der TO 'lost' geführt hat — der from_status ist unser Rollback-Ziel.
+    const sorted = [...activities].sort(
+      (a, b) => new Date(b.date_created).getTime() - new Date(a.date_created).getTime(),
+    )
+    const lostTransition = sorted.find(
+      (a) => a.type === 'stage_change' && a.metadata?.to_status === 'lost' && a.metadata?.from_status,
+    )
+    return (lostTransition?.metadata?.from_status as LeadStatus) ?? null
+  }
+
   return {
     canTransition,
     getNextStatuses,
     getNoShowFallback,
     canHaveNoShow,
+    canReschedule,
+    getRescheduleFallback,
     isInAcquisition,
     isActive,
     defaultReactivationDate,
+    getRollbackTargetFromActivities,
   }
 }
 
