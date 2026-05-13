@@ -47,6 +47,14 @@ definePageMeta({ layout: 'crm', middleware: ['auth'] })
 
 const settingsItems = [
   {
+    path: '/patienten/einstellungen/welcome-sequence',
+    label: 'Welcome-Sequenz',
+    description: 'Slot-Einstellungen & Brevo-Template-IDs',
+    icon: 'pi pi-inbox',
+    iconColor: '#06b6d4',
+    bgColor: 'bg-cyan-50',
+  },
+  {
     path: '/patienten/einstellungen/email-vorlagen',
     label: 'E-Mail Vorlagen',
     description: 'E-Mail-Templates verwalten',
