@@ -29,6 +29,8 @@ export default defineNuxtConfig({
     welcomeCronSecret: '',       // env: NUXT_WELCOME_CRON_SECRET
     // Appointment-Sync + Reminder-Cron
     appointmentCronSecret: '',   // env: NUXT_APPOINTMENT_CRON_SECRET
+    // HKP-Postbox Inbound (Modul F MVP)
+    hkpIngestSecret: '',         // env: NUXT_HKP_INGEST_SECRET
     directusUrl: '',             // env: NUXT_DIRECTUS_URL (server-side fetch, ggf. interne URL)
     directusServiceToken: '',    // env: NUXT_DIRECTUS_SERVICE_TOKEN
   },
