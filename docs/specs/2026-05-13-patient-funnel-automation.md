@@ -184,20 +184,28 @@ Sieben unabhängige Liefer-Pakete. **MVP-Schnitt: A + B + C + D** (markiert mit 
 | UPDATE `appointments` | `treatment_finished_date != null` und `treatment.category = behandlung` | Trigger Modul G (Behandlung-Done) |
 | INSERT `appointments` | `treatment.category = behandlung` | `lead.status = treatment_scheduled` + Mail |
 
-**Daten-Match:**
-- Kalender hat `appointments.patient.patient_number`, CRM hat `lead.patient_number` ODER `lead.id ↔ patient.lead_id` (zu prüfen, evtl. neue Foreign-Key-Spalte nötig)
-- Wenn Kalender-Patient noch keinen CRM-Lead hat: Auto-Create-Stub + Warn-Toast im Sales-Dashboard
+**Daten-Match (entschieden 2026-05-13):**
+- **Hybrid-Mapping**: erst `lead.patient_number === appointment.patient.patient_number`, wenn null/no-match dann `lead.mail === appointment.patient.email` (case-insensitive trim).
+- **Bestandspatient ohne Lead → ignorieren** (kein Auto-Create-Stub). CRM kümmert sich nur um B2C-Funnel-Leads; Termine ohne matching Lead werden nicht ans CRM weitergereicht. Bei Modul G (Behandlung-Done) muss daher beim ersten Lead-Match die Lead-Patient-Verknüpfung manuell vom Sales-MA gepflegt sein.
+- Match-Logik in eigenem Composable `useAppointmentLeadMatch.ts` (testbar isoliert).
 
 **Edge-Cases:**
 - Termin wird verschoben (Update `start_date_time`) → keine Status-Änderung, nur Activity-Log "Termin verschoben"
 - Termin wird gelöscht → Lead bleibt im aktuellen Status, Activity "Termin storniert"
 - Mehrere offene Termine pro Lead → nur der jüngste triggert Status-Wechsel
 
+**Sync-Modus (entschieden 2026-05-13):**
+- **Directus-WebSocket-Subscription** als primärer Kanal (Pattern aus Kalender-`useSocket.ts` adaptieren).
+- Reconnect-Logik mit exponential Backoff (1s, 2s, 4s, … max 30s).
+- Auth via dasselbe Directus-Token wie HTTP-Calls.
+- Server-side Re-Sync-Endpoint `POST /api/cron/appointment-resync` für verpasste Events (nicht als Default-Cron, nur manuell triggerbar — z.B. nach Server-Restart).
+
 **Akzeptanzkriterien:**
 - [ ] Buchung im Kalender erscheint binnen 5 s als Termin-Card im Lead-Detail
 - [ ] Status wechselt automatisch nach Mapping
-- [ ] Bei WebSocket-Disconnect läuft Fallback-Polling alle 60 s
+- [ ] WebSocket-Disconnect löst Reconnect aus, in der Zwischenzeit verpasste Events kommen via Resync-Endpoint nach
 - [ ] Idempotenz: gleicher Event mehrfach verarbeitet → kein doppelter Status-Wechsel, kein doppeltes Mail
+- [ ] Bestandspatient-Termine (kein matching Lead) werden stillschweigend ignoriert, kein Error-Log
 
 **Aufwand:** 3–4 T
 
