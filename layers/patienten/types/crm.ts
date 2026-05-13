@@ -255,6 +255,11 @@ export interface Lead {
   welcome_sequence_position?: number    // 0 = noch nicht gestartet, 1-6 = letzte versandte Mail
   welcome_sequence_paused_at?: string   // ISO timestamp: pausiert (z.B. consultation_scheduled erreicht)
 
+  // Appointment-Sync (Plan v9 Modul C MVP)
+  patient_number?: string                // Backfill aus Kalender-Termin nach Erst-Visit
+  linked_appointment_id?: string         // ID des aktuell verknüpften Kalender-Termins
+  last_appointment_synced_at?: string    // ISO timestamp: letztes verarbeitetes Sync-Event
+
   query_params?: Record<string, any> | Array<{ name: string; value: string; timestamp: string }>
   newsletter_accepted_time?: string
   Tags?: string[] | null
