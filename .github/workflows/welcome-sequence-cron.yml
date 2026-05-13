@@ -1,0 +1,23 @@
+name: Welcome-Sequence Cron
+
+on:
+  schedule:
+    - cron: '0 8 * * *'   # täglich 09:00 Berlin (UTC+1)
+  workflow_dispatch:        # manueller Trigger zum Testen
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call welcome-sequence endpoint
+        run: |
+          response=$(curl -sS -o /tmp/body -w "%{http_code}" \
+            -X POST "${{ secrets.CRM_BASE_URL }}/api/cron/welcome-sequence" \
+            -H "x-welcome-cron-secret: ${{ secrets.WELCOME_CRON_SECRET }}" \
+            -H "content-type: application/json")
+          echo "HTTP $response"
+          cat /tmp/body
+          if [ "$response" -ne "200" ]; then
+            echo "::error::Welcome-Sequence cron returned $response"
+            exit 1
+          fi
