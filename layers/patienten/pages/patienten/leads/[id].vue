@@ -241,6 +241,25 @@
             </p>
           </div>
 
+          <!-- Anruf-Rotation (Plan v9 Modul B MVP) -->
+          <div v-if="lead.status === 'new' || lead.status === 'contacting' || lead.status === 'contacted'"
+            class="bg-white rounded-lg p-4 border border-dental-blue--5">
+            <h2 class="text-sm font-semibold text-dental-blue-0 mb-2">Anruf-Rotation</h2>
+            <div class="flex gap-2 mb-2">
+              <button class="flex-1 px-3 py-1.5 text-[11px] font-medium text-white bg-green-600 hover:bg-green-700 rounded transition-colors" @click="onCallSuccess">
+                <i class="pi pi-check text-[10px] mr-1" /> Erreicht
+              </button>
+              <button class="flex-1 px-3 py-1.5 text-[11px] font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded transition-colors" @click="onCallFailed">
+                <i class="pi pi-times text-[10px] mr-1" /> Nicht erreicht
+              </button>
+            </div>
+            <p v-if="lead.call_attempt_count" class="text-[10px] text-dental-blue--3">
+              Versuche: {{ lead.call_attempt_count }}
+              <span v-if="lead.next_call_slot_at" class="ml-2">· nächster Slot: {{ formatCallDateTime(lead.next_call_slot_at) }}</span>
+              <span v-if="lead.successful_call_window" class="ml-2 italic">· erfolgreich: {{ lead.successful_call_window }}</span>
+            </p>
+          </div>
+
           <!-- Follow-up -->
           <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
             <h2 class="text-sm font-semibold text-dental-blue-0 mb-2">Follow-up</h2>
@@ -788,6 +807,59 @@ const onMarkLost = async () => {
       detail: `${reason} · Reaktivierung in 90 Tagen vorgemerkt`,
     })
   }
+}
+
+// Plan v9 Modul B: Smart-Callback-Rotation
+const { classifySlot, nextRetrySlot, shouldFailover } = useCallbackScheduler()
+
+const formatCallDateTime = (iso: string) => new Date(iso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+
+const onCallSuccess = async () => {
+  if (!lead.value) return
+  const now = new Date()
+  const slot = classifySlot(now)
+  await saveField('last_call_attempt_at', now.toISOString())
+  if (slot) await saveField('successful_call_window', slot)
+  await saveField('next_call_slot_at', null)
+  try {
+    await addActivity({
+      lead_id: lead.value.id,
+      type: 'call',
+      subject: 'Patient erreicht',
+      content: `Slot: ${slot || 'außerhalb Geschäftszeit'}`,
+      direction: 'outbound',
+      outcome: 'successful',
+      metadata: { call_slot: slot },
+      date_created: now.toISOString(),
+    } as any)
+    await loadActivities()
+  } catch (e) { console.warn(e) }
+  toast.add({ severity: 'success', summary: 'Erreicht', detail: slot ? `Slot ${slot} als erfolgreich markiert` : 'Erfolgreich' })
+}
+
+const onCallFailed = async () => {
+  if (!lead.value) return
+  const now = new Date()
+  const attempts = (lead.value.call_attempt_count || 0) + 1
+  await saveField('last_call_attempt_at', now.toISOString())
+  await saveField('call_attempt_count', attempts)
+  const failover = shouldFailover({ ...lead.value, call_attempt_count: attempts } as any)
+  const nextSlot = nextRetrySlot({ ...lead.value, call_attempt_count: attempts, last_call_attempt_at: now.toISOString() } as any, now)
+  await saveField('next_call_slot_at', nextSlot ? nextSlot.toISOString() : null)
+  try {
+    await addActivity({
+      lead_id: lead.value.id,
+      type: 'call',
+      subject: failover ? `Nicht erreicht (Versuch ${attempts}, Failover SMS+Email)` : `Nicht erreicht (Versuch ${attempts})`,
+      content: nextSlot ? `Nächster Slot: ${nextSlot.toLocaleString('de-DE')}` : 'Keine weiteren Versuche geplant',
+      direction: 'outbound',
+      outcome: 'no_contact',
+      metadata: { call_slot: classifySlot(now), next_slot: nextSlot?.toISOString() },
+      date_created: now.toISOString(),
+    } as any)
+    await loadActivities()
+  } catch (e) { console.warn(e) }
+  toast.add({ severity: 'warn', summary: 'Nicht erreicht', detail: nextSlot ? `Wiedervorlage: ${nextSlot.toLocaleString('de-DE')}` : 'Keine weiteren Versuche' })
 }
 
 const loadActivities = async () => {
