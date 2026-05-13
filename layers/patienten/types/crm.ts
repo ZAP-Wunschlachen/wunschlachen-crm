@@ -250,6 +250,11 @@ export interface Lead {
   reschedule_count?: number             // Counter: Patient hat Termin proaktiv verschoben (≠ no_show)
   last_reschedule_reason?: RescheduleReason // letzter Grund für Termin-Verschiebung
 
+  // Welcome-Sequenz (Plan v9 Modul A MVP)
+  welcome_sequence_started_at?: string  // ISO timestamp: Sign-up / Sequenz-Start
+  welcome_sequence_position?: number    // 0 = noch nicht gestartet, 1-6 = letzte versandte Mail
+  welcome_sequence_paused_at?: string   // ISO timestamp: pausiert (z.B. consultation_scheduled erreicht)
+
   query_params?: Record<string, any> | Array<{ name: string; value: string; timestamp: string }>
   newsletter_accepted_time?: string
   Tags?: string[] | null
