@@ -208,10 +208,19 @@ export const usePatientLeads = () => {
   }
 
   const createLead = async (data: Partial<Lead>) => {
+    const now = new Date().toISOString()
+    // Welcome-Sequenz beim Anlegen automatisch starten — die Cron-Logik in
+    // useWelcomeSequence prüft Pause-Bedingungen, sodass auch hier nichts
+    // vorsichtig geprüft werden muss.
+    const enriched: Partial<Lead> = {
+      ...data,
+      welcome_sequence_started_at: data.welcome_sequence_started_at ?? now,
+      welcome_sequence_position: data.welcome_sequence_position ?? 0,
+    }
     try {
       return await createItem<Lead>({
         collection: COLLECTION,
-        data,
+        data: enriched,
       })
     } catch (err) {
       error.value = err as Error
