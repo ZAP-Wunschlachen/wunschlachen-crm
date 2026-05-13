@@ -493,6 +493,13 @@ const { getResponseTime } = useResponseTime()
 const { compute: computeNBA } = useNextBestAction()
 const recommendation = computed(() => computeNBA(lead.value))
 
+// Plan v9 Modul C: bei Sync-Update (Cron oder Realtime) Activities + Termine reladen
+watch(() => lead.value?.last_appointment_synced_at, async (val, oldVal) => {
+  if (!val || val === oldVal) return
+  await loadActivities()
+  leadAppointmentsRef.value?.reload?.()
+})
+
 // Aliasing für Timeline (gleiche Daten, expliziterer Name)
 const allLeadActivities = computed(() => activities.value)
 
