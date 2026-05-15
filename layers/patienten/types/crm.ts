@@ -335,13 +335,18 @@ export const ACTIVITY_TYPE_CONFIG: Record<LeadActivityType, { label: string; ico
  * System-Events (stage_change, no_show, reschedule, lost_rollback, hkp_ingest,
  * email_sent/received) werden automatisch geschrieben und tauchen hier NICHT auf.
  */
+/**
+ * Achtung: 'meeting' ist hier bewusst NICHT drin — echte Termine werden
+ * über den Kalender-Deep-Link gebucht (siehe openKalenderForBooking im
+ * Lead-Detail). Rückwirkende „Termin-Notizen" trägt der Sales-MA als
+ * 'note' ein.
+ */
 export const MANUAL_ACTIVITY_TYPES: LeadActivityType[] = [
   'note',
   'call',
   'email',
   'sms',
   'whatsapp',
-  'meeting',
   'task',
   'newsletter',
 ]

@@ -210,7 +210,7 @@
           <!-- Activities -->
           <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
             <h2 class="text-sm font-semibold text-dental-blue-0 mb-3">Aktivitäten</h2>
-            <PatientenActivityQuickActions class="mb-4" @select="openActivityDialog" />
+            <PatientenActivityQuickActions class="mb-4" @select="openActivityDialog" @book="openKalenderForBooking" />
             <PatientenActivityFeed :activities="activities" @removed="onActivityRemoved" />
           </div>
         </div>
