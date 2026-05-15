@@ -4,9 +4,20 @@
       Noch keine Aktivitäten
     </div>
 
-    <div v-else class="space-y-3">
+    <div v-else>
+      <!-- Filter-Bar -->
+      <div class="flex items-center justify-between gap-2 mb-3 text-[11px]">
+        <label class="flex items-center gap-1.5 text-dental-blue--2 cursor-pointer select-none">
+          <input v-model="hideSystemEvents" type="checkbox" class="accent-dental-blue-0" />
+          System-Events ausblenden
+          <span v-if="systemEventCount > 0" class="text-dental-blue--3">({{ systemEventCount }})</span>
+        </label>
+        <span class="text-dental-blue--3">{{ filteredActivities.length }} von {{ activities.length }}</span>
+      </div>
+
+    <div class="space-y-3">
       <div
-        v-for="activity in activities"
+        v-for="activity in displayedActivities"
         :key="activity.id"
         class="flex gap-3 group"
       >
@@ -62,6 +73,25 @@
         </div>
       </div>
     </div>
+
+    <!-- Mehr-anzeigen-Button -->
+    <div v-if="hiddenCount > 0" class="mt-3 pt-3 border-t border-dental-blue--5 text-center">
+      <button
+        class="text-[11px] text-dental-blue--1 hover:text-dental-blue-0 hover:underline font-medium"
+        @click="showAll = true"
+      >
+        ↓ {{ hiddenCount }} weitere {{ hiddenCount === 1 ? 'Aktivität' : 'Aktivitäten' }} anzeigen
+      </button>
+    </div>
+    <div v-else-if="showAll && filteredActivities.length > INITIAL_LIMIT" class="mt-3 pt-3 border-t border-dental-blue--5 text-center">
+      <button
+        class="text-[11px] text-dental-blue--3 hover:text-dental-blue-0 hover:underline"
+        @click="showAll = false"
+      >
+        ↑ Einklappen (nur {{ INITIAL_LIMIT }} neueste)
+      </button>
+    </div>
+    </div>
   </div>
 </template>
 
@@ -69,18 +99,46 @@
 import {
   ACTIVITY_TYPE_CONFIG,
   ACTIVITY_OUTCOME_LABELS,
+  MANUAL_ACTIVITY_TYPES,
   type LeadActivity,
   type LeadActivityType,
   type ActivityOutcome,
 } from '~/types/crm'
 
-defineProps<{
+const props = defineProps<{
   activities: LeadActivity[]
 }>()
 
 defineEmits<{ removed: [id: string] }>()
 
+const INITIAL_LIMIT = 5
 const expanded = ref<Set<string>>(new Set())
+const showAll = ref(false)
+const hideSystemEvents = ref(false)
+
+const isManual = (t: LeadActivityType): boolean => MANUAL_ACTIVITY_TYPES.includes(t)
+
+const sortedActivities = computed(() =>
+  [...props.activities].sort((a, b) => new Date(b.date_created).getTime() - new Date(a.date_created).getTime()),
+)
+
+const systemEventCount = computed(() => sortedActivities.value.filter((a) => !isManual(a.type)).length)
+
+const filteredActivities = computed(() =>
+  hideSystemEvents.value
+    ? sortedActivities.value.filter((a) => isManual(a.type))
+    : sortedActivities.value,
+)
+
+const displayedActivities = computed(() =>
+  showAll.value ? filteredActivities.value : filteredActivities.value.slice(0, INITIAL_LIMIT),
+)
+
+const hiddenCount = computed(() =>
+  !showAll.value && filteredActivities.value.length > INITIAL_LIMIT
+    ? filteredActivities.value.length - INITIAL_LIMIT
+    : 0,
+)
 
 const typeConfig = (type: LeadActivityType) => ACTIVITY_TYPE_CONFIG[type] || ACTIVITY_TYPE_CONFIG.note
 
