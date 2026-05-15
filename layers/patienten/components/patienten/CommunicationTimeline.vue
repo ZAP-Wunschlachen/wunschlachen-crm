@@ -68,6 +68,24 @@
         </ul>
       </section>
     </div>
+
+    <!-- Mehr-anzeigen-Footer -->
+    <div v-if="hiddenCount > 0" class="px-4 py-3 border-t border-dental-blue--5 text-center">
+      <button
+        class="text-[11px] text-dental-blue--1 hover:text-dental-blue-0 hover:underline font-medium"
+        @click="showAll = true"
+      >
+        ↓ {{ hiddenCount }} weitere {{ hiddenCount === 1 ? 'Eintrag' : 'Einträge' }} anzeigen
+      </button>
+    </div>
+    <div v-else-if="showAll && totalFilteredCount > INITIAL_LIMIT" class="px-4 py-3 border-t border-dental-blue--5 text-center">
+      <button
+        class="text-[11px] text-dental-blue--3 hover:text-dental-blue-0 hover:underline"
+        @click="showAll = false"
+      >
+        ↑ Einklappen (nur {{ INITIAL_LIMIT }} neueste)
+      </button>
+    </div>
   </div>
 </template>
 
@@ -88,6 +106,12 @@ const filters: { value: FilterValue; label: string }[] = [
   { value: 'status', label: 'Status' },
 ]
 const activeFilter = ref<FilterValue>('all')
+
+const INITIAL_LIMIT = 5
+const showAll = ref(false)
+
+// Beim Filter-Wechsel die Limit-Anzeige zurücksetzen
+watch(activeFilter, () => { showAll.value = false })
 
 interface TimelineItem {
   key: string
@@ -187,15 +211,29 @@ const enriched = computed<TimelineItem[]>(() => {
   })
 })
 
-// Gruppierung nach Datum
+// Sortiert + (optional) auf Limit geschnitten
+const sortedEnriched = computed<TimelineItem[]>(() =>
+  [...enriched.value].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+)
+
+const totalFilteredCount = computed(() => sortedEnriched.value.length)
+
+const visibleEnriched = computed<TimelineItem[]>(() =>
+  showAll.value ? sortedEnriched.value : sortedEnriched.value.slice(0, INITIAL_LIMIT),
+)
+
+const hiddenCount = computed(() =>
+  !showAll.value && totalFilteredCount.value > INITIAL_LIMIT
+    ? totalFilteredCount.value - INITIAL_LIMIT
+    : 0,
+)
+
+// Gruppierung nach Datum (auf der gesliceten Liste)
 type Group = { label: string; items: TimelineItem[] }
 const grouped = computed<Group[]>(() => {
-  const sorted = [...enriched.value].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  )
   const groups: Record<string, TimelineItem[]> = {}
 
-  for (const item of sorted) {
+  for (const item of visibleEnriched.value) {
     const label = relativeDayLabel(item.date)
     if (!groups[label]) groups[label] = []
     groups[label].push(item)
