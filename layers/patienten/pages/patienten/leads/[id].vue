@@ -430,6 +430,16 @@
       @saved="refreshActivities"
     />
 
+    <!-- Quick-Send-Dialog für NBA-Actions mit Template -->
+    <PatientenQuickSendDialog
+      v-model:visible="quickSendVisible"
+      :lead="lead"
+      :channel="quickSendChannel"
+      :label="quickSendLabel"
+      :template-id="quickSendTemplateId"
+      @sent="loadActivities"
+    />
+
     <!-- Reschedule-Dialog -->
     <div
       v-if="rescheduleDialogVisible"
@@ -577,6 +587,20 @@ const onReactivateNow = async () => {
   }
 }
 
+// QuickSend: NBA-Quick-Actions mit template_id öffnen den QuickSendDialog
+// statt des generischen Aktivitäts-Dialogs.
+const quickSendVisible = ref(false)
+const quickSendChannel = ref<'email' | 'sms' | 'whatsapp'>('email')
+const quickSendLabel = ref('')
+const quickSendTemplateId = ref<string | undefined>(undefined)
+
+const openQuickSend = (channel: 'email' | 'sms' | 'whatsapp', label: string, templateId?: string) => {
+  quickSendChannel.value = channel
+  quickSendLabel.value = label
+  quickSendTemplateId.value = templateId
+  quickSendVisible.value = true
+}
+
 // Action-Handler für Quick-Buttons in NextBestActionCard
 const onAction = (action: import('../../../composables/useNextBestAction').NextBestAction) => {
   switch (action.type) {
@@ -586,12 +610,14 @@ const onAction = (action: import('../../../composables/useNextBestAction').NextB
       activityDialogVisible.value = true
       break
     case 'email':
-      emailDialogVisible.value = true
+      // Mit template_id: QuickSend mit vorgefülltem Inhalt. Ohne: freier Compose-Dialog.
+      if (action.template_id) openQuickSend('email', action.label, action.template_id)
+      else emailDialogVisible.value = true
       break
     case 'sms':
     case 'whatsapp':
-      activityDialogType.value = action.type
-      activityDialogVisible.value = true
+      if (action.template_id) openQuickSend(action.type, action.label, action.template_id)
+      else { activityDialogType.value = action.type; activityDialogVisible.value = true }
       break
     case 'book_meeting':
       openKalenderForBooking()
