@@ -4,7 +4,9 @@ import type { Appointment, AttendanceStatus } from '~/types/appointments'
 
 const COLLECTION = 'appointments'
 
-const USE_MOCK_DATA = true
+// `false` = Live-Daten aus Directus appointments-Collection
+// (Dev: Server-Proxy /api/dev-read; Prod: cookie-authentifiziert)
+const USE_MOCK_DATA = false
 const MOCK_KEY = 'patient-crm-mock-appointments'
 
 const readMock = (): Appointment[] => {

@@ -5,8 +5,9 @@ import type { Lead, LeadStatus, LeadSource } from '~/types/crm'
 const COLLECTION = 'Leads' // Capital L — matches Directus collection name
 
 // Mock-Mode: nutzt localStorage 'patient-crm-mock-leads' (seeded via mock-seed.client.ts)
-// Auf `false` setzen sobald Directus-Backend verfügbar ist.
-const USE_MOCK_DATA = true
+// `false` = Live-Daten via useSecureData (Dev: Server-Proxy /api/dev-read mit Static-Token;
+// Prod: cookie-authentifiziert direkt gegen Directus).
+const USE_MOCK_DATA = false
 const MOCK_STORAGE_KEY = 'patient-crm-mock-leads'
 
 const readMockLeads = (): Lead[] => {
@@ -138,9 +139,12 @@ export const usePatientLeads = () => {
           meta: ['total_count', 'filter_count'],
         },
       })
-      leads.value = result
+      // Legacy-Status-Mapping (Directus speichert noch alte Choice-Werte wie
+      // 'scheduled', 'cancelled' — wir mappen on-the-fly auf v9-Status)
+      const mapped = result.map(mapDirectusLeadStatus)
+      leads.value = mapped
       pagination.value.page = currentPage
-      return result
+      return mapped
     } catch (err) {
       error.value = err as Error
       throw err
@@ -166,8 +170,9 @@ export const usePatientLeads = () => {
         id,
         params: { fields: LEAD_DETAIL_FIELDS },
       })
-      currentLead.value = result
-      return result
+      const mapped = mapDirectusLeadStatus(result)
+      currentLead.value = mapped
+      return mapped
     } catch (err) {
       error.value = err as Error
       throw err

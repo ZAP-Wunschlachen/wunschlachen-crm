@@ -164,7 +164,19 @@ export const LEGACY_STATUS_MAP: Record<string, LeadStatus> = {
 
 /**
  * Reverse-Lookup für Lost-Reason-Migration aus alten Status-Cancellations.
+ * (nur historisch — keine 'other' mehr nach LostReason-Migration auf Directus-Werte)
  */
 export const LEGACY_CANCEL_REASON: Record<string, LostReason> = {
-  cancelled: 'other',
+  cancelled: 'personal_reasons',
+}
+
+/**
+ * Map a Directus-Lead-Object zum CRM-internen Format:
+ * - Status legacy→v9
+ * - Tags/Datums-Felder unverändert
+ */
+export const mapDirectusLeadStatus = <T extends { status?: string | null }>(lead: T): T => {
+  if (!lead?.status) return lead
+  const mapped = LEGACY_STATUS_MAP[lead.status as string]
+  return mapped ? { ...lead, status: mapped } : lead
 }
