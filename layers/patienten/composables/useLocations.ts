@@ -1,39 +1,32 @@
-// composables/useLocations.ts — Standorte aus Directus mit Mock-Fallback für Dev
+// composables/useLocations.ts — Standorte aus Directus via /api/lookup-Proxy
 
 interface Location {
   id: string
   name: string
 }
 
-// Mock-Standorte als Fallback wenn Directus nicht erreichbar / leer
-const MOCK_LOCATIONS: Location[] = [
-  { id: 'loc-berlin',   name: 'Wunschlachen Berlin' },
-  { id: 'loc-hamburg',  name: 'Wunschlachen Hamburg' },
-  { id: 'loc-muenchen', name: 'Wunschlachen München' },
-  { id: 'loc-koeln',    name: 'Wunschlachen Köln' },
-]
-
 export const useLocations = () => {
-  const { getItems } = useSecureData()
   const locations = ref<Location[]>([])
   const isLoading = ref(false)
+  const error = ref<Error | null>(null)
 
   const fetchLocations = async () => {
     if (locations.value.length > 0) return
     isLoading.value = true
+    error.value = null
     try {
-      const data = await getItems<Location>({
-        collection: 'locations',
-        params: { fields: ['id', 'name'], sort: ['name'], limit: -1 },
+      const resp = await $fetch<{ data: Location[] }>('/api/lookup/locations', {
+        params: { fields: 'id,name', sort: 'name' },
       })
-      locations.value = data && data.length > 0 ? data : MOCK_LOCATIONS
-    } catch (err) {
-      console.warn('[useLocations] Directus-Fetch fehlgeschlagen, nutze Mock:', err)
-      locations.value = MOCK_LOCATIONS
+      locations.value = resp?.data || []
+    } catch (err: any) {
+      console.warn('[useLocations] /api/lookup/locations fehlgeschlagen:', err)
+      error.value = err
+      locations.value = []
     } finally {
       isLoading.value = false
     }
   }
 
-  return { locations, isLoading, fetchLocations }
+  return { locations, isLoading, error, fetchLocations }
 }

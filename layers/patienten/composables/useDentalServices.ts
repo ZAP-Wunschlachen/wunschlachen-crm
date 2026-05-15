@@ -1,43 +1,32 @@
-// composables/useDentalServices.ts — Zahnärztliche Leistungen aus Directus mit Mock-Fallback
+// composables/useDentalServices.ts — Zahnärztliche Leistungen aus Directus via /api/lookup-Proxy
 
 interface DentalService {
   id: string
   name: string
 }
 
-// Mock-Liste als Fallback wenn Directus nicht erreichbar / leer
-const MOCK_SERVICES: DentalService[] = [
-  { id: 'svc-implantat-einzelzahn', name: 'Einzelzahn-Implantat' },
-  { id: 'svc-implantat-mehrere',    name: 'Mehrere Implantate / Brücke' },
-  { id: 'svc-implantat-allon4',     name: 'All-on-4® / All-on-6®' },
-  { id: 'svc-zahnersatz',           name: 'Zahnersatz / Prothese' },
-  { id: 'svc-zahnersatz-festsitzend', name: 'Festsitzender Zahnersatz' },
-  { id: 'svc-veneers',              name: 'Veneers / ästhetische Zahnheilkunde' },
-  { id: 'svc-kieferchirurgie',      name: 'Kieferchirurgie / Knochenaufbau' },
-  { id: 'svc-beratung-allgemein',   name: 'Allgemeine Beratung' },
-]
-
 export const useDentalServices = () => {
-  const { getItems } = useSecureData()
   const services = ref<DentalService[]>([])
   const isLoading = ref(false)
+  const error = ref<Error | null>(null)
 
   const fetchDentalServices = async () => {
     if (services.value.length > 0) return
     isLoading.value = true
+    error.value = null
     try {
-      const data = await getItems<DentalService>({
-        collection: 'dental_services',
-        params: { fields: ['id', 'name'], sort: ['name'], limit: -1 },
+      const resp = await $fetch<{ data: DentalService[] }>('/api/lookup/dental_services', {
+        params: { fields: 'id,name', sort: 'name' },
       })
-      services.value = data && data.length > 0 ? data : MOCK_SERVICES
-    } catch (err) {
-      console.warn('[useDentalServices] Directus-Fetch fehlgeschlagen, nutze Mock:', err)
-      services.value = MOCK_SERVICES
+      services.value = resp?.data || []
+    } catch (err: any) {
+      console.warn('[useDentalServices] /api/lookup/dental_services fehlgeschlagen:', err)
+      error.value = err
+      services.value = []
     } finally {
       isLoading.value = false
     }
   }
 
-  return { services, isLoading, fetchDentalServices }
+  return { services, isLoading, error, fetchDentalServices }
 }
