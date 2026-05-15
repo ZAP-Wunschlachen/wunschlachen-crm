@@ -4,6 +4,13 @@
       <h1 class="text-2xl font-bold text-dental-blue-0">Leads</h1>
       <div class="flex items-center gap-2">
         <button
+          class="px-3 py-2 text-sm font-medium text-dental-blue--2 hover:text-dental-blue-0 hover:bg-dental-blue--6 rounded-lg flex items-center gap-2"
+          @click="showLostStats = !showLostStats"
+        >
+          <i :class="showLostStats ? 'pi pi-chevron-up' : 'pi pi-chart-bar'" class="text-xs" />
+          Verlust-Analyse
+        </button>
+        <button
           class="px-4 py-2 text-sm font-medium text-dental-blue-0 border border-dental-blue--5 rounded-lg hover:bg-[#ededed] flex items-center gap-2"
           @click="handleExport"
         >
@@ -18,6 +25,11 @@
           Neuer Lead
         </button>
       </div>
+    </div>
+
+    <!-- Verlust-Analyse Widget (ausklappbar) -->
+    <div v-if="showLostStats" class="mb-4">
+      <PatientenLostReasonsCard />
     </div>
 
     <!-- Filters -->
@@ -233,6 +245,7 @@ const search = ref('')
 const activeStatus = ref<LeadStatus | null>(null)
 const activeSource = ref<LeadSource | null>(null)
 const showCreate = ref(false)
+const showLostStats = ref(false)
 type SortMode = 'default' | 'urgency' | 'score' | 'callqueue'
 const sortMode = ref<SortMode>('default')
 

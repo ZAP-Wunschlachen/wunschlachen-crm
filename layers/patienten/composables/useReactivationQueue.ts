@@ -7,12 +7,14 @@
  *   - Manueller `reactivate(lead)` setzt Status zurück zu 'contacting' + Tag 'reactivated'
  *   - Cron-Endpoint `/api/cron/reactivation-check` läuft täglich + triggert auto-reactivation
  *
- * Reactivation-Strategien je nach lost_reason:
- *   - too_expensive / no_budget → Finanzierungs-Angebot mit Reactivation-Mail
- *   - no_response → "Wir sind hier wenn du bereit bist" + neue Promo
- *   - competitor → "Was hat dich überzeugt?" Feedback-Ask
- *   - distance_too_far → "Wir haben jetzt mobiles Angebot" (falls relevant)
- *   - andere → Standard-Reactivation
+ * Reactivation-Strategien je nach lost_reason (Directus-Choice-Werte):
+ *   - too_expensive / no_budget → Finanzierungs-Angebot
+ *   - missing_trust → Vertrauen-Aufbau (Patientenstimmen, Team-Vorstellung)
+ *   - other_dentist → "Was hat überzeugt?" Feedback-Ask
+ *   - no-contact-information → keine Reactivation (kein Touchpoint)
+ *   - distance_too_far → Hinweis auf nächstgelegenen Berliner Standort
+ *   - language-barrier → Mehrsprachiger Hinweis
+ *   - personal_reasons → behutsame Wieder-Annäherung
  */
 
 import type { Lead, LostReason } from '~/types/crm'
@@ -39,41 +41,29 @@ const STRATEGIES: Record<LostReason, ReactivationStrategy> = {
     template_id: 'reactivation-financing',
     approach: 'Erweiterte Finanzierungsoptionen + Förderprogramme',
   },
-  competitor: {
-    reason: 'competitor',
+  missing_trust: {
+    reason: 'missing_trust',
+    label: 'Vertrauens-Aufbau',
+    template_id: 'reactivation-trust',
+    approach: 'Patientenstimmen, Team-Vorstellung, transparente Behandlungsplanung',
+  },
+  other_dentist: {
+    reason: 'other_dentist',
     label: 'Erfahrungs-Feedback',
     template_id: 'reactivation-feedback',
-    approach: 'Höflich nach Erfahrung beim Mitbewerber fragen',
-  },
-  no_response: {
-    reason: 'no_response',
-    label: 'Niedrigschwellige Wieder-Annäherung',
-    template_id: 'reactivation-soft',
-    approach: '"Wir sind hier wenn du bereit bist" + nützlicher Content',
+    approach: 'Höflich nach Erfahrung beim anderen Zahnarzt fragen — Tür offen halten',
   },
   distance_too_far: {
     reason: 'distance_too_far',
-    label: 'Mobiles Angebot',
-    template_id: 'reactivation-mobile',
-    approach: 'Hinweis auf mobile/regionale Optionen',
+    label: 'Standort-Hinweis',
+    template_id: 'reactivation-location',
+    approach: 'Hinweis auf nächstgelegenen Berliner Wunschlachen-Standort + ÖPNV',
   },
-  health_unfit: {
-    reason: 'health_unfit',
-    label: 'Sensible Wieder-Annäherung',
-    template_id: 'reactivation-health',
-    approach: 'Genesungs-Wünsche + offene Tür für später (nur falls medizinische Situation sich geändert hat)',
-  },
-  language_barrier: {
-    reason: 'language_barrier',
+  'language-barrier': {
+    reason: 'language-barrier',
     label: 'Mehrsprachiges Angebot',
     template_id: 'reactivation-language',
-    approach: 'Hinweis auf englisch/türkisch sprechende Praxisteams',
-  },
-  not_interested: {
-    reason: 'not_interested',
-    label: 'Neue Angebote',
-    template_id: 'reactivation-soft',
-    approach: 'Niedrigschwelliger Re-Engagement mit aktueller Aktion',
+    approach: 'Hinweis auf mehrsprachige Teams (Englisch/Türkisch/Russisch je nach Standort)',
   },
   personal_reasons: {
     reason: 'personal_reasons',
@@ -81,11 +71,11 @@ const STRATEGIES: Record<LostReason, ReactivationStrategy> = {
     template_id: 'reactivation-soft',
     approach: 'Behutsame Wieder-Aufnahme nach persönlicher Situation',
   },
-  other: {
-    reason: 'other',
-    label: 'Standard-Reactivation',
-    template_id: 'reactivation-soft',
-    approach: 'Allgemeine Wieder-Annäherung mit Special-Offer',
+  'no-contact-information': {
+    reason: 'no-contact-information',
+    label: 'Keine Reactivation möglich',
+    template_id: '',
+    approach: 'Kein Touchpoint vorhanden — Lead bleibt im Lost-Status',
   },
 }
 
@@ -123,9 +113,16 @@ export const useReactivationQueue = () => {
   /**
    * Empfiehlt Reactivation-Strategie basierend auf lost_reason.
    */
+  // Fallback wenn lost_reason fehlt oder unbekannt
+  const DEFAULT_STRATEGY: ReactivationStrategy = {
+    reason: 'personal_reasons',
+    label: 'Standard-Reactivation',
+    template_id: 'reactivation-soft',
+    approach: 'Niedrigschwellige Wieder-Annäherung — kein spezifischer Grund hinterlegt',
+  }
   const getStrategy = (lead: Lead): ReactivationStrategy => {
-    const reason = lead.lost_reason || 'other'
-    return STRATEGIES[reason] || STRATEGIES.other
+    const reason = lead.lost_reason as LostReason | undefined
+    return (reason && STRATEGIES[reason]) || DEFAULT_STRATEGY
   }
 
   /**

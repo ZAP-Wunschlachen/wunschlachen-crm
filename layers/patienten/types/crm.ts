@@ -138,29 +138,31 @@ export const LEAD_SOURCE_CONFIG: Record<LeadSource, { label: string; icon: strin
  * Für temporäre Verhinderungen (Krankheit, Termin-Konflikt) → RescheduleReason +
  * markAsRescheduled (Status springt zurück statt auf 'lost').
  */
+/**
+ * Lost-Reasons — Source of Truth ist die `Leads.lost_reason`-Choice-Liste
+ * in Directus. IDs und Reihenfolge müssen mit dem Directus-Schema matchen.
+ * Bindestriche in `no-contact-information` + `language-barrier` sind
+ * absichtlich (Directus-Konvention, nicht ändern).
+ */
 export type LostReason =
-  | 'not_interested'
   | 'too_expensive'
   | 'no_budget'
-  | 'competitor'
-  | 'no_response'
+  | 'missing_trust'
   | 'distance_too_far'
-  | 'health_unfit'         // medizinisch nicht (mehr) geeignet — final
-  | 'language_barrier'
   | 'personal_reasons'
-  | 'other'
+  | 'other_dentist'
+  | 'no-contact-information'
+  | 'language-barrier'
 
 export const LOST_REASON_LABELS: Record<LostReason, string> = {
-  not_interested:    'Kein Interesse',
-  too_expensive:     'Zu teuer',
-  no_budget:         'Kein Budget / Finanzierung abgelehnt',
-  competitor:        'Anderer Anbieter gewählt',
-  no_response:       'Patient antwortet nicht mehr',
-  distance_too_far:  'Entfernung zu groß',
-  health_unfit:      'Medizinisch nicht geeignet',
-  language_barrier:  'Sprachliche Barriere',
-  personal_reasons:  'Persönliche Gründe',
-  other:             'Sonstiges',
+  too_expensive:           'Zu teuer',
+  no_budget:               'Kein Kapital',
+  missing_trust:           'Fehlendes Vertrauen',
+  distance_too_far:        'Distanz zu weit',
+  personal_reasons:        'Persönliche Gründe',
+  other_dentist:           'Anderer Zahnarzt',
+  'no-contact-information': 'Keine Kontaktmöglichkeit',
+  'language-barrier':      'Sprachliche Barriere',
 }
 
 /**
