@@ -1,705 +1,961 @@
-# Wunschlachen Email-Marketing-Funnel — Komplettkonzept
+# Wunschlachen Email-Marketing-Funnel — Praxisgruppen-Komplettkonzept
 
-**Datum:** 2026-05-13
+**Datum:** 2026-05-15
 **Owner:** Tony Günther
-**Version:** 1.0
+**Version:** 2.0 — Komplettüberarbeitung auf Basis realer Directus-Stammdaten
 **Branch:** feat/full-merge
 **Bezug:** [docs/specs/2026-05-13-patient-funnel-automation.md](../specs/2026-05-13-patient-funnel-automation.md) Modul A
+
+> **Hinweis zur Überarbeitung:** v1.0 dieses Dokuments ging fälschlich davon aus, dass Wunschlachen eine auf Implantat-Dental-Tourismus spezialisierte Gruppe sei (USPs wie „keine Bulgarien-Reise", Vergleich mit Dentaprime). Das war ein Fehler. Wunschlachen ist eine **sechsköpfige Berliner Zahnarzt-Praxisgruppe** mit breit aufgestelltem Leistungsspektrum und klarer Standort-Spezialisierung. Alle Inhalte wurden neu kalibriert.
 
 ---
 
 ## Inhaltsverzeichnis
 
-1. [Strategie-Layer](#1-strategie-layer)
-   1. [Brand-Voice-Definition](#11-brand-voice-wunschlachen-vs-dentaprime)
-   2. [USP-Statements](#12-usp-statements)
-   3. [Zielgruppen-Psychografie & Einwände](#13-zielgruppen-psychografie--einwände)
-   4. [Sequenz-Architektur & Frequenz](#14-sequenz-architektur--frequenz)
-2. [Themen-Cluster — Übersicht aller 44 Templates](#2-themen-cluster--übersicht-aller-44-templates)
-3. [Welcome-Sequenz Tag 0–14 (6 Mails) — Detailblock](#3-welcome-sequenz-tag-014-6-mails--detailblock)
-4. [Steady-State-Sequenz Wochen 3–26 (~34 Mails) — Detailblock](#4-steady-state-sequenz-wochen-326-34-mails--detailblock)
-5. [Saison-Specials](#5-saison-specials)
-6. [Termin-bezogene Trigger-Mails](#6-termin-bezogene-trigger-mails)
-7. [Re-Engagement-Sequenz für Lost-Leads](#7-re-engagement-sequenz-für-lost-leads)
-8. [KPIs & A/B-Tests](#8-kpis--ab-tests)
-9. [Brevo-Setup-Hinweise](#9-brevo-setup-hinweise)
-10. [Nächste Schritte für das Marketing-Team](#10-nächste-schritte-für-das-marketing-team)
+1. [Strategie + Markenpositionierung](#1-strategie--markenpositionierung)
+   1. [Wer ist Wunschlachen — korrekte Selbstbeschreibung](#11-wer-ist-wunschlachen--korrekte-selbstbeschreibung)
+   2. [Brand-Voice-Prinzipien](#12-brand-voice-prinzipien)
+   3. [USP-Statements (korrigiert)](#13-usp-statements-korrigiert)
+   4. [Zielgruppen-Psychografie + Kern-Einwände](#14-zielgruppen-psychografie--kern-einwände)
+   5. [Sequenz-Architektur + Frequenz](#15-sequenz-architektur--frequenz)
+2. [Standort-Strukturen + USPs pro Standort](#2-standort-strukturen--usps-pro-standort)
+3. [Lead-Segmentierung nach dental_service](#3-lead-segmentierung-nach-dental_service)
+4. [Themen-Cluster — Übersicht aller ~65 Templates](#4-themen-cluster--übersicht-aller-65-templates)
+5. [Welcome-Sequenz Tag 0–14 — Detailblock (Mails 1001–1006)](#5-welcome-sequenz-tag-014--detailblock-mails-10011006)
+6. [Segment-Sequenzen Wochen 3–26](#6-segment-sequenzen-wochen-326)
+   1. [Segment A — Implantate + Zahnersatz (IDs 1010–1019)](#61-segment-a--implantate--zahnersatz-ids-10101019)
+   2. [Segment B — KFO + Aligner (IDs 1020–1029)](#62-segment-b--kfo--aligner-ids-10201029)
+   3. [Segment C — Ästhetik + White Cocoon (IDs 1030–1039)](#63-segment-c--ästhetik--white-cocoon-ids-10301039)
+   4. [Segment D — Angstpatienten + Sanfte Behandlung (IDs 1040–1049)](#64-segment-d--angstpatienten--sanfte-behandlung-ids-10401049)
+   5. [Segment E — Vorsorge + Zahnreinigung (IDs 1050–1059)](#65-segment-e--vorsorge--zahnreinigung-ids-10501059)
+   6. [Segment F — Default / Allgemein (IDs 1060–1079)](#66-segment-f--default--allgemein-ids-10601079)
+7. [Saison-Specials](#7-saison-specials)
+8. [Termin-bezogene Trigger-Mails](#8-termin-bezogene-trigger-mails)
+9. [Re-Engagement-Sequenz für Lost-Leads](#9-re-engagement-sequenz-für-lost-leads)
+10. [KPIs + A/B-Tests](#10-kpis--ab-tests)
+11. [Brevo-Setup-Hinweise + Template-ID-Schema](#11-brevo-setup-hinweise--template-id-schema)
+12. [Nächste Schritte für das Marketing-Team](#12-nächste-schritte-für-das-marketing-team)
 
 ---
 
-## 1. Strategie-Layer
+## 1. Strategie + Markenpositionierung
 
-### 1.1 Brand-Voice — Wunschlachen vs. Dentaprime
+### 1.1 Wer ist Wunschlachen — korrekte Selbstbeschreibung
 
-**Wer ist Dentaprime?**
-Dentaprime ist eine bulgarische Zahnklinik, die deutsche Patienten mit Niedrigpreis-Argumenten ("60 % günstiger als in Deutschland") und Reisepaketen wirbt. Die Emails sind aufmerksamkeitsstark, nutzen aggressive FOMO-Formulierungen ("Sie verdienen Zahnimplantate!", "Keine Ausreden mehr!") und setzen stark auf emotionale Schock-Trigger. Das Format ist fast ausschließlich HTML-heavy, visuelle Banner dominieren über Text-Substanz. Der Ton ist vertrieblich — ein Zahnarzt würde so nicht mit einem Patienten reden.
+Wunschlachen ist eine **Berliner Zahnarzt-Praxisgruppe mit sechs Standorten**, die das gesamte Spektrum moderner Zahnmedizin abdeckt — von der Kinderzahnheilkunde über Kieferorthopädie und klassische Zahnerhaltung bis hin zu Implantologie und der ästhetischen Speziallinie „White Cocoon by Wunschlachen". Die Standorte sind gezielt auf Berliner Bezirke verteilt; die Spezialisierungen sind ortsbezogen gebündelt, sodass Patienten kurze Wege zum richtigen Angebot haben.
 
-**Wer ist Wunschlachen?**
-Wunschlachen ist eine deutsche Zahnimplantat-Praxisgruppe. Die Nähe zum Patienten ist kein Marketing-Argument — sie ist einfach die Realität: kurze Anfahrt, gleiche Sprache, bekannte Krankenkassen, kontinuierliche Betreuung durch denselben Zahnarzt von der Erstberatung bis zur Nachkontrolle. Das ist der strukturelle Vorteil gegenüber einer Auslandsklinik, den Dentaprime nie replizieren kann.
+**In einem Satz für den Leser:** *„Wunschlachen ist Ihr Berliner Zahnarzt mit sechs Standorten — einer für jeden Bedarf, alle kurz erreichbar."*
 
-**Voice-Prinzipien für alle Emails:**
+Das bedeutet konkret: Ein Implantat-Patient wird in Friedrichstraße oder den Implantat-Standorten in Reinickendorf/Schöneberg hervorragend versorgt. Eltern mit kieferorthopädisch zu behandelnden Kindern finden in den KFO+Kinder-Standorten spezialisierte Kompetenz. Wer ein strahlend weißes, ästhetisch optimiertes Lächeln möchte, ist in der White Cocoon-Praxis in Charlottenburg richtig. Das ist kein Marketing — das ist die tatsächliche Struktur.
 
-| Dimension | Dentaprime-Stil (vermeiden) | Wunschlachen-Stil (anstreben) |
+---
+
+### 1.2 Brand-Voice-Prinzipien
+
+| Dimension | Vermeiden | Anstreben |
 |---|---|---|
-| Ansprache | Herr/Frau + Nachname, formell-distanziert | Vorname (`{{firstName}}`), warm aber respektvoll |
-| Ton | Vertrieblich, drängend, emotional aufgeladen | Sachkundig, ruhig, aufklärend — wie ein Arzt beim Beratungsgespräch |
-| Dringlichkeit | Künstlich ("JETZT!", "Keine Ausreden mehr!") | Echt: Wartezeiten sind real; gute Slots vergehen — das reicht |
-| Länge | Sehr kurze Texte, primär Bild | Mittellang (200–350 Wörter im Copywriter-Draft), Substanz über Style |
-| CTA | Einzelner dominanter Button, oft rot | Dezenter primärer CTA + weiche Sekundär-Option ("oder rufen Sie uns an") |
-| Zahlen | Große Versprechen ohne Kontext | Konkret wenn belegt, "typischerweise" wenn nicht — keine erfundenen Garantien |
-| Abschluss | Anonym ("Das Dentaprime-Team") | Person: Behandler-Name oder Praxisname mit Telefonnummer sichtbar |
+| Ansprache | Formell-distanziert, anonymes „Team" | Vorname `{{firstName}}`, warmherzig aber respektvoll |
+| Ton | Vertrieblich, drängend, emotionaler Druck | Sachkundig, aufklärend — wie ein Arzt beim Erstgespräch |
+| Dringlichkeit | Künstliche FOMO-Formulierungen | Echt: gute Termine werden vergeben, das reicht als Argument |
+| Länge | Nur Bilder, minimaler Text | 200–350 Wörter im Draft, Substanz über Stil |
+| CTA | Dominanter roter Button, Einzeloption | Dezenter primärer CTA + weiche Sekundäroption (Anrufen) |
+| Zahlen | Unbeelegte Versprechen, erfundene %-Angaben | Konkret wenn belegt, „branchen-typisch" wenn nicht |
+| Abschluss | Anonym | Person: Praxisname + Telefon sichtbar, gerne Behandler-Name |
+| Berliner Bezug | Austauschbar deutschlandweit | Bezirke, Kiez, U-Bahn-Nähe — Wunschlachen ist lokal |
 
-**Wunschlachen-Tonalität in einem Satz:**
-*"Wir informieren Sie so, wie wir selbst informiert werden möchten — ehrlich, fachlich korrekt, ohne Verkaufsdruck."*
-
----
-
-### 1.2 USP-Statements
-
-Die folgenden USPs sind auf Basis des deutschen Markt-Kontexts angenommen. **Tony sollte diese Liste gegen die tatsächliche Praxis-Positionierung prüfen und korrigieren.**
-
-**USP 1 — Keine Reise, kein Risiko**
-Komplikationen nach einer Implantat-Behandlung können auftreten — auch wenn sie selten sind. Bei Dentaprime bedeutet ein Problem: einen Flug buchen, erneut Urlaub nehmen, ein fremdes Krankenhaus aufsuchen. Bei Wunschlachen: kurzer Anruf, nächster verfügbarer Slot in der vertrauten Praxis. Diese After-Care-Sicherheit ist für viele Patienten der eigentliche Kaufentscheid.
-
-**USP 2 — Deutscher Zahnarzt mit voller rechtlicher Absicherung**
-Deutsche Approbation, deutsches Haftungsrecht, PKV/GKV-Abrechnung nach GOZ/BEMA. Kein Übersetzungsrisiko, keine unbekannten Abrechnungsstrukturen, volle Patientenrechte.
-
-**USP 3 — Kontinuierliche Behandler-Beziehung**
-Von der Erstberatung bis zur Nachkontrolle in 5 Jahren derselbe Zahnarzt. Keine Rotations-Teams, keine Übergaben an unbekannte Ärzte zwischen Besuchen. Das schafft Vertrauen und verbessert klinische Ergebnisse (der Arzt kennt die Anamnese).
-
-**USP 4 — Krankenkassen-Kompetenz**
-Wunschlachen rechnet direkt mit GKV und PKV ab und kennt den Festzuschuss-Dschungel. Patienten erhalten proaktiv Unterstützung beim Kostenvoranschlag, nicht erst auf Nachfrage.
-
-**USP 5 — Transparente Kostenplanung (kein Preisschock)**
-Detaillierter Heil- und Kostenplan (HKP) vor jeder Behandlung. Keine versteckten Aufpreise für Material oder Prothesensitze. Wunschlachen ist nicht das billigste Angebot — aber das Gesamtpaket (kein Reiseaufwand, keine Folgereisekosten, volle GKV-Abrechnung) ist oft vergleichbar oder günstiger als das Bulgarien-Paket.
-
-**USP 6 — Moderne Technologie ohne Klinik-Tourismus-Aufpreis**
-3D-Röntgen, digitaler Abdruck, CAD/CAM-Fertigung sind in deutschen Praxen heute Standard — nicht exklusiv für Dental-Touristen. (Annahme — bitte gegen tatsächliche Ausstattung prüfen.)
+**Tonalität in einem Satz:**
+*„Wir informieren so, wie wir selbst informiert werden möchten — ehrlich, fachlich korrekt, lokal verwurzelt, ohne Verkaufsdruck."*
 
 ---
 
-### 1.3 Zielgruppen-Psychografie & Einwände
+### 1.3 USP-Statements (korrigiert)
 
-**Typisches Lead-Profil:**
-Person zwischen 45–70 Jahren, ein oder mehrere fehlende Zähne oder stark geschädigte Zähne, hat sich bereits online informiert, ist preissensibel aber qualitätsbewusst, hat möglicherweise bereits von Auslandskliniken gehört. Hat auf einer Wunschlachen-Seite ein Kontaktformular ausgefüllt — das ist aktives Informationsinteresse, kein impulsiver Klick.
+> Tony: Bitte diese Punkte gegen eure interne Positionierung prüfen. Was unten steht, basiert auf den Directus-Stammdaten, nicht auf Gesprächen mit dem Team.
 
-**Die 5 Kern-Einwände und wie der Funnel sie adressiert:**
+**USP 1 — Sechs Berliner Standorte, spezialisiert und koordiniert**
+Kein langer Weg zu einem Spezialisten außerhalb Berlins. Die Wunschlachen-Gruppe bietet innerhalb Berlins Implantologie, Kieferorthopädie, Kinderzahnheilkunde und ästhetische Zahnmedizin — aufgeteilt auf Standorte, die für ihren Schwerpunkt optimiert sind. Für Patienten, die mehrere Behandlungen benötigen, bleibt alles in einem Netz.
+
+**USP 2 — Eine Praxisgruppe für die ganze Familie**
+Kleinkind mit erstem Zahnarzttermin, Jugendlicher mit Aligner-Bedarf, Erwachsener mit Implantat-Wunsch, Senior mit Zahnersatz — all das kann Wunschlachen abbilden. Das vereinfacht Eltern-Kind-Koordination und schafft ein echtes langfristiges Behandlungsverhältnis.
+
+**USP 3 — White Cocoon: Ästhetik ohne Kompromiss**
+Die Sub-Marke White Cocoon in Charlottenburg steht für ästhetische Zahnmedizin auf Spezialisten-Niveau. Bleaching, Veneers, Ästhetik-Aligner — in einem Umfeld, das diesem Anspruch gerecht wird. Für Patienten, bei denen das Lächeln Visitenkarte ist.
+
+**USP 4 — Angstpatienten-Konzept: Lachgas und Vollnarkose**
+Zahnarztangst ist weit verbreitet. Wunschlachen bietet Lachgas-Sedierung und Behandlung unter Vollnarkose an — damit auch Patienten, die jahrelang notwendige Behandlungen vermieden haben, einen sicheren Weg zurück zur Zahngesundheit finden.
+
+**USP 5 — Berliner Kontinuität: kein Behandler-Wechsel**
+Wer bei Wunschlachen behandelt wird, hat einen festen Ansprechpartner in seiner Praxis — nicht ein rotierendes Team-System. Von der Erstberatung bis zur Nachkontrolle kennt der Behandler die Patientengeschichte.
+
+**USP 6 — GKV + PKV + Transparenter HKP**
+Direkte Abrechnung mit allen deutschen Krankenversicherungen. Heil- und Kostenplan vor jeder Behandlung — keine Überraschungen. Festzuschuss-Beratung für Implantat-Patienten inklusive.
+
+---
+
+### 1.4 Zielgruppen-Psychografie + Kern-Einwände
+
+Wunschlachen bedient mehrere deutlich unterschiedliche Zielgruppen. Die Psychografie hängt stark vom Segment ab (siehe §3), aber folgende Einwände sind übergreifend relevant:
 
 | Einwand | Unterströmung | Funnel-Antwort |
 |---|---|---|
-| "Das ist zu teuer" | Unklarheit über Gesamtkosten; Vergleich mit Ausland ohne Reisekosten-Kalkulation | Kosten-Mail (T+10, dann mehrfach in Steady-State): transparenter HKP-Prozess, Festzuschuss-Erklärung, Finanzierungsoptionen |
-| "Das tut bestimmt weh" | Angst vor dem unbekannten Eingriff; schlechte Erfahrungen beim Zahnarzt früher | Schmerzfreiheits-Mail (T+7), Behandlungsablauf-Erklärung, Patient-Story-Mails |
-| "Ich muss das noch überlegen" | Entscheidungsaufschub als Selbstschutz-Mechanismus | Kontinuierliche Informationsdosis ohne Druck; bei Status "contacted": Urgency-Trigger einbauen |
-| "Kann ich euch vertrauen?" | Unbekannte Praxis, kein persönlicher Empfehler | Team-Vorstellung, Dr.-Profil-Mails, Patienten-Feedback, Zertifikate/Zugehörigkeiten |
-| "Sieht man, dass das Zahnersatz ist?" | Ästhetischer Selbstzweifel | Ästhetik-Mails, "natürliches Lächeln"-Thema, vorher-nachher-Kontext (ohne reißerische Bilder) |
+| „Das ist zu teuer" | Unklarheit über GKV-Anteil, Finanzierungsoptionen unbekannt | Kosten-Mails pro Segment: HKP-Prozess, Festzuschuss, Ratenzahlung |
+| „Das tut weh" / „Ich habe Angst" | Schlechte Erfahrungen früher, unbekannter Eingriff | Angstpatienten-Cluster als eigener Funnel-Pfad; Lachgas/Vollnarkose prominent |
+| „Ich muss das noch überlegen" | Aufschub als Selbstschutz | Regelmäßige, druckfreie Informationsdosis; kein aggressives Follow-up |
+| „Kann ich euch vertrauen?" | Unbekannte Praxis, kein persönlicher Empfehler | Team-Vorstellung, Standort-Spotlight, Patienten-Feedback |
+| „Bin ich am richtigen Standort?" | Berliner Kiez-Denken: Reinickendorf ≠ Charlottenburg | Standort-Routing im Lead-Formular; Standort-Spotlight-Mails |
+| „Ist das bei Kindern richtig?" | Eltern-Zweifel vor KFO-Behandlung | Familien-Cluster: edukative Inhalte über Kinderzahnheilkunde + KFO-Timing |
 
 ---
 
-### 1.4 Sequenz-Architektur & Frequenz
+### 1.5 Sequenz-Architektur + Frequenz
 
 ```
-SIGN-UP
+SIGN-UP (dental_service aus Formular → Segment-Routing)
    │
    ▼ T+0  (< 60 Sek)
-   Mail 1: Welcome + sofortiger Buchungs-CTA
+   Mail 1001: Welcome — Segment-aware (Default oder spezifisch)
    │
    ▼ T+1
-   Mail 2: Team-Vorstellung (Trust)
+   Mail 1002: Team + Standort-Vorstellung
    │
    ▼ T+3
-   Mail 3: Mythen-Aufklärung
+   Mail 1003: Segment-spezifische Aufklärung (Mythen / Fragen)
    │
    ▼ T+7
-   Mail 4: Schmerzfreiheit / Angstabbau
+   Mail 1004: Pain-Point-Adressierung (Angst / Kosten / Skepsis)
    │
    ▼ T+10
-   Mail 5: Kosten / Finanzierung
+   Mail 1005: Kosten + Finanzierung
    │
    ▼ T+14
-   Mail 6: Direkter Buchungs-CTA ("Jetzt oder nie")
+   Mail 1006: Direkter Buchungs-CTA (Welcome-Abschluss)
    │
-   ▼ WOCHE 3–26 (Steady-State)
-   Mittwoch: Content-Mail (kein Druck-CTA)
-   Sonntag: Booking-CTA-Mail
-   ⊕ Zusätzlich: Saison-Specials nach Kalender
+   ▼ WOCHE 3–26 — Segment-Sequenz (IDs 1010–1079)
+   Mittwoch: Content-Mail (Information, kein Druck-CTA)
+   Sonntag:  Booking-CTA-Mail
+   ⊕ Zusätzlich: Saison-Specials nach Kalender-Trigger
 ```
 
 **Frequenzlogik:**
-- Wochen 1–2: Täglich bis alle 3 Tage (Welcome-Sequenz = 6 Mails in 14 Tagen)
-- Wochen 3–26: 2×/Woche (Mi + So) = ~48 Steady-State-Mails über 6 Monate
-- Davon entfallen: ~34 auf reguläre Steady-State-Slots (Wochen 3–20), ~4 Saison-Specials
+- Wochen 1–2: Welcome-Sequenz (6 Mails, 1001–1006)
+- Wochen 3–26: 2×/Woche (Mi + So) = ~48 Slots à Segment, davon ~10 Segment-spezifisch + Rest aus Default-Pool
+- Saison-Specials: 4–6 pro Jahr, überschreiben den regulären Slot bei Relevanz
 
-**Pause-Bedingungen (für das Marketing-Team verständlich):**
-- `consultation_scheduled` und alle nachfolgenden Status: Nurture stoppt, eigene Reihe (Termin-Bestätigung → Reminder → Nach-Beratung) übernimmt
-- Status `lost`: Lead kommt in die Re-Engagement-Queue (90 Tage Pause, dann 3-Touch-Reaktivierung)
-- Brevo-Unsubscribe: Kein weiteres Marketing-Mail. Transaktionale Mails (Termin-Bestätigung) weiterhin erlaubt wenn separat konfiguriert
-- `GDPR_accepted_at = null`: Keine Mail überhaupt — DSGVO-Pflicht
+**Pause-Bedingungen:**
+- `consultation_scheduled` → Nurture stoppt; Termin-Trigger-Kette übernimmt (§8)
+- Status `lost` → Re-Engagement-Queue nach 90 Tagen Pause (§9)
+- Brevo-Unsubscribe → kein Marketing-Mail mehr; transaktionale Mails (Termin-Bestätigung) separat konfiguriert
+- `GDPR_accepted_at = null` → keine Mail; DSGVO-Pflicht
 
 ---
 
-## 2. Themen-Cluster — Übersicht aller 44 Templates
+## 2. Standort-Strukturen + USPs pro Standort
 
-> Legende Slot-Format: W = Welcome (Tag-Offset), Mi = Mittwoch Woche n, So = Sonntag Woche n, S = Saison-Special
+| Standort | Bezirk | Spezialisierung | Zielgruppe | Standort-USP (Email-Messaging) |
+|---|---|---|---|---|
+| White Cocoon by Wunschlachen | Charlottenburg | Ästhetische Zahnmedizin | Erwachsene mit Ästhetik-Fokus | Sub-Marke, Premium-Umfeld, Spezialisten für Veneers/Bleaching/Smile Design |
+| Wunschlachen Friedrichstraße | Mitte | Zahnarzt & Implantate | Berufstätige Berlin-Mitte, Implantat-Patienten | Zentrallage, gut per ÖPNV erreichbar, Implantat-Spezialisierung |
+| Wunschlachen Reinickendorf (1) | Reinickendorf | Kieferorthopädie & Kinderzahnmedizin | Familien, Kinder, Jugendliche | Kinder-freundliche Praxis, KFO-Spezialist vor Ort |
+| Wunschlachen Reinickendorf (2) | Reinickendorf | Zahnarzt & Implantate | Implantat-Patienten im Norden Berlins | Implantat-Kompetenz ohne weite Anreise für Reinickendorf/Spandau |
+| Wunschlachen Schöneberg (1) | Schöneberg | Kieferorthopädie & Kinderzahnarzt | Familien, Kinder, Jugendliche | KFO + Kinder im südlichen Berlin, entspannte Praxis-Atmosphäre |
+| Wunschlachen Schöneberg (2) | Schöneberg | Zahnarzt & Implantate | Implantat-Patienten im Süden Berlins | Implantologie im Kiez — kein langer Weg für Schöneberger/Tempelhof-Patienten |
 
-| # | Slot | Cluster | Subject-Zeile | Pre-Header (~80 Z.) | Body-Skelett (Hook → Story → CTA) | Primärer CTA | Brevo-Tag |
+**Drei Spezialisierungs-Cluster für Email-Routing:**
+- **Implantat-Cluster:** Friedrichstraße + Reinickendorf (2) + Schöneberg (2)
+- **KFO+Kinder-Cluster:** Reinickendorf (1) + Schöneberg (1)
+- **Ästhetik-Cluster:** Charlottenburg White Cocoon
+
+> Tony: Bitte genaue Adressen + ÖPNV-Infos für Mails ergänzen (für Standort-Spotlight-Mails notwendig).
+
+---
+
+## 3. Lead-Segmentierung nach dental_service
+
+Das Lead-Formular enthält das Feld `dental_service` mit den 23 Leistungsoptionen aus Directus. Dieses Feld bestimmt, in welchen Segment-Funnel der Lead eingeteilt wird.
+
+### Mapping-Tabelle: 23 Leistungen → 5 Segmente + Default
+
+| dental_service (Formular-Wert) | Segment | Funnel-Name | Brevo-Tag |
+|---|---|---|---|
+| Implantate | A | Implantat-Funnel | `seg-implantate` |
+| Zahnersatz | A | Implantat-Funnel | `seg-implantate` |
+| Füllungstherapien | A (wenn komplex) / F (Default) | Implantat-Funnel oder Default | `seg-implantate` / `seg-default` |
+| Aligner | B | KFO+Aligner-Funnel | `seg-kfo` |
+| Kieferorthopädie | B | KFO+Aligner-Funnel | `seg-kfo` |
+| Ästhetik | C | Ästhetik-Funnel (White Cocoon) | `seg-aesthetik` |
+| Bleaching | C | Ästhetik-Funnel (White Cocoon) | `seg-aesthetik` |
+| Zahnschmuck | C | Ästhetik-Funnel (White Cocoon) | `seg-aesthetik` |
+| Angstpatienten | D | Sanfte-Behandlung-Funnel | `seg-angst` |
+| Lachgas | D | Sanfte-Behandlung-Funnel | `seg-angst` |
+| Vollnarkose | D | Sanfte-Behandlung-Funnel | `seg-angst` |
+| Zahnreinigung/Prophylaxe | E | Vorsorge-Funnel | `seg-vorsorge` |
+| Kontrolltermin | E | Vorsorge-Funnel | `seg-vorsorge` |
+| Beratungstermin | E | Vorsorge-Funnel | `seg-vorsorge` |
+| Karies | E (mit Up-Sell) | Vorsorge-Funnel | `seg-vorsorge` |
+| Parodontitis | E (mit Up-Sell) | Vorsorge-Funnel | `seg-vorsorge` |
+| Mundgeruch | E | Vorsorge-Funnel | `seg-vorsorge` |
+| Wurzelbehandlung | F | Default / Allgemein | `seg-default` |
+| Funktionsdiagnostik | F | Default / Allgemein | `seg-default` |
+| Knirsch- & Schnarchschiene | F | Default / Allgemein | `seg-default` |
+| Laser-Behandlung | F | Default / Allgemein | `seg-default` |
+| Akupunktur | F | Default / Allgemein | `seg-default` |
+| Sonstige | F | Default / Allgemein | `seg-default` |
+| *(nicht ausgefüllt / leer)* | F | Default / Allgemein | `seg-default` |
+
+**Routing-Logik in Brevo:**
+1. Lead füllt Formular aus → Segment-Tag wird gesetzt
+2. Welcome-Sequenz 1001–1006 läuft bei allen Segmenten gleich (universell formuliert, kein harter Segment-Lock)
+3. Ab Woche 3: Brevo-Automation prüft Segment-Tag → schaltet die richtige Steady-State-Sequenz frei
+4. Kein Segment-Tag gesetzt → Default-Sequenz (Seg F)
+
+> Tony validieren: Soll `Füllungstherapien` wirklich in Seg A oder eher Seg F? Zahnfüllungen sind kein Implantat-Einstieg — ggf. Seg F sinnvoller.
+
+---
+
+## 4. Themen-Cluster — Übersicht aller ~65 Templates
+
+> Legende: **W** = Welcome (Tag-Offset), **Mi** = Mittwoch Woche n, **So** = Sonntag Woche n, **T** = Trigger-Mail, **RE** = Re-Engagement, **S** = Saison-Special
+
+### Welcome-Sequenz (Mails 1001–1006) — Alle Segmente
+
+| ID | Slot | Cluster | Subject-Zeile | Pre-Header | Body-Skelett | Primärer CTA | Brevo-Tag |
 |---|---|---|---|---|---|---|---|
-| **1** | W T+0 | cta_booking | Re: Ihre Anfrage zu Zahnimplantaten | Wir haben Ihre Nachricht — so geht es jetzt weiter | Hook: sofortige Bestätigung. Story: kurze Praxis-Vorstellung, was passiert als nächstes. CTA: Beratungstermin direkt buchen | Beratung buchen | `welcome-day-0-cta` |
-| **2** | W T+1 | trust | Ihr Wunschlachen-Team stellt sich vor | Lernen Sie die Menschen hinter Ihrer Behandlung kennen | Hook: "Wissen Sie, wer Ihren Zahn behandeln wird?" Story: Team-Vorstellung, Qualifikationen, Praxis-Werte. CTA: Team-Seite besuchen | Team kennenlernen | `welcome-day-1-trust` |
-| **3** | W T+3 | mythen | 5 Mythen über Zahnimplantate — was wirklich stimmt | "Es tut weh", "sieht man sofort", "zu teuer" — wir klären auf | Hook: häufigste Mythen nennen. Story: 5 kurze Fakten-vs-Mythos-Blöcke. CTA: Beratung buchen | Mythen-FAQ lesen | `welcome-day-3-mythen` |
-| **4** | W T+7 | pain_point | Schmerzfrei zum neuen Lächeln, {{firstName}} | Angst vor dem Eingriff? Hier ist, was Sie wirklich erwartet | Hook: "Die häufigste Frage bei uns: 'Tut das weh?'" Story: Lokal-Anästhesie-Konzept, Sedierungs-Option, typischer Behandlungsablauf. CTA: Fragen jetzt klären | Beratung buchen | `welcome-day-7-pain` |
-| **5** | W T+10 | cost | Was Zahnimplantate bei Wunschlachen wirklich kosten | Ohne Schockmoment: transparente Kostenübersicht mit GKV-Anteil | Hook: "Die Kosten-Frage ist die ehrlichste Frage." Story: HKP-Prozess, Festzuschuss erklären, Finanzierungsoption erwähnen. CTA: Kostenrechner | Kostenrechner nutzen | `welcome-day-10-cost` |
-| **6** | W T+14 | cta_booking | {{firstName}}, Ihr nächster Schritt zu festen Zähnen | Zwei Wochen Infos — jetzt ist der richtige Moment | Hook: Zusammenfassung der 5 Kernpunkte in 5 Sätzen. Story: Keine weiteren Argumente — Einladung zum ersten Schritt. CTA: Beratungstermin (telefonisch oder vor Ort) | Termin vereinbaren | `welcome-day-14-last-call` |
-| **7** | Mi-W3 | trust | Wie läuft eine Erstberatung bei Wunschlachen ab? | In 45 Minuten zu Ihrem persönlichen Behandlungsplan | Hook: Ungewissheit vor dem ersten Termin abbauen. Story: Schritt-für-Schritt-Ablauf (Anamnese → Röntgen → HKP). CTA: Termin buchen | Termin buchen | `ss-w3-mi-ablauf` |
-| **8** | So-W3 | cta_booking | Ihr Beratungstermin: jetzt in 2 Minuten buchen | Online-Buchung: wählen Sie den Slot, der zu Ihnen passt | Hook: kurze Erinnerung warum frühzeitig buchen sinnvoll ist. Story: Buchungsprozess in 3 Schritten. CTA: Online-Termin buchen | Online-Termin buchen | `ss-w3-so-cta` |
-| **9** | Mi-W4 | mythen | "Sieht man denn nicht, dass das künstlich ist?" | Wie natürlich wirken Zahnimplantate wirklich? | Hook: Zitat einer Patientenfrage. Story: Keramik-Krone, individuelle Farbabstimmung, Foto-Erklärung (kein Vorher-Nachher-Reißerformat). CTA: Bilder ansehen / Beratung | Beratung buchen | `ss-w4-mi-optik` |
-| **10** | So-W4 | cta_booking | {{firstName}}, der nächste freie Beratungs-Slot ist für Sie | Gute Slots vergehen — so sichern Sie sich Ihren | Hook: echte Knappheit ohne Druck. Story: warum frühe Planung sinnvoll ist (Osseointegration, Behandlungsplanung). CTA: Termin | Termin sichern | `ss-w4-so-cta` |
-| **11** | Mi-W5 | pain_point | Wie lange dauert die Implantat-Behandlung insgesamt? | Von der Erstberatung bis zum fertigen Implantat — ehrlich erklärt | Hook: Frage stellen die jeder hat aber selten fragt. Story: Zeitplan-Übersicht (Einsetzen → Einheilung → Krone), Abweichungen nennen. CTA: Individuelle Zeitplanung besprechen | Termin buchen | `ss-w5-mi-zeitplan` |
-| **12** | So-W5 | cta_booking | Heute Termin buchen — schon nächsten Monat lächeln? | So realistisch ist Ihre Zeitplanung | Hook: konkretes Datum / Monat einsetzen. Story: Ablauf für Einzelimplantat vs. Vollversorgung. CTA: Termin jetzt buchen | Termin buchen | `ss-w5-so-cta` |
-| **13** | Mi-W6 | cost | GKV und Zahnimplantate — was zahlt Ihre Krankenkasse wirklich? | Festzuschuss, Bonus-Heft, Zusatzversicherung: alles erklärt | Hook: verbreiteter Irrtum ("GKV zahlt sowieso nichts"). Story: Festzuschuss-Erklärung, Bonus-Heft-Tipp, PKV-Erstattung. CTA: Kostencheck | Kostencheck anfragen | `ss-w6-mi-gkv` |
-| **14** | So-W6 | cta_booking | Was würde Ihr Implantat bei Wunschlachen kosten? | Jetzt kostenfrei berechnen — ohne Verbindlichkeit | Hook: unverbindlicher Kostenrechner-Hinweis. Story: 3 Schritte zur Kostenschätzung. CTA: Kostenrechner | Kostenrechner | `ss-w6-so-cta` |
-| **15** | Mi-W7 | trust | Unsere Patienten erzählen — Erfahrungsberichte | Was andere sagen, wenn sie uns empfehlen | Hook: kurzes Zitat eines (anonymisierten oder eingewilligten) Patienten. Story: Kontextualisierung — wer war der Patient, was war das Problem, was ist das Ergebnis. CTA: Mehr Erfahrungen lesen | Beratung buchen | `ss-w7-mi-referenzen` |
-| **16** | So-W7 | cta_booking | Jetzt Termin buchen: {{firstName}}, Ihr Lächeln wartet | Drei Klicks zum Beratungstermin — ohne Warteschleife | Hook: konkreter Call-to-Action mit einfachem Booking-Weg. Story: Wie einfach die Online-Buchung funktioniert. CTA: Termin buchen | Termin buchen | `ss-w7-so-cta` |
-| **17** | Mi-W8 | lifestyle | Wie festes Zähnen Ihr Alltagsleben verändert — 5 echte Beispiele | Nicht nur Ästhetik: was Menschen nach dem Implantat berichten | Hook: "Das hätte ich früher nicht erwartet..."-Format. Story: 5 konkrete Alltagsverbesserungen (Kauen, Sprechen, Selbstbewusstsein, Sport, Schlaf). CTA: Beratung | Beratung buchen | `ss-w8-mi-lifestyle` |
-| **18** | So-W8 | cta_booking | {{firstName}}, wann buchen Sie Ihren Termin? | Erinnerung — Ihr Beratungstermin lässt sich in 2 Minuten sichern | Hook: sanfte Erinnerung ohne Druck. Story: Was in der Erstberatung passiert (keine Verpflichtung, nur Informationen). CTA: Termin | Termin buchen | `ss-w8-so-cta` |
-| **19** | Mi-W9 | mythen | Zahnimplantate im Alter — ab wann ist es "zu spät"? | Die Antwort überrascht viele Patienten | Hook: Patientenfrage "Bin ich zu alt?". Story: Fakten zur Knochen-Grundvoraussetzung, Altersgrenzen (keine nach oben), medizinische Voraussetzungen. CTA: Individuelle Prüfung | Beratung buchen | `ss-w9-mi-alter` |
-| **20** | So-W9 | cta_booking | Individuelle Beratung: Was geht bei Ihnen? | Jeder Fall ist anders — deshalb gibt es die kostenfreie Erstberatung | Hook: kein generisches Angebot, sondern persönliche Behandlungsplanung. Story: Was der Arzt beim ersten Termin prüft. CTA: Termin | Termin buchen | `ss-w9-so-cta` |
-| **21** | Mi-W10 | cost | Zahnimplantate auf Raten — wie funktioniert das? | Finanzierung ohne Kompromisse bei der Qualität | Hook: "Müssen Sie wirklich sofort alles zahlen?" Story: Finanzierungspartner, Laufzeiten, was bei Zahnersatz möglich ist. CTA: Finanzierungsoptionen anfragen | Beratung buchen | `ss-w10-mi-finanzierung` |
-| **22** | So-W10 | cta_booking | Ihr Beratungstermin — kostenlos, unverbindlich, informativ | So funktioniert der erste Schritt bei Wunschlachen | Hook: Barrieren abbauen (kein Termin = keine Verpflichtung). Story: Was genau passiert in der Erstberatung. CTA: Termin buchen | Termin buchen | `ss-w10-so-cta` |
-| **23** | Mi-W11 | trust | Hinter den Kulissen: So arbeitet das Wunschlachen-Team | Ein Einblick in unseren Behandlungsalltag | Hook: Was man in einer Zahnarztpraxis normalerweise nicht sieht. Story: Hygiene-Standards, Sterilisation, Materialwahl, Teamkultur. CTA: Team kennenlernen | Team-Seite besuchen | `ss-w11-mi-behind` |
-| **24** | So-W11 | cta_booking | Noch heute Termin sichern, {{firstName}} | Freie Slots sind begrenzt — das ist keine Phrase | Hook: ehrliche Knappheits-Aussage (keine künstliche FOMO). Story: wie viele Erstberatungen pro Woche stattfinden, warum frühzeitig buchen lohnt. CTA: Termin | Termin buchen | `ss-w11-so-cta` |
-| **25** | Mi-W12 | faq | Die 10 häufigsten Fragen zu Zahnimplantaten — beantwortet | Von Schmerzen bis Langlebigkeit: Ihr FAQ | Hook: "Was würden Sie fragen, wenn Sie sich trauen würden?" Story: 10 Fragen in kompakter Form (Qualität über Quantität). CTA: Alle Fragen persönlich klären | Beratung buchen | `ss-w12-mi-faq` |
-| **26** | So-W12 | cta_booking | {{firstName}}: 3 Monate nach Ihrer Anfrage — wie steht es? | Erinnerung: Ihr Lächeln wartet noch immer | Hook: Rückblick auf Kontaktaufnahme. Story: Was sich in diesen 3 Monaten bei anderen Patienten verändert hat. CTA: Termin | Termin buchen | `ss-w12-so-3monate` |
-| **27** | Mi-W13 | pain_point | Angst vor dem Zahnarzt — Sie sind nicht allein | Wie wir mit Zahnarztangst umgehen: ehrlich erklärt | Hook: Statistik (branchenüblich: ein erheblicher Teil der Bevölkerung hat Zahnarztangst). Story: konkrete Methoden (Kommunikation, Stopp-Signal, Sedierung). CTA: Angst ansprechen — Termin buchen | Beratung buchen | `ss-w13-mi-angst` |
-| **28** | So-W13 | cta_booking | Telefonische Beratung: jetzt sofort kostenfrei | 10 Minuten am Telefon klären mehr als 10 Emails | Hook: Effizienz-Argument für telefonischen Kontakt. Story: Was man in einem kurzen Anruf klären kann. CTA: Rückruf anfragen | Rückruf anfragen | `ss-w13-so-telefon` |
-| **29** | Mi-W14 | lifestyle | Lächeln und Karriere — was Studien zeigen | Kein Verkaufsgespräch: was die Forschung über Lächeln sagt | Hook: überraschende Forschungs-Anekdote. Story: psychologische Effekte von Selbstbewusstsein, nicht verkäuferisch überzeichnet. CTA: Beratung | Beratung buchen | `ss-w14-mi-karriere` |
-| **30** | So-W14 | cta_booking | Bereit für den ersten Schritt, {{firstName}}? | Die Erstberatung kostet Sie nichts — nur 45 Minuten | Hook: Kosten-Einwand für den Termin eliminieren. Story: Was die Erstberatung kostet (nichts), was dabei rauskommt (persönlicher Plan). CTA: Termin | Termin buchen | `ss-w14-so-cta` |
-| **31** | Mi-W15 | trust | Implantologie in Deutschland — welche Qualitätsstandards gelten? | Was deutsche Approbation und DGI-Mitgliedschaft bedeuten | Hook: "Was unterscheidet einen Implantologen vom Zahnarzt?" Story: Deutsche Ausbildungsstandards, Fortbildungspflicht, DGI/DGZMK. CTA: Qualitätsversprechen | Beratung buchen | `ss-w15-mi-qualität` |
-| **32** | So-W15 | cta_booking | {{firstName}}, buchen Sie noch heute | Noch 3–4 Werktage für einen Termin im nächsten Monat | Hook: konkrete Zeitplanung anbieten. Story: Wie schnell ein Termin verfügbar ist. CTA: Termin | Termin buchen | `ss-w15-so-cta` |
-| **33** | Mi-W16 | mythen | Implantate halten lebenslang — Mythos oder Wahrheit? | Was die Langzeitstudien wirklich zeigen | Hook: Versprechen analysieren. Story: Studienlage zu Implantat-Haltbarkeit, Pflege-Faktoren, was die Lebensdauer beeinflusst. CTA: Nachfragen | Beratung buchen | `ss-w16-mi-haltbarkeit` |
-| **34** | So-W16 | cta_booking | Ihr Implantat — wann starten wir, {{firstName}}? | Persönliche Einladung zur Erstberatung | Hook: direkte persönliche Ansprache. Story: sehr kurz — wir sind bereit, wenn Sie es sind. CTA: Termin buchen | Termin buchen | `ss-w16-so-cta` |
-| **35** | Mi-W17 | cost | Wie viel zahlt eine Zusatzversicherung bei Implantaten? | Was Sie wissen sollten, bevor Sie eine Zusatzversicherung abschließen | Hook: Häufiges Missverständnis adressieren. Story: Was Zahnzusatzversicherungen typischerweise leisten (und was nicht), Wartezeiten-Hinweis. CTA: Beratung | Beratung buchen | `ss-w17-mi-zusatzversicherung` |
-| **36** | So-W17 | cta_booking | Heute ist ein guter Tag für Ihren ersten Schritt | Online-Buchung dauert 90 Sekunden | Hook: Barriere Minimum — 90 Sekunden. Story: Buchungsschritte in drei Sätzen. CTA: Termin | Termin buchen | `ss-w17-so-cta` |
-| **37** | Mi-W18 | lifestyle | Essen, was Sie wollen — was das bedeutet | Patienten berichten: das erste Steak nach Jahren | Hook: emotionale Story-Eröffnung (nicht reißerisch). Story: wie Kauproblemen die Lebensqualität einschränken, was sich nach dem Implantat ändert. CTA: Beratung | Beratung buchen | `ss-w18-mi-essen` |
-| **38** | So-W18 | cta_booking | {{firstName}}, Ihr letzter Beratungsplatz diesen Monat | Jetzt buchen — nächste freie Slots im übernächsten Monat | Hook: echte Verfügbarkeit als Argument. Story: kurz. CTA: Termin | Termin buchen | `ss-w18-so-cta` |
-| **39** | Mi-W19 | trust | Was passiert bei Komplikationen nach dem Implantat? | Ehrliche Antwort: wie wir mit Problemen umgehen | Hook: Tabu-Thema ansprechen. Story: Komplikationsrate-Kontext (wissenschaftlich), was bei Wunschlachen im Fall der Fälle passiert (Erreichbarkeit, Nachbehandlung in derselben Praxis). CTA: Vertrauen aufbauen | Beratung buchen | `ss-w19-mi-komplikationen` |
-| **40** | So-W19 | cta_booking | 5 Monate Infos — jetzt ein konkretes Gespräch | Was wir in 20 Minuten am Telefon klären | Hook: Punkt im Funnel benennen (5 Monate). Story: Liste was in einem Anruf/Termin konkret besprochen wird. CTA: Rückruf oder Termin | Rückruf anfragen | `ss-w19-so-cta` |
-| **41** | Mi-W20 | faq | Implantat vs. Brücke vs. Prothese — was ist für Sie das Richtige? | Ein fairer Vergleich ohne Verkaufsabsicht | Hook: "Es gibt Fälle, wo ein Implantat nicht die beste Option ist." Story: Ehrlicher Vergleich der Optionen, wann welche Lösung sinnvoll ist. CTA: Individuelle Beratung | Beratung buchen | `ss-w20-mi-vergleich` |
-| **42** | So-W20 | cta_booking | {{firstName}} — ein halbes Jahr nach Ihrer Anfrage | Ihr Lächeln hat auf Sie gewartet. Wir auch. | Hook: emotionaler Moment ohne Druck. Story: Was in 6 Monaten hätte sein können (nicht anklagend). CTA: Termin — letzter regulärer Steady-State-CTA | Termin buchen | `ss-w20-so-6monate` |
-| **S1** | Saison | saison | Ihr Sommer-Lächeln — jetzt planen | Bis zum Sommer feste Zähne? Das ist realistisch | Hook: Sommer-Kontext. Story: Zeitplanung für Behandlungsstart im Frühjahr. CTA: Termin | Termin buchen | `saison-sommer-lächeln` |
-| **S2** | Saison | saison | Neues Jahr, neues Lächeln — Ihr Vorsatz für {{year}} | Zahngesundheit als Jahres-Investment | Hook: Neujahrs-Kontext. Story: Warum Zahngesundheit wie Fitness-Vorsätze funktioniert (jetzt anfangen). CTA: Termin | Termin buchen | `saison-neujahr` |
-
-*Saison-Specials S3–S4 siehe §5*
+| 1001 | W T+0 | cta_booking | Re: Ihre Anfrage bei Wunschlachen, {{firstName}} | Ihre Nachricht ist da — so geht es jetzt weiter | Hook: Bestätigung. Story: Was passiert als nächstes (Rückruf + Online-Option). Praxis-Info sichtbar. | Beratung buchen | `welcome-day-0-cta` |
+| 1002 | W T+1 | trust | Ihr Wunschlachen-Team + Ihr Standort | 6 Standorte in Berlin — der richtige für Sie | Hook: Kurze Standort-Übersicht. Story: Welcher Standort passt zu `dental_service`. Team-Vorstellung allgemein. | Standort entdecken | `welcome-day-1-trust` |
+| 1003 | W T+3 | aufklärung | Die häufigsten Fragen — ehrlich beantwortet | Was Sie wirklich wissen möchten, bevor Sie kommen | Hook: „Fast jeder Patient hat diese Fragen." Story: 4–5 Fragen segment-angepasst (generisch: Ablauf, Schmerz, Kosten, Dauer). | Beratung buchen | `welcome-day-3-faq` |
+| 1004 | W T+7 | pain_point | Sorgen vor dem Zahnarzt? Das ist bei uns anders | Wie wir mit Nervosität, Fragen und Unsicherheit umgehen | Hook: Angst + Unsicherheit normalisieren. Story: Angstpatienten-Konzept (Lachgas, Vollnarkose erwähnen), Stop-Signal, ruhige Atmosphäre. | Fragen stellen — Beratung | `welcome-day-7-angst` |
+| 1005 | W T+10 | cost | Was kostet Ihre Behandlung bei Wunschlachen? | Kein Schockmoment: transparente Kostenübersicht, GKV-Anteil, Finanzierungsoptionen | Hook: „Die Kostenfrage ist die ehrlichste Frage." Story: HKP-Prozess, Festzuschuss, Finanzierungspartner. | Kostencheck anfragen | `welcome-day-10-cost` |
+| 1006 | W T+14 | cta_booking | {{firstName}}, Ihr nächster Schritt — wir sind bereit | Zwei Wochen Infos — jetzt ist der richtige Moment für den ersten Schritt | Hook: 5-Satz-Zusammenfassung. Story: Einladung, keine weiteren Argumente. Telefon + Online-Option. | Termin vereinbaren | `welcome-day-14-last-call` |
 
 ---
 
-## 3. Welcome-Sequenz Tag 0–14 (6 Mails) — Detailblock
+### Segment A — Implantate + Zahnersatz (Kurzübersicht, Detail in §6.1)
 
-Diese 6 Mails bilden den heißesten Teil des Funnels. Der Lead hat gerade eine Anfrage gestellt — die Aufmerksamkeit ist maximal. Jede Mail muss präzise liefern, keine Wiederholungen, keine leeren Floskeln.
+| ID | Slot | Cluster | Subject-Zeile | Pre-Header | Brevo-Tag |
+|---|---|---|---|---|---|
+| 1010 | Mi-W3 | trust | Wie läuft eine Implantat-Erstberatung ab? | 45 Minuten für Ihren persönlichen Behandlungsplan | `seg-a-w3-mi-ablauf` |
+| 1011 | So-W3 | cta_booking | Ihren Termin in 2 Minuten sichern | Online-Buchung: wählen Sie den Slot, der zu Ihnen passt | `seg-a-w3-so-cta` |
+| 1012 | Mi-W4 | mythen | „Sieht man, dass das ein Implantat ist?" | Wie natürlich wirken moderne Zahnimplantate? | `seg-a-w4-mi-optik` |
+| 1013 | So-W4 | cta_booking | Gute Slots vergehen — so sichern Sie sich Ihren | {{firstName}}, der nächste freie Beratungsslot | `seg-a-w4-so-cta` |
+| 1014 | Mi-W5 | aufklärung | Wie lange dauert die Implantat-Behandlung? | Von der Erstberatung bis zum fertigen Implantat — ehrlich erklärt | `seg-a-w5-mi-zeitplan` |
+| 1015 | So-W5 | cta_booking | Heute buchen — schon nächsten Monat lächeln? | So realistisch ist Ihre Zeitplanung | `seg-a-w5-so-cta` |
+| 1016 | Mi-W7 | cost | GKV und Zahnimplantate — was zahlt Ihre Kasse? | Festzuschuss, Bonus-Heft, Zusatzversicherung: alles erklärt | `seg-a-w7-mi-gkv` |
+| 1017 | So-W7 | cta_booking | Was würde Ihr Implantat kosten? | Jetzt kostenfrei abschätzen — unverbindlich | `seg-a-w7-so-cta` |
+| 1018 | Mi-W10 | lifestyle | Essen, was Sie wollen — was sich nach dem Implantat ändert | Patienten berichten: das erste Steak nach Jahren | `seg-a-w10-mi-lifestyle` |
+| 1019 | Mi-W14 | trust | Was passiert bei Komplikationen? | Ehrliche Antwort: wie wir mit Problemen umgehen | `seg-a-w14-mi-komplikationen` |
 
 ---
 
-### Mail 1 — Tag 0 (< 60 Sekunden nach Sign-up)
+### Segment B — KFO + Aligner (Kurzübersicht, Detail in §6.2)
 
-**Slot:** `welcome-day-0-cta`
-**Subject:** `Re: Ihre Anfrage zu Zahnimplantaten bei Wunschlachen`
-**Pre-Header:** Ihre Nachricht ist bei uns angekommen — so geht es weiter
+| ID | Slot | Cluster | Subject-Zeile | Pre-Header | Brevo-Tag |
+|---|---|---|---|---|---|
+| 1020 | Mi-W3 | trust | Aligner oder Spange — was passt zu Ihnen? | Kieferorthopädie für Erwachsene: was heute möglich ist | `seg-b-w3-mi-aligner-vs-spange` |
+| 1021 | So-W3 | cta_booking | KFO-Beratung: kostenlos, unverbindlich, in Berlin | Ihr nächster Schritt zu geraden Zähnen | `seg-b-w3-so-cta` |
+| 1022 | Mi-W4 | aufklärung | Wie lange muss man Aligner tragen? | Typischer Behandlungsplan: Monate, nicht Jahre | `seg-b-w4-mi-dauer` |
+| 1023 | So-W4 | cta_booking | {{firstName}}, Ihr KFO-Beratungstermin | Jetzt Termin im KFO-Standort sichern | `seg-b-w4-so-cta` |
+| 1024 | Mi-W5 | familien | KFO für Kinder: wann ist der richtige Zeitpunkt? | Was Eltern über den ersten KFO-Termin wissen sollten | `seg-b-w5-mi-kinder-kfo` |
+| 1025 | So-W5 | cta_booking | Termin für Ihr Kind: unkompliziert und kindgerecht | Unsere KFO+Kinder-Standorte in Reinickendorf und Schöneberg | `seg-b-w5-so-cta` |
+| 1026 | Mi-W7 | cost | Was kostet eine Aligner-Behandlung? | GKV-Anteil, Eigenanteil, Finanzierungsoptionen — ehrlich erklärt | `seg-b-w7-mi-cost` |
+| 1027 | So-W7 | cta_booking | Ihr geradeaus-Lächeln: wann starten wir? | Erstberatung buchen — kostenlos, ohne Wartezeit | `seg-b-w7-so-cta` |
+| 1028 | Mi-W10 | lifestyle | Aligner im Alltag: was wirklich passiert | Essen, Zähneputzen, soziale Situationen — ohne Beschönigung | `seg-b-w10-mi-lifestyle` |
+| 1029 | Mi-W14 | mythen | „Aligner funktionieren nicht wirklich" — stimmt das? | Was die klinische Evidenz zeigt | `seg-b-w14-mi-mythen` |
 
-**Warum "Re:"?**
-Dentaprime nutzt dieses Muster mit gutem Grund: "Re:" signalisiert menschliche Antwort, nicht Automation. Es erhöht die Open-Rate erheblich. Wunschlachen kann dasselbe nutzen — mit dem Unterschied, dass das tatsächlich der Beginn eines menschlichen Prozesses ist (Sales-Agent ruft innerhalb von 24h an).
+---
+
+### Segment C — Ästhetik + White Cocoon (Kurzübersicht, Detail in §6.3)
+
+| ID | Slot | Cluster | Subject-Zeile | Pre-Header | Brevo-Tag |
+|---|---|---|---|---|---|
+| 1030 | Mi-W3 | trust | White Cocoon by Wunschlachen — was steckt dahinter? | Ästhetische Zahnmedizin auf Spezialisten-Niveau in Charlottenburg | `seg-c-w3-mi-white-cocoon` |
+| 1031 | So-W3 | cta_booking | Ihr Lächeln verdient Spezialisten | White Cocoon Erstberatung — Termin sichern | `seg-c-w3-so-cta` |
+| 1032 | Mi-W4 | aufklärung | Veneers, Bleaching oder Aligner — was ist für Sie richtig? | Smile Design ohne Reißbrett: Ihre individuelle Lösung | `seg-c-w4-mi-optionen` |
+| 1033 | So-W4 | cta_booking | {{firstName}}, Ihr Lächeln als Statement | Jetzt Beratungstermin in der White Cocoon-Praxis | `seg-c-w4-so-cta` |
+| 1034 | Mi-W5 | mythen | „Bleaching schädigt die Zähne" — Mythos oder Fakt? | Was professionelles Bleaching von Supermarkt-Produkten unterscheidet | `seg-c-w5-mi-bleaching-mythen` |
+| 1035 | So-W5 | cta_booking | Helles Lächeln in Charlottenburg: Termin buchen | Professionelles Bleaching bei White Cocoon | `seg-c-w5-so-cta` |
+| 1036 | Mi-W7 | cost | Was kostet Smile Design bei White Cocoon? | Veneers, Bleaching, Aligner: Kostenrahmen ohne Überraschungen | `seg-c-w7-mi-cost` |
+| 1037 | So-W7 | cta_booking | Ihr neues Lächeln: wann darf es beginnen? | Termin bei White Cocoon sichern | `seg-c-w7-so-cta` |
+| 1038 | Mi-W10 | lifestyle | Ein Lächeln als Visitenkarte — was Patienten berichten | Wie sich ästhetische Zahnmedizin im Alltag anfühlt | `seg-c-w10-mi-lifestyle` |
+| 1039 | Mi-W14 | trust | Warum Spezialisierung bei Ästhetik entscheidend ist | Was White Cocoon von einer allgemeinen Zahnarztpraxis unterscheidet | `seg-c-w14-mi-spezialisierung` |
+
+---
+
+### Segment D — Angstpatienten + Sanfte Behandlung (Kurzübersicht, Detail in §6.4)
+
+| ID | Slot | Cluster | Subject-Zeile | Pre-Header | Brevo-Tag |
+|---|---|---|---|---|---|
+| 1040 | Mi-W3 | angst | Sie sind nicht allein mit Ihrer Zahnarztangst | Wie wir mit Nervosität und Angst umgehen — konkret | `seg-d-w3-mi-angst` |
+| 1041 | So-W3 | cta_booking | Erster Schritt ohne Druck: einfach anrufen | Unverbindliches Vorgespräch — telefonisch oder per Mail | `seg-d-w3-so-cta` |
+| 1042 | Mi-W4 | aufklärung | Lachgas beim Zahnarzt: was Sie erwartet | Wie Lachgas-Sedierung funktioniert und wann sie sinnvoll ist | `seg-d-w4-mi-lachgas` |
+| 1043 | So-W4 | cta_booking | {{firstName}}, Ihr erster Termin bei uns | Wir nehmen uns Zeit — kein Druck, kein Eiltempo | `seg-d-w4-so-cta` |
+| 1044 | Mi-W5 | aufklärung | Behandlung unter Vollnarkose — wann und wie? | Für Patienten, die eine andere Lösung brauchen | `seg-d-w5-mi-vollnarkose` |
+| 1045 | So-W5 | cta_booking | Auf Ihrem Tempo: Termin vereinbaren | Kein Zeitdruck — Sie entscheiden, wann Sie kommen | `seg-d-w5-so-cta` |
+| 1046 | Mi-W7 | trust | Was passiert beim ersten Angstpatienten-Termin? | Schritt für Schritt: kein Eingriff ohne Ihr OK | `seg-d-w7-mi-ablauf` |
+| 1047 | So-W7 | cta_booking | Telefonisch vorab klären: wir hören zu | 10 Minuten am Telefon können viel Unsicherheit nehmen | `seg-d-w7-so-telefon` |
+| 1048 | Mi-W10 | lifestyle | Was Angst-Patienten nach ihrem ersten Termin sagen | Erfahrungsberichte — anonym, ehrlich | `seg-d-w10-mi-berichte` |
+| 1049 | Mi-W14 | mythen | „Ich werde das nie schaffen" — doch, mit dem richtigen Rahmen | Zahnarztangst ist behandelbar; die Zähne auch | `seg-d-w14-mi-mut` |
+
+---
+
+### Segment E — Vorsorge + Zahnreinigung (Kurzübersicht, Detail in §6.5)
+
+| ID | Slot | Cluster | Subject-Zeile | Pre-Header | Brevo-Tag |
+|---|---|---|---|---|---|
+| 1050 | Mi-W3 | trust | Warum regelmäßige Kontrolle mehr als Prophylaxe ist | Was ein Kontrolltermin bei Wunschlachen beinhaltet | `seg-e-w3-mi-kontrolle` |
+| 1051 | So-W3 | cta_booking | Termin für Zahnreinigung: in 2 Minuten gebucht | Nächster freier Slot — unkompliziert online buchen | `seg-e-w3-so-cta` |
+| 1052 | Mi-W4 | aufklärung | Parodontitis: oft unbemerkt, früh behandelbar | Was Ihr Kontrolltermin erkennt, bevor es teuer wird | `seg-e-w4-mi-paro` |
+| 1053 | So-W4 | cta_booking | {{firstName}}, Ihre Zahngesundheit als Investment | Jetzt Termin sichern — Vorsorge zahlt sich aus | `seg-e-w4-so-cta` |
+| 1054 | Mi-W5 | aufklärung | GKV-Prophylaxe: was zahlt Ihre Kasse? | Festzuschuss, Bonus-Heft, was übrig bleibt | `seg-e-w5-mi-gkv` |
+| 1055 | So-W5 | cta_booking | Termin für die ganze Familie: unkompliziert | Kinderzahnheilkunde und Erwachsene — alles bei Wunschlachen | `seg-e-w5-so-familien` |
+| 1056 | Mi-W7 | upsell | Über die Reinigung hinaus: was wäre noch möglich? | Wenn beim Kontrolltermin mehr sichtbar wird | `seg-e-w7-mi-upsell` |
+| 1057 | So-W7 | cta_booking | Ihr Halbjahres-Check: wann war der letzte? | Erinnerung — Prophylaxe-Termin jetzt sichern | `seg-e-w7-so-cta` |
+| 1058 | Mi-W10 | lifestyle | Zähne, die ein Leben lang halten — was das braucht | Prophylaxe + Kontrolle als langfristige Strategie | `seg-e-w10-mi-lifestyle` |
+| 1059 | Mi-W14 | familien | Kinderzahnheilkunde: erster Termin ohne Angst | Wie wir Kinder an den Zahnarzt gewöhnen | `seg-e-w14-mi-kinder` |
+
+---
+
+### Segment F — Default / Allgemein (Kurzübersicht, Detail in §6.6)
+
+| ID | Slot | Cluster | Subject-Zeile | Pre-Header | Brevo-Tag |
+|---|---|---|---|---|---|
+| 1060 | Mi-W3 | trust | Was Wunschlachen von anderen Praxen unterscheidet | 6 Standorte in Berlin — eine Praxis-Gruppe für alle | `seg-f-w3-mi-usp` |
+| 1061 | So-W3 | cta_booking | Termin bei Wunschlachen: online in 2 Minuten | Welcher Standort passt zu Ihnen? | `seg-f-w3-so-cta` |
+| 1062 | Mi-W4 | aufklärung | Zahnarzt-Angst ist häufiger als Sie denken | Wie Wunschlachen damit umgeht | `seg-f-w4-mi-angst` |
+| 1063 | So-W4 | cta_booking | {{firstName}}, Ihr persönlicher Ansprechpartner wartet | Erstberatung buchen — kostenlos und unverbindlich | `seg-f-w4-so-cta` |
+| 1064 | Mi-W5 | aufklärung | Alle Leistungen bei Wunschlachen — eine Übersicht | Von der Prophylaxe bis zur Implantologie | `seg-f-w5-mi-leistungen` |
+| 1065 | So-W5 | cta_booking | Ihr Berliner Zahnarzt: nah, spezialisiert, vertrauenswürdig | Jetzt Termin sichern | `seg-f-w5-so-cta` |
+| 1066 | Mi-W7 | cost | Was kostet eine Behandlung bei Wunschlachen? | Transparente Kostenplanung vor jedem Eingriff | `seg-f-w7-mi-cost` |
+| 1067 | So-W7 | cta_booking | Wann dürfen wir Sie begrüßen? | Freie Slots — jetzt wählen | `seg-f-w7-so-cta` |
+| 1068 | Mi-W10 | lifestyle | Zahngesundheit als Lebensqualität | Was Berliner Patienten über Wunschlachen sagen | `seg-f-w10-mi-lifestyle` |
+| 1069 | Mi-W14 | trust | Wunschlachen für die ganze Familie | Eine Praxis-Gruppe von Klein bis Implantat | `seg-f-w14-mi-familie` |
+| 1070 | Mi-W16 | trust | Hinter den Kulissen: so arbeitet Wunschlachen | Hygiene, Technologie, Team-Kultur | `seg-f-w16-mi-behind` |
+| 1071 | So-W16 | cta_booking | {{firstName}}, noch heute Termin sichern | Freie Beratungsslots sind begrenzt — das ist keine Phrase | `seg-f-w16-so-cta` |
+| 1072 | Mi-W18 | saison | Frühjahrspflege für Ihre Zähne | Nach dem Winter: Prophylaxe + Check in einem Termin | `seg-f-w18-mi-frühling` |
+| 1073 | So-W18 | cta_booking | Jetzt Termin buchen — bevor der Sommer beginnt | Beliebte Slots vergehen schnell | `seg-f-w18-so-cta` |
+| 1074 | Mi-W20 | trust | 5 Monate nach Ihrer Anfrage — wir sind noch da | Was bei anderen Patienten in dieser Zeit passiert ist | `seg-f-w20-mi-5monate` |
+| 1075 | So-W20 | cta_booking | {{firstName}} — letzter regulärer Buchungs-CTA | Ihr Lächeln hat auf Sie gewartet. Wir auch. | `seg-f-w20-so-6monate` |
+
+---
+
+### Transaktionale Trigger-Mails (T-Serie)
+
+| ID | Trigger | Subject-Zeile | Brevo-Tag |
+|---|---|---|---|
+| T-001 | Termin bestätigt | Ihr Termin bei Wunschlachen — Bestätigung | `trigger-termin-bestaetigung` |
+| T-002 | 48h vor Termin | Erinnerung: Ihr Termin morgen | `trigger-termin-reminder-48h` |
+| T-003 | 2h vor Termin | Ihr Termin in 2 Stunden — Wegbeschreibung | `trigger-termin-reminder-2h` |
+| T-004 | Nach Beratung | {{firstName}}, wie war Ihre Beratung? | `trigger-post-beratung` |
+| T-005 | HKP gesendet | Ihr Heil- und Kostenplan liegt vor | `trigger-hkp-gesendet` |
+
+---
+
+### Re-Engagement (RE-Serie)
+
+| ID | Slot | Subject-Zeile | Pre-Header | Brevo-Tag |
+|---|---|---|---|---|
+| RE-001 | RE Tag 0 | {{firstName}}, vermissen Sie uns? | Wir haben Sie eine Weile nicht gesehen — ist alles in Ordnung? | `re-engagement-1` |
+| RE-002 | RE Tag 14 | Ein letzter Gedanke zu Ihrer Zahngesundheit | Kein Druck — nur ein kurzer Hinweis, falls es hilfreich ist | `re-engagement-2` |
+| RE-003 | RE Tag 28 | Abmelden oder weiterlesen? Sie entscheiden | Wir machen es kurz: Soll Ihr Postfach frei bleiben? | `re-engagement-3-sunset` |
+
+---
+
+### Saison-Specials (S-Serie)
+
+| ID | Saison | Subject-Zeile | Brevo-Tag |
+|---|---|---|---|
+| S-001 | Januar | Neues Jahr, frischer Start für Ihre Zähne | `saison-neujahr` |
+| S-002 | März/April | Frühjahrspflege: Prophylaxe-Termin jetzt sichern | `saison-frühjahr` |
+| S-003 | Juni | Sommerlächeln: rechtzeitig Bleaching-Termin planen | `saison-sommer` |
+| S-004 | September | Zurück aus dem Urlaub — Kontrolltermin nachgeholt? | `saison-herbst` |
+| S-005 | November | Jahresende-Check: Bonus-Heft aktuell? | `saison-jahresende-bonus` |
+| S-006 | Dezember | Das schönste Geschenk: ein Lächeln ohne Schmerzen | `saison-advent` |
+
+---
+
+## 5. Welcome-Sequenz Tag 0–14 — Detailblock (Mails 1001–1006)
+
+Diese 6 Mails bilden den heißesten Funnel-Abschnitt. Der Lead hat gerade eine Anfrage gestellt — Aufmerksamkeit ist maximal. Alle Mails laufen segmentübergreifend (universell formuliert), da zu diesem Zeitpunkt die Segment-Zuordnung noch nicht genutzt wird.
+
+> **CRM-Hinweis:** Im Modul-A-Code sind diese 6 Mails als Slot-IDs 1001–1006 implementiert. Das sind die ersten Templates, die im Brevo-Dashboard angelegt werden müssen.
+
+---
+
+### Mail 1001 — Tag 0 (< 60 Sekunden nach Sign-up)
+
+**Subject:** `Re: Ihre Anfrage bei Wunschlachen, {{firstName}}`
+**Pre-Header:** Ihre Nachricht ist angekommen — so geht es jetzt weiter
 
 **Body-Skelett:**
-- **Hook:** "Hallo {{firstName}}, wir haben Ihre Nachricht erhalten und freuen uns, von Ihnen zu hören."
-- **Orientierung:** Was passiert jetzt? Ein Mitarbeiter meldet sich innerhalb von [X Stunden/1 Werktag] telefonisch. In der Zwischenzeit können Sie vorab lesen/sich vorbereiten.
-- **Sofort-Option:** Wer nicht warten möchte: Online-Buchungslink für Erstberatung (sofort verfügbar)
-- **Praxis-Info:** Adresse, Telefon, Öffnungszeiten — sichtbar, nicht vergraben
-- **Abschluss:** Name/Funktion des Team-Mitglieds, das sich melden wird (oder generisch: "Ihr Wunschlachen-Team")
+- **Hook:** „Hallo {{firstName}}, Ihre Anfrage ist bei uns angekommen — danke, dass Sie sich an Wunschlachen gerichtet haben."
+- **Orientierung:** Was passiert jetzt? Ein Mitarbeiter meldet sich innerhalb von [X Stunden / 1 Werktag] telefonisch. Wer nicht warten möchte: Online-Buchungslink sofort verfügbar.
+- **Praxis-Infos:** Adresse(n), Telefon, Öffnungszeiten — sichtbar, nicht vergraben
+- **Abschluss:** Name/Funktion des Teammitglieds oder „Ihr Wunschlachen-Team"
 
 **CTA:** Beratungstermin direkt buchen (primär) | Telefon anrufen (sekundär)
-**Unsubscribe-Hinweis:** Pflicht in Brevo-Template-Footer
+**Unsubscribe:** Pflicht-Footer in jedem Brevo-Template
 
 ---
 
-### Mail 2 — Tag 1
+### Mail 1002 — Tag 1
 
-**Slot:** `welcome-day-1-trust`
-**Subject:** `Das Wunschlachen-Team — wer behandelt Sie?`
-**Pre-Header:** Persönliche Vorstellung: Ihre Ansprechpartner von Erstberatung bis Nachkontrolle
+**Subject:** `Ihr Wunschlachen-Team + Ihr Standort in Berlin`
+**Pre-Header:** Sechs Standorte — der richtige für Sie ist nah
 
 **Body-Skelett:**
-- **Hook:** "Bevor Sie zu uns kommen, möchten wir Ihnen sagen, wer Sie empfängt."
-- **Team-Block:** Kurze Vorstellung der behandelnden Ärzte (Ausbildung, Spezialisierung, ein persönlicher Satz). Keine PR-Floskeln, echte Personen.
-- **Praxis-Philosophie:** Was Wunschlachen-Implantologie von einer Standard-Zahnarztpraxis unterscheidet (Spezialisierung, Behandler-Kontinuität)
-- **Abschluss:** "Wir freuen uns darauf, Sie persönlich kennenzulernen."
-- **CTA:** Team-Seite / Über-uns-Seite + weicher Booking-Link
+- **Hook:** „Bevor Sie zu uns kommen, möchten wir Ihnen zeigen, wer Sie erwartet."
+- **Standort-Übersicht:** Kurze Tabelle oder Liste: Standort → Spezialisierung → Bezirk
+- **Segment-Hinweis (soft):** „Je nachdem, was Sie beschäftigt — unser Team hilft Ihnen beim ersten Kontakt, den richtigen Standort zu finden."
+- **Team:** Ein Satz pro Behandlungs-Cluster (Implantologie, KFO, Ästhetik, Kinder, Angstpatienten)
+- **Abschluss:** „Wir freuen uns darauf, Sie kennenzulernen."
 
-**CTA:** Team kennenlernen (primär) | Termin buchen (sekundär)
+**CTA:** Standort-Übersicht besuchen (primär) | Termin buchen (sekundär)
+**Unsubscribe:** Pflicht-Footer
 
 ---
 
-### Mail 3 — Tag 3
+### Mail 1003 — Tag 3
 
-**Slot:** `welcome-day-3-mythen`
-**Subject:** `Mythen über Zahnimplantate — was wirklich stimmt, {{firstName}}`
-**Pre-Header:** 5 häufige Irrtümer, die viele Patienten von der richtigen Entscheidung abhalten
+**Subject:** `Die häufigsten Fragen — ehrlich beantwortet, {{firstName}}`
+**Pre-Header:** Was Patienten wirklich wissen möchten, bevor sie den ersten Termin buchen
 
 **Body-Skelett:**
-- **Hook:** "Fast jeder Patient kommt zu uns mit mindestens einem dieser Missverständnisse."
-- **5 Mythen:** Kompakt-Format (Mythos fett → 2 Sätze Fakten):
-  1. "Implantate sieht man sofort" → Keramik-Krone ist individuell angefertigt
-  2. "Das tut sehr weh" → Lokal-Anästhesie macht Eingriff schmerzfrei
-  3. "Das ist zu teuer" → GKV-Festzuschuss, Finanzierungsoptionen existieren
-  4. "Zu alt für Implantate" → Kein Oberlimit, nur Knochensubstanz ist relevant
-  5. "Implantate halten nicht lange" → Langzeit-Daten zeigen hohe Erfolgsrate bei richtiger Pflege
-- **Abschluss:** "Haben Sie weitere Fragen? Im Beratungsgespräch beantworten wir sie alle — ohne Zeitdruck."
+- **Hook:** „Fast jeder Patient kommt zu uns mit denselben Fragen — das ist gut so."
+- **4–5 FAQ-Blöcke (generisch, kein Segment-Lock):**
+  1. „Tut das weh?" → Lokale Anästhesie, Lachgas-Option, Stop-Signal
+  2. „Wie lange dauert eine Behandlung?" → Je nach Art: Prophylaxe = 1h, Implantat = Monate
+  3. „Was zahlt meine Krankenkasse?" → GKV Grundleistungen + Festzuschuss + Zusatz
+  4. „Muss ich gleich beim ersten Termin etwas entscheiden?" → Nein: Erstberatung ist informativ
+  5. „Welcher Standort ist für mich?" → Auf Rückfrage oder beim Buchen
+- **Abschluss:** Einladung, weitere Fragen per Mail oder Telefon zu stellen
 
-**CTA:** Beratungstermin buchen
+**CTA:** Beratung buchen | oder: Frage stellen (Reply / Telefon)
+**Unsubscribe:** Pflicht-Footer
 
 ---
 
-### Mail 4 — Tag 7
+### Mail 1004 — Tag 7
 
-**Slot:** `welcome-day-7-pain`
-**Subject:** `Schmerzfrei zum neuen Lächeln — wie das bei Wunschlachen funktioniert`
-**Pre-Header:** Angst vor dem Eingriff? Hier ist, was Sie in der Behandlung wirklich erwartet
+**Subject:** `Nervös vor dem Zahnarzt? Das ist bei uns anders.`
+**Pre-Header:** Wie wir mit Zahnarztangst umgehen — konkret und ohne Verharmlosung
 
 **Body-Skelett:**
-- **Hook:** "Die häufigste Frage unserer Patienten: 'Tut das weh?'"
-- **Fakten-Block:** Lokal-Anästhesie erklärt (kein Fachjargon), Sedierungs-Option für Patienten mit Zahnarztangst, Behandlungsablauf Schritt für Schritt
-- **Nach der Behandlung:** Was ist normal (leichte Schwellung 1–2 Tage), was nicht (wann man anrufen sollte). Das zeigt Kompetenz und Vertrauen.
-- **Patient-Perspektive:** Anonymisiertes Zitat oder kurze Story eines Patienten der Angst hatte und die Behandlung als "viel besser als erwartet" beschreibt
-- **Abschluss:** "Sie können Angst ansprechen — unser Team hört zu."
+- **Hook:** „Zahnarztangst ist weit verbreitet — und kein Grund, Behandlungen aufzuschieben."
+- **Konkretes Konzept:** Stop-Signal, ruhige Atmosphäre, kein Zeitdruck, Lachgas-Sedierung, ggf. Vollnarkose
+- **Zitat (anonym/eingewilligt):** Kurzer Patientensatz über die Erfahrung
+- **Normalisierung:** „Viele unserer Patienten haben jahrelang gezögert — wir urteilen nicht, wir helfen."
 
-**CTA:** Beratung vereinbaren (mit Hinweis: Angst-Fragen sind willkommen)
+**CTA:** Angst-freundliche Beratung buchen (primär) | Telefonisch vorab sprechen (sekundär)
+**Unsubscribe:** Pflicht-Footer
 
 ---
 
-### Mail 5 — Tag 10
+### Mail 1005 — Tag 10
 
-**Slot:** `welcome-day-10-cost`
-**Subject:** `Zahnimplantate bei Wunschlachen — was kostet das wirklich?`
-**Pre-Header:** Transparente Kostenübersicht: Festzuschuss, Finanzierung, was Sie wirklich zahlen
+**Subject:** `Was Ihre Behandlung bei Wunschlachen kostet — ohne Überraschungen`
+**Pre-Header:** Heil- und Kostenplan, GKV-Anteil, Finanzierungsoptionen: klar erklärt
 
 **Body-Skelett:**
-- **Hook:** "Die Kostenfrage ist die ehrlichste Frage — und sie verdient eine ehrliche Antwort."
-- **HKP-Prozess:** Wie der Heil- und Kostenplan funktioniert, warum es keine Pauschalpreise gibt, was eine seriöse Praxis vorab festlegt
-- **GKV-Erklärung:** Festzuschuss, wie Bonus-Heft genutzt werden kann, Kassenleistung für Zahnersatz (korrekt, nicht aufgebauscht)
-- **Finanzierung:** Falls angeboten — Ratenzahlung, Partner, Laufzeiten
-- **Direkter Vergleich:** Warum "billiger" nicht immer günstiger ist (Folgebehandlung, Nachkontrolle, Reisekosten wenn relevant)
-- **Abschluss:** "Der erste Schritt ist kostenlos: Erstberatung mit persönlichem Kostenvoranschlag."
+- **Hook:** „Die Kostenfrage ist die ehrlichste Frage. Hier ist unsere ehrliche Antwort."
+- **HKP-Prozess:** Vor jeder Behandlung schriftlicher Plan — keine Überraschungen
+- **GKV-Grundlagen:** Festzuschuss für Zahnersatz, Bonus-Heft-Tipp (konservativ formulieren — kein %-Versprechen)
+- **Finanzierungsoptionen:** Ratenzahlung möglich — kurze Erwähnung
+- **PKV-Patienten:** Direkte Abrechnung, GOZ-Standard
 
-**CTA:** Kostenrechner (wenn vorhanden) | Beratungstermin buchen
+**CTA:** Kostenfragen klären — Beratung buchen
+**Unsubscribe:** Pflicht-Footer
 
 ---
 
-### Mail 6 — Tag 14
+### Mail 1006 — Tag 14
 
-**Slot:** `welcome-day-14-last-call`
-**Subject:** `{{firstName}}, wann ist der richtige Moment für Ihren ersten Schritt?`
-**Pre-Header:** Zwei Wochen Informationen — jetzt ein 45-Minuten-Gespräch statt 45 weiterer Emails
+**Subject:** `{{firstName}}, Ihr nächster Schritt — wir sind bereit`
+**Pre-Header:** Zwei Wochen Informationen — jetzt der erste konkrete Schritt
 
 **Body-Skelett:**
-- **Hook:** "Wir haben Ihnen in den letzten zwei Wochen viel geschrieben." (Ehrlichkeit über den Prozess)
-- **5-Punkte-Recap:** Ein Satz pro Kernpunkt (Schmerzfreiheit, Kosten, Team, Langlebigkeit, Ablauf)
-- **Direkter Appell:** Ohne Druck — "Der nächste Schritt ist ein kostenfreies Gespräch. Kein Kaufzwang, keine Verbindlichkeit."
-- **Beide Optionen:** Online-Buchung + Telefonnummer für spontane Anrufer
-- **Abschluss:** Persönlicher Ton: "Wir freuen uns auf Sie — wann auch immer Sie bereit sind."
+- **Hook:** Kurze Zusammenfassung in 5 Sätzen: wer wir sind, was wir können, warum Berlin, wie der Termin läuft, was er kostet (nichts)
+- **Story:** Keine neuen Argumente — Einladung. „Wir haben Ihnen alles gesagt, was wir für wichtig halten. Den Rest klären wir persönlich."
+- **Beide Optionen präsent:** Online-Buchung + Telefon + Standort-Adresse
 
-**CTA:** Termin buchen (primär) | Uns anrufen (sekundär)
+**CTA:** Termin vereinbaren (primär) | Uns anrufen (sekundär)
+**Unsubscribe:** Pflicht-Footer
 
 ---
 
-## 4. Steady-State-Sequenz Wochen 3–26 (~34 Mails) — Detailblock
+## 6. Segment-Sequenzen Wochen 3–26
 
-### Rhythmus
+Jedes Segment bekommt ab Woche 3 eine eigene Steady-State-Sequenz. Das Mi/So-Rhythmus-Schema bleibt gleich. Hier werden die wichtigsten Mails pro Segment detailliert; die restlichen Slots folgen dem gleichen Skelett-Format.
 
-```
-Mittwoch (Content):  Informations-Mail, kein direkter Kaufdruck
-                     Themen: Trust, Mythen, Pain Point, Cost, Lifestyle, FAQ
-Sonntag (CTA):       Booking-Reminder, direkt und knapp
-                     Variiert in Formulierung, nicht identisch
-```
+---
 
-### Mittwoch-Mails — Grundprinzipien
+### 6.1 Segment A — Implantate + Zahnersatz
 
-1. **Jede Mail hat eine eigene Aussage.** Kein Auffüllen mit generischem Content. Wenn der Copywriter nichts Substanzielles zu sagen hat, lieber kürzen als aufblähen.
-2. **Keine versteckten CTAs.** Mittwoch-Mails haben einen weichen "Wenn Sie das interessiert"-Link, keinen dominant-platzierten Button.
-3. **Ton wie ein kompetenter Arzt.** Erklärend, nicht wertend. "Manche Patienten fragen uns..." ist besser als "Wussten Sie, dass...?"
+**Segment-Kontext:** Leads, die `Implantate` oder `Zahnersatz` im Formular angegeben haben. Meist Erwachsene 45+, ein oder mehrere fehlende Zähne, preissensibel aber qualitätsorientiert. Einwand-Schwerpunkt: Kosten, Schmerz, Dauer, Ästhetik.
 
-### Sonntag-Mails — Grundprinzipien
+**Standort-Routing:** Friedrichstraße, Reinickendorf (2), Schöneberg (2)
 
-1. **Kurz und direkt.** Maximal 100 Wörter im Body, ein großer CTA.
-2. **Variation im Framing.** Nicht jede Woche "Termin buchen" — manchmal "Rückruf anfragen", manchmal "10 Minuten am Telefon", manchmal konkreter Monat/Datum.
-3. **Nie identisch.** Brevo-Tags erlauben zu prüfen, wer vorherige Mails geöffnet hat — wenn ein Lead Mi regelmäßig öffnet und So nie klickt, ist das ein Segmentierungs-Signal für den Sales-Agent.
+---
 
-### Cluster-Rotation-Plan (Wochen 3–20)
+#### Mail 1010 — Mi Woche 3
 
-| Woche | Mi-Cluster | So-Stil | Notiz |
+**Subject:** `Wie läuft eine Implantat-Erstberatung bei Wunschlachen ab?`
+**Pre-Header:** 45 Minuten für Ihren persönlichen Behandlungsplan — was Sie erwartet
+
+**Body-Skelett:**
+- **Hook:** Ungewissheit vor dem ersten Termin abbauen — „Was passiert da eigentlich?"
+- **Schritt-für-Schritt:** Anamnese → Röntgen (3D wenn nötig) → Befund erklären → HKP-Entwurf → Fragen beantworten
+- **Keine Verpflichtung:** Erstberatung ≠ Behandlungsbeginn. Patient entscheidet danach.
+- **Abschluss:** Praxis-Adresse des Implantat-Standorts + Buchungslink
+
+**CTA:** Erstberatung buchen
+**Unsubscribe:** Pflicht-Footer
+
+---
+
+#### Mail 1012 — Mi Woche 4
+
+**Subject:** `„Sieht man, dass das ein Implantat ist?" — eine ehrliche Antwort`
+**Pre-Header:** Wie natürlich wirken moderne Implantate und Keramikkronen?
+
+**Body-Skelett:**
+- **Hook:** Patientenzitat als Eröffnung
+- **Erklärung:** Individuelle Keramikkrone, Farbabstimmung, natürlicher Zahnersatz
+- **Keine Vorher-Nachher-Reißer-Bilder** — eher technische Erklärung + ruhiger Ton
+- **Fazit:** In den meisten Fällen nicht erkennbar — aber ehrlich: es kommt auf Ausgangssituation an
+
+**CTA:** Ästhetische Beratung im Implantat-Termin ansprechen
+**Unsubscribe:** Pflicht-Footer
+
+---
+
+#### Mail 1016 — Mi Woche 7
+
+**Subject:** `GKV und Zahnimplantate — was zahlt Ihre Krankenkasse wirklich?`
+**Pre-Header:** Festzuschuss, Bonus-Heft, Zusatzversicherung: alles erklärt ohne Fachjargon
+
+**Body-Skelett:**
+- **Hook:** Weit verbreitetes Missverständnis ansprechen: „GKV zahlt bei Implantaten sowieso nichts."
+- **Fakten:** Festzuschuss auf Zahnersatz (nicht auf das Implantat selbst, aber auf die Krone/Versorgung), Bonus-Heft-Tipp
+- **PKV:** Direktabrechnung, in der Regel höhere Erstattung
+- **Finanzierung:** Falls GKV-Anteil nicht reicht — Ratenzahlung möglich
+- **Keine %-Zahlen erfinden** — „branchen-typisch" formulieren
+
+**CTA:** Kostenfragen im Erstgespräch klären
+**Unsubscribe:** Pflicht-Footer
+
+---
+
+#### Mail 1019 — Mi Woche 14
+
+**Subject:** `Was passiert, wenn nach einem Implantat etwas nicht stimmt?`
+**Pre-Header:** Ehrliche Antwort: wie wir mit Komplikationen umgehen
+
+**Body-Skelett:**
+- **Hook:** Tabu-Thema direkt ansprechen — Vertrauen entsteht durch Offenheit
+- **Kontext:** Komplikationsrate bei Implantaten ist branchen-typisch gering — ohne konkrete %-Zahl
+- **Wunschlachen-Antwort:** Kurzer Anruf, nächster Slot in der vertrauten Praxis — kein Fremdkrankenhaus, kein langer Weg
+- **Abschluss:** Kontinuität als echtes Versprechen (kein Marketing-Text)
+
+**CTA:** Vertrauensgespräch — Termin buchen
+**Unsubscribe:** Pflicht-Footer
+
+---
+
+### 6.2 Segment B — KFO + Aligner
+
+**Segment-Kontext:** Leads mit `Aligner` oder `Kieferorthopädie`. Zwei Untergruppen: (a) Erwachsene, die bisher keine KFO hatten oder eine verbessern möchten; (b) Eltern für ihre Kinder. Der Funnel adressiert beide.
+
+**Standort-Routing:** Reinickendorf (1), Schöneberg (1)
+
+---
+
+#### Mail 1020 — Mi Woche 3
+
+**Subject:** `Aligner oder Spange — was passt zu Ihnen (oder Ihrem Kind)?`
+**Pre-Header:** Kieferorthopädie für Erwachsene und Kinder: was heute möglich ist
+
+**Body-Skelett:**
+- **Hook:** KFO ist nicht mehr nur für Teenager — Erwachsenen-KFO ist heute Standard
+- **Vergleich:** Feste Spange vs. Aligner — wann was sinnvoll ist (keine generelle Empfehlung, da individual)
+- **Kinder:** Frühzeitige Diagnose wichtig — wann der erste KFO-Check?
+- **Fazit:** KFO-Beratung klärt das — kostenlos und ohne Verpflichtung
+
+**CTA:** KFO-Beratungstermin buchen
+**Unsubscribe:** Pflicht-Footer
+
+---
+
+#### Mail 1024 — Mi Woche 5
+
+**Subject:** `KFO für Kinder: wann ist der richtige Zeitpunkt für den ersten Termin?`
+**Pre-Header:** Was Eltern über den ersten KFO-Check wissen sollten — und wann er stattfinden sollte
+
+**Body-Skelett:**
+- **Hook:** Eltern-Frage: „Wann soll ich mein Kind zum KFO bringen?"
+- **Antwort:** Empfehlungen zum optimalen Ersttermin-Alter (ohne konkrete %-Zahlen, allgemein: „in der Regel zwischen X und X Jahren" — Tony bitte fachlich abstimmen)
+- **Wunschlachen-Standorte:** KFO + Kinderzahnheilkunde in Reinickendorf und Schöneberg
+- **Kinder-freundliche Praxis:** Atmosphäre, kein Druck, spielerischer Einstieg
+
+**CTA:** Termin für Ihr Kind — jetzt buchen
+**Unsubscribe:** Pflicht-Footer
+
+---
+
+### 6.3 Segment C — Ästhetik + White Cocoon
+
+**Segment-Kontext:** Leads mit `Ästhetik`, `Bleaching`, `Zahnschmuck`. Häufig berufstätige Erwachsene, die ihr Lächeln als Ausdrucksmittel verstehen. Preissensibel aber bereit für Premium, wenn Qualität überzeugend.
+
+**Standort-Routing:** Charlottenburg White Cocoon
+
+---
+
+#### Mail 1030 — Mi Woche 3
+
+**Subject:** `White Cocoon by Wunschlachen — was steckt hinter der Sub-Marke?`
+**Pre-Header:** Ästhetische Zahnmedizin auf Spezialisten-Niveau in Charlottenburg
+
+**Body-Skelett:**
+- **Hook:** „White Cocoon ist nicht einfach ein anderer Name für denselben Zahnarzt."
+- **Was White Cocoon ist:** Spezialisierter Standort für ästhetische Zahnmedizin — Veneers, Bleaching, Smile Design, Ästhetik-Aligner
+- **Atmosphäre:** Charlottenburg-Setting, auf ästhetische Patientenzielgruppe ausgerichtet
+- **Abgrenzung:** Kein Luxus-Marketing, aber klares Bekenntnis zur Spezialisierung
+
+**CTA:** White Cocoon kennenlernen — Termin buchen
+**Unsubscribe:** Pflicht-Footer
+
+---
+
+#### Mail 1034 — Mi Woche 5
+
+**Subject:** `„Bleaching schädigt doch die Zähne" — stimmt das wirklich?`
+**Pre-Header:** Was professionelles Bleaching von Supermarkt-Produkten unterscheidet
+
+**Body-Skelett:**
+- **Hook:** Häufigster Bleaching-Mythos direkt ansprechen
+- **Fakten:** Professionelles Bleaching mit ärztlicher Aufsicht vs. OTC-Produkte ohne Dosierungs-Kontrolle
+- **Wann nicht:** Kontraindikationen kurz erwähnen (z.B. empfindliche Zähne, Restaurationen)
+- **Fazit:** Professionell durchgeführt und angemessen eingesetzt ist Bleaching sicher — Beratung klärt, ob es für Sie passt
+
+**CTA:** Bleaching-Beratung bei White Cocoon buchen
+**Unsubscribe:** Pflicht-Footer
+
+---
+
+### 6.4 Segment D — Angstpatienten + Sanfte Behandlung
+
+**Segment-Kontext:** Leads mit `Angstpatienten`, `Lachgas`, `Vollnarkose`. Hochsensible Gruppe — Ton muss besonders empathisch, langsam und ohne jeden Druck sein. Kein FOMO, kein Zeitdruck.
+
+**Standort-Routing:** Alle Standorte (Angstpatienten-Konzept ist standortübergreifend)
+
+---
+
+#### Mail 1040 — Mi Woche 3
+
+**Subject:** `Zahnarztangst — Sie sind damit nicht allein`
+**Pre-Header:** Wie wir mit Nervosität und Angst umgehen — konkret, nicht als Marketing-Phrase
+
+**Body-Skelett:**
+- **Hook:** Zahnarztangst normalisieren — ein erheblicher Teil der Bevölkerung betroffen (ohne konkrete %-Zahl)
+- **Kein Urteil:** „Wir verstehen, warum Sie zögern. Und wir beurteilen das nicht."
+- **Konkrete Maßnahmen:** Stop-Signal, kein Zeitdruck, Gespräch vor jeder Maßnahme, Lachgas-Option, Vollnarkose für ausgeprägte Fälle
+- **Erster Schritt:** Kann auch nur ein Telefongespräch sein — kein Stuhl, kein Eingriff
+
+**CTA:** Unverbindliches Vorgespräch — anrufen oder buchen
+**Unsubscribe:** Pflicht-Footer
+
+---
+
+#### Mail 1042 — Mi Woche 4
+
+**Subject:** `Lachgas beim Zahnarzt: was Sie wirklich erwartet`
+**Pre-Header:** Wie Lachgas-Sedierung funktioniert, wann sie sinnvoll ist — ehrlich erklärt
+
+**Body-Skelett:**
+- **Hook:** „Viele Patienten haben von Lachgas gehört, wissen aber nicht, was es ist."
+- **Was Lachgas ist/nicht ist:** Kein Vollnarkose-Äquivalent, aber deutliche Entspannung. Patient bleibt ansprechbar.
+- **Ablauf:** Maske, Einsatz nach wenigen Minuten, Abklingen nach Behandlung
+- **Für wen geeignet:** Leichte bis mittlere Angst, Kinder, Patienten mit Würgereiz
+- **Wann nicht:** Schwangerschaft, bestimmte Vorerkrankungen — Aufklärungsgespräch klärt das
+
+**CTA:** Lachgas-Beratung buchen
+**Unsubscribe:** Pflicht-Footer
+
+---
+
+### 6.5 Segment E — Vorsorge + Zahnreinigung
+
+**Segment-Kontext:** Leads mit `Zahnreinigung/Prophylaxe`, `Kontrolltermin`, `Beratungstermin`, `Karies`, `Parodontitis`, `Mundgeruch`. Vorsorge-orientierte Patienten — häufig bereits „gute" Zahnarzt-Nutzer, die einen neuen Berliner Zahnarzt suchen oder nach langer Pause zurückkehren. Wichtiges Up-Sell-Potenzial zu komplexeren Behandlungen.
+
+**Standort-Routing:** Alle Standorte
+
+---
+
+#### Mail 1050 — Mi Woche 3
+
+**Subject:** `Warum ein Kontrolltermin bei Wunschlachen mehr ist als Prophylaxe`
+**Pre-Header:** Was eine professionelle Kontrolluntersuchung beinhaltet — und was Sie davon haben
+
+**Body-Skelett:**
+- **Hook:** „Prophylaxe ist gut. Prophylaxe plus frühzeitige Diagnose ist besser."
+- **Was passiert:** Zahnreinigung + Befund + ggf. Röntgen + Beratung in einem Termin
+- **Frühzeitige Erkennung:** Parodontitis, Karies, Schliffflächen — was früh erkannt günstig bleibt
+- **Familien-Hinweis:** Kinder-Prophylaxe an den KFO+Kinder-Standorten
+
+**CTA:** Prophylaxe-Termin buchen
+**Unsubscribe:** Pflicht-Footer
+
+---
+
+#### Mail 1056 — Mi Woche 7
+
+**Subject:** `Bei Ihrer Zahnreinigung wurde etwas sichtbar — was dann?`
+**Pre-Header:** Wenn beim Kontrolltermin Bedarf für weitere Behandlungen erkannt wird
+
+**Body-Skelett:**
+- **Hook:** „Was passiert, wenn beim Prophylaxe-Termin mehr sichtbar wird als erwartet?"
+- **Ablauf:** Kein sofortiger Eingriff ohne Absprache — zuerst Befund erklären, dann gemeinsam entscheiden
+- **Optionen:** Welche weiterführenden Leistungen Wunschlachen anbietet (Übersicht der 23 Leistungen kurz erwähnt)
+- **Kein Druck:** Wenn nichts eilig ist, kann alles in Ruhe geplant werden
+
+**CTA:** Kontrolltermin buchen — alles andere ergibt sich
+**Unsubscribe:** Pflicht-Footer
+
+---
+
+### 6.6 Segment F — Default / Allgemein
+
+Enthält die allgemeine Wunschlachen-USP-Kommunikation für alle Leads ohne spezifisches Segment. Baut auf USPs aus §1.3 auf. Mails 1060–1075 abgedeckt in der Kurzübersicht in §4.
+
+---
+
+## 7. Saison-Specials
+
+Saison-Specials überschreiben den regulären Slot (Mi oder So) wenn der Kalender-Trigger feuert. Sie werden in allen aktiven Segmenten ausgespielt (mit leichter Segment-Anpassung wenn sinnvoll).
+
+| ID | Saison | Timing | Subject-Zeile | Body-Fokus | Brevo-Tag |
+|---|---|---|---|---|---|
+| S-001 | Neujahr | 1.–10. Januar | Neues Jahr, frischer Start für Ihre Zähne | Jahresvorsatz Zahngesundheit; Bonus-Heft auffüllen | `saison-neujahr` |
+| S-002 | Frühjahr | März | Frühjahrspflege: Prophylaxe-Termin jetzt sichern | Saisonaler Reminder Prophylaxe; Kindertermin für das neue Schuljahr | `saison-frühjahr` |
+| S-003 | Sommer | Mai/Juni | Sommerlächeln: Bleaching oder Prophylaxe vor dem Urlaub | White Cocoon-Verweis für Ästhetik-Leads; allgemein: Vorsorge vor Reise | `saison-sommer` |
+| S-004 | Herbst | September | Zurück aus dem Urlaub — Kontrolltermin verpasst? | Erinnerung nach Urlaubssaison; Bonus-Heft-Tipp | `saison-herbst` |
+| S-005 | Jahresende | Oktober/November | Restbudget für Zahngesundheit nutzen? | Zusatzversicherungs-Hinweis; was GKV noch im laufenden Jahr zahlt | `saison-jahresende-bonus` |
+| S-006 | Advent | Dezember | Das schönste Geschenk: ein Lächeln ohne Schmerzen | Emotional warm — kein Verkaufsdruck, aber sanfter CTA | `saison-advent` |
+
+---
+
+## 8. Termin-bezogene Trigger-Mails
+
+Diese Mails sind transaktional und laufen außerhalb des Marketing-Funnels. DSGVO-Pflicht gilt dennoch; Unsubscribe-Footer muss vorhanden sein (transaktionale Mails dürfen in Brevo separat konfiguriert werden — kein Nurture-Stop nötig).
+
+---
+
+### T-001 — Termin bestätigt
+
+**Subject:** `Ihr Termin bei Wunschlachen — Bestätigung`
+**Pre-Header:** Datum, Uhrzeit, Standort und was Sie mitbringen sollten
+
+**Body-Skelett:**
+- Datum + Uhrzeit + Standortadresse
+- Anfahrt / ÖPNV-Hinweis
+- Was mitbringen: Krankenkassenkarte, ggf. Überweisung, Bonus-Heft
+- Storno/Umbuchung: Wie und bis wann
+
+**Unsubscribe:** Pflicht-Footer
+
+---
+
+### T-002 — 48h Erinnerung
+
+**Subject:** `Erinnerung: Ihr Termin morgen bei Wunschlachen`
+**Pre-Header:** Ihr Termin am [Datum] um [Uhrzeit] in [Standort]
+
+**Body-Skelett:**
+- Kurze Erinnerung: Datum, Uhrzeit, Standort
+- Anfahrt + Kontaktnummer falls Fragen
+- Storno bis [X Stunden vorher]
+
+---
+
+### T-003 — 2h Erinnerung
+
+**Subject:** `Ihr Termin in 2 Stunden — schnelle Wegbeschreibung`
+**Pre-Header:** Wir freuen uns auf Sie
+
+**Body-Skelett:**
+- Zeit + Standort + Maps-Link
+- Kurzer Warm-up: „Sollten Sie Fragen haben, rufen Sie uns an."
+
+---
+
+### T-004 — Nach Beratung
+
+**Subject:** `{{firstName}}, wie war Ihre Beratung bei uns?`
+**Pre-Header:** Kurzes Feedback hilft uns — und Ihnen
+
+**Body-Skelett:**
+- Dank für den Besuch
+- Feedback-Link (falls vorhanden)
+- Nächster Schritt: HKP prüfen, Termin vereinbaren, Fragen stellen
+- Kontaktnummer sichtbar
+
+---
+
+### T-005 — HKP gesendet
+
+**Subject:** `Ihr Heil- und Kostenplan liegt vor, {{firstName}}`
+**Pre-Header:** Bitte prüfen — und bei Fragen melden Sie sich
+
+**Body-Skelett:**
+- HKP als Anhang oder Verweis auf Patientenportal
+- Erläuterung: Was steht im HKP, wie lesen Sie ihn
+- Nächster Schritt: Termin für Behandlungsbeginn
+- Finanzierungsoptionen kurz erwähnt
+
+---
+
+## 9. Re-Engagement-Sequenz für Lost-Leads
+
+Tritt in Kraft nach 90 Tagen ohne Termin + Status `lost` oder 90 Tage ohne Öffnung. 3-Touch-Sequenz, dann Sunset.
+
+---
+
+### RE-001 — Re-Engagement Tag 0
+
+**Subject:** `{{firstName}}, wir haben Sie eine Weile nicht gehört`
+**Pre-Header:** Falls sich etwas verändert hat — wir sind noch da
+
+**Body-Skelett:**
+- **Hook:** „Es ist eine Weile her seit Ihrer Anfrage. Wir machen uns keine Vorwürfe — das Leben ist voll."
+- **Keine Anklage:** Kein „Warum haben Sie nicht gebucht?"
+- **Erinnerung an USPs:** 6 Standorte, neue Möglichkeit (ggf. Segment-spezifisch)
+- **CTA:** Termin buchen | oder: Einfach anrufen
+
+---
+
+### RE-002 — Re-Engagement Tag 14
+
+**Subject:** `Ein letzter Gedanke zu Ihrer Zahngesundheit, {{firstName}}`
+**Pre-Header:** Kein Druck — nur ein kurzer Hinweis, falls er hilfreich ist
+
+**Body-Skelett:**
+- **Sehr kurz:** 3–4 Sätze
+- **Inhalt:** Ein konkreter Tipp oder Fakt (je nach Segment) — kein Verkaufsdruck
+- **CTA:** Termin buchen (dezent) | oder: nichts — wir sehen uns
+
+---
+
+### RE-003 — Sunset Tag 28
+
+**Subject:** `Abmelden oder weiterlesen, {{firstName}}? Sie entscheiden.`
+**Pre-Header:** Wir machen es kurz — und respektieren Ihre Entscheidung
+
+**Body-Skelett:**
+- **Sehr kurz:** Klare Wahl anbieten
+- **Option A:** Weiterhin informiert bleiben → Klick-Link
+- **Option B:** Kein weiteres Marketing → Unsubscribe-Link
+- **Kein Druck:** Wer abmeldet, wird nicht mehr kontaktiert (außer transaktional)
+- **Abschluss:** „Vielen Dank, dass Sie sich an Wunschlachen gerichtet haben."
+
+---
+
+## 10. KPIs + A/B-Tests
+
+> Keine erfundenen Conversion-Rates. Folgende KPIs sind als Tracking-Ziele definiert — Benchmarks nach branchen-typischen Werten zu kalibrieren.
+
+### Wichtigste KPIs pro Sequenz-Abschnitt
+
+| KPI | Messbar in Brevo | Ziel-Bereich (branchen-typisch) |
+|---|---|---|
+| Open Rate Welcome (1001–1006) | Ja | Deutlich über allgemeinem Durchschnitt — Welcome-Mails sind traditionell öffnungsstärker |
+| Click-Through Rate (CTR) | Ja | Booking-CTA-Mails: höher als Content-Mails |
+| Booking-Conversion (Mail → Termin) | Extern (CRM-Integration) | Primär-KPI: Leads die einen Termin gebucht haben |
+| Segment-Routing-Fehlerquote | Manuell | Wie viele Leads landen in `seg-default` ohne echten Grund? → Formular-Optimierung |
+| Re-Engagement-Rate | Ja | Wie viele Lost-Leads werden durch RE-001–RE-003 reaktiviert? |
+| Unsubscribe-Rate | Ja | Wenn zu hoch: Frequenz oder Relevanz anpassen |
+
+### A/B-Test-Vorschläge
+
+| Test | Variable A | Variable B | Entscheidung nach |
 |---|---|---|---|
-| 3 | Trust: Behandlungsablauf | Standard-CTA | Übergang aus Welcome |
-| 4 | Mythen: Optik/Ästhetik | Standard-CTA | |
-| 5 | Pain Point: Zeitplan | Zeitplan-CTA | |
-| 6 | Cost: GKV-Erklärung | Kostenrechner-CTA | |
-| 7 | Trust: Patienten-Referenz | Standard-CTA | |
-| 8 | Lifestyle: Alltagsveränderung | Erinnerungs-CTA | |
-| 9 | Mythen: Alter / Voraussetzungen | Individuell-CTA | |
-| 10 | Cost: Finanzierung | Unverbindlich-CTA | |
-| 11 | Trust: Behind-the-Scenes | Knappheits-CTA | |
-| 12 | FAQ: Top 10 | 3-Monats-Reminder | Milestone: 3 Monate |
-| 13 | Pain Point: Zahnarztangst | Telefon-CTA | |
-| 14 | Lifestyle: Karriere | Barrier-CTA | |
-| 15 | Trust: Qualitätsstandards DE | Standard-CTA | |
-| 16 | Mythen: Haltbarkeit | Persönlich-CTA | |
-| 17 | Cost: Zusatzversicherung | Einfach-CTA | |
-| 18 | Lifestyle: Essen / Kauen | Knappheits-CTA | |
-| 19 | Trust: Komplikationen (Tabu-Thema) | Telefon-CTA | |
-| 20 | FAQ: Implantat vs. Alternativen | 6-Monats-Abschluss | Milestone: 6 Monate |
+| Subject-Line 1001 | „Re: Ihre Anfrage..." | „Hallo {{firstName}}, Ihre Anfrage bei Wunschlachen" | 200+ Öffnungen |
+| CTA-Text 1006 | „Termin vereinbaren" | „Jetzt Erstgespräch buchen" | 500+ Klicks |
+| Frequenz Steady-State | 2×/Woche | 1×/Woche | Unsubscribe-Rate + Booking-Rate nach 4 Wochen |
+| Segment-Routing | Formular-Pflichtfeld | Formular-Optional | Ausfüllrate + Routing-Qualität |
 
 ---
 
-## 5. Saison-Specials
+## 11. Brevo-Setup-Hinweise + Template-ID-Schema
 
-Saison-Mails ersetzen die reguläre Mi/So-Mail für diese Woche. Sie werden zusätzlich zur Sequenz als Broadcast an alle aktiven Leads versandt, die die Saison-Bedingung erfüllen (Sequenz läuft, kein Termin). Maximale Saison-Broadcasts: 1×/Saison pro Lead.
+### Template-ID-Reservierungen
 
-| # | Titel | Timing | Subject-Zeile | Cluster | Body-Skelett | CTA | Brevo-Tag |
-|---|---|---|---|---|---|---|---|
-| S1 | Sommer-Lächeln | April/Mai | Strahlendes Lächeln im Sommer — jetzt planen | saison | Hook: Sommer kommt, wer will dann mit Zahnproblemen Einschränkungen haben. Story: realistischer Zeitplan von Erstberatung bis Krone (Einzelimplantat: ca. 3–6 Monate). CTA: Termin jetzt buchen. | Termin buchen | `saison-sommer` |
-| S2 | Weihnachten / Jahresende | November | Mit welchem Lächeln gehen Sie ins neue Jahr? | saison | Hook: Jahresende als natürlicher Reflexionspunkt. Story: Kassen-Budget: restliche Jahresleistungen nutzen, Bonus-Heft. CTA: Beratung noch dieses Jahr | Termin buchen | `saison-weihnachten` |
-| S3 | Neujahr / Vorsätze | Januar | Ihr Vorsatz für {{year}}: in Ihre Zahngesundheit investieren | saison | Hook: Vorsätze brauchen einen ersten konkreten Schritt. Story: Was ein Implantat bedeutet (kein Luxus, sondern Gesundheitsinvestition). CTA: Kostenlosen Ersttermin buchen | Termin buchen | `saison-neujahr` |
-| S4 | EM/WM | Mai-Juli (in EM/WM-Jahren) | {{firstName}}, Ihr Lächeln verdient einen Platz im Finale | saison/lifestyle | Hook: sportliches Erfolgs-Framing (nicht reißerisch à la Dentaprime, sondern leicht). Story: Energie für Veränderungen — Turnier-Momente als Erinnerung. CTA: Termin | Termin buchen | `saison-sport-event` |
+| ID-Bereich | Verwendung | Status |
+|---|---|---|
+| 1001–1006 | Welcome-Sequenz (alle Segmente, universell) | **Im CRM-Code implementiert — erste Priorität** |
+| 1010–1019 | Segment A — Implantate + Zahnersatz | Anzulegen nach Welcome-Sequenz |
+| 1020–1029 | Segment B — KFO + Aligner | Anzulegen nach Seg A |
+| 1030–1039 | Segment C — Ästhetik + White Cocoon | Anzulegen nach Seg A |
+| 1040–1049 | Segment D — Angstpatienten + Sanfte Behandlung | Anzulegen nach Seg A |
+| 1050–1059 | Segment E — Vorsorge + Zahnreinigung | Anzulegen nach Seg A |
+| 1060–1079 | Segment F — Default / Allgemein | Anlegen parallel zu Seg A–E |
+| T-001–T-005 | Transaktionale Trigger-Mails | Separat als transaktionale Templates anlegen |
+| RE-001–RE-003 | Re-Engagement | Erst nach Go-Live der anderen Sequenzen |
+| S-001–S-006 | Saison-Specials | Kalender-Trigger, nach Bedarf anlegen |
 
-**Wichtig:** S4 nur in Jahren mit EM oder WM aktiv schalten. Segment: Leads mit `status: new/contacting/contacted AND welcome_sequence_position >= 3`. Kein S4-Broadcast an frische Leads (T+0 bis T+14) — da läuft die Welcome-Sequenz.
+### Brevo-Automation-Logik (Zusammenfassung)
 
----
+1. **Lead kommt rein** → Brevo-Kontakt angelegt, Segment-Tag gesetzt (aus `dental_service`)
+2. **Welcome-Automation** startet sofort → Mails 1001–1006 nach Zeitplan
+3. **Nach Tag 14** → Automation prüft Segment-Tag → schaltet richtige Steady-State-Sequenz ein
+4. **Status-Check** → wenn `consultation_scheduled` → Nurture-Automation pausieren, Trigger-Kette starten
+5. **90 Tage ohne Termin + kein Öffnen** → Re-Engagement-Automation starten
 
-## 6. Termin-bezogene Trigger-Mails
+### Brevo-Tag-Konventionen
 
-Diese Mails sind **transaktionale Mails**, keine Marketing-Mails. Sie laufen auf einem separaten Brevo-Sender/Liste (aus Compliance-Gründen und weil sie bei unsubscribed Leads trotzdem gesendet werden dürfen, wenn DSGVO-Einwilligung für Behandlungskommunikation vorliegt).
-
-Trigger kommt aus **Modul C** (Kalender-Sync, Spec §3) — nicht aus dem Email-Cron.
-
-### 6.1 Termin-Bestätigung
-
-**Trigger:** `appointments INSERT + treatment.name = 'Beratung'`
-**Timing:** Sofort (< 2 Minuten nach Buchung)
-**Subject:** `Ihr Beratungstermin bei Wunschlachen — Bestätigung`
-**Pre-Header:** {{appointmentDate}}, {{appointmentTime}} Uhr — alles Wichtige auf einen Blick
-
-**Body-Inhalt:**
-- Termin-Datum, -Uhrzeit, Behandler-Name
-- Praxis-Adresse mit Google-Maps-Link (oder Standort-Link)
-- "Was bringen Sie mit": Krankenversicherungskarte, Bonusheft (falls vorhanden), Röntgenbilder (falls vorhanden)
-- Kontakt für Rückfragen / Stornierung (Telefon + Email)
-- DSGVO-Hinweis: "Diese Mail enthält Informationen zu Ihrem gebuchten Termin."
-
-**Brevo-Tag:** `transactional-appt-confirmation`
+- Segment-Tags: `seg-implantate`, `seg-kfo`, `seg-aesthetik`, `seg-angst`, `seg-vorsorge`, `seg-default`
+- Status-Tags: `welcome-active`, `steady-state-active`, `termin-scheduled`, `re-engagement-active`, `lost`, `unsubscribed`
+- Mail-Tags: Format `welcome-day-0-cta`, `seg-a-w3-mi-ablauf` usw. (aus §4)
 
 ---
 
-### 6.2 Termin-Reminder 24h vorher
+## 12. Nächste Schritte für das Marketing-Team
 
-**Trigger:** Cron täglich 09:00 — alle Termine mit `start_date_time = morgen`
-**Timing:** 24h vor Termin
-**Subject:** `Erinnerung: Ihr Termin bei Wunschlachen morgen um {{time}} Uhr`
-**Pre-Header:** Ihr Termin ist morgen — wir freuen uns auf Sie
+### Priorisierte Reihenfolge für Brevo-Umsetzung
 
-**Body-Inhalt:**
-- Termin-Zusammenfassung (Datum, Zeit, Ort)
-- "Was mitbringen" — kurze Liste
-- Storno-Hinweis: "Wenn Sie absagen müssen, bitte bis [X Stunden vorher] melden — Telefon [Nummer]"
-- Warm-up: "Haben Sie noch Fragen? Rufen Sie uns an — wir sind bis [Zeit] erreichbar."
+**Phase 1 — Sofort (Welcome-Sequenz, IDs 1001–1006)**
+- [ ] 6 Templates in Brevo anlegen (IDs 1001–1006)
+- [ ] Automation für Welcome-Sequenz (T+0 bis T+14) konfigurieren
+- [ ] Test-Lead durchlaufen lassen (echte Mail-Adressen, alle 6 Mails prüfen)
+- [ ] Unsubscribe-Footer-Pflicht in jedem Template überprüfen
+- [ ] DSGVO: Sicherstellen, dass `GDPR_accepted_at` vor Mail-Versand geprüft wird
 
-**Brevo-Tag:** `transactional-appt-reminder-24h`
+**Phase 2 — Parallel (Transaktionale Mails T-001–T-005)**
+- [ ] 5 transaktionale Templates anlegen (getrennt von Marketing-Automation)
+- [ ] Termin-Bestätigung + Reminder testen
+- [ ] HKP-Mail mit Dateianhang oder Verweis konfigurieren
 
----
+**Phase 3 — Danach (Segment-Sequenzen, IDs 1010–1079)**
+- [ ] Segment A (Implantate) als erstes, da vermutlich stärkster Traffic-Kanal
+- [ ] Segment D (Angstpatienten) sorgfältig testen — Tonalität besonders wichtig
+- [ ] Segment F (Default) als Fallback immer aktiv halten
+- [ ] Routing-Logik für `dental_service` → Segment-Tag in Brevo testen
 
-### 6.3 Nach-Beratung-Mail (HKP-Erläuterung)
+**Phase 4 — Go-Live-Optimierung**
+- [ ] Re-Engagement-Sequenz (RE-001–RE-003) nach 90 Tagen Go-Live-Erfahrung aktivieren
+- [ ] Saison-Specials nach Kalender zeitnah befüllen (S-001 Neujahr: Deadline Ende Dezember)
+- [ ] A/B-Tests für Subject Lines 1001 + 1006 starten
 
-**Trigger:** `appointments UPDATE arrival_date != null` (Termin stattgefunden)
-**Timing:** Selber Tag, ~2 Stunden nach Termin-Startzeit
-**Subject:** `Nach Ihrer Beratung bei Wunschlachen — Ihre nächsten Schritte`
-**Pre-Header:** Alles Besprochen zusammengefasst — und wie es weitergeht
+### Was Tony noch validieren muss
 
-**Body-Inhalt:**
-- Dankeschön für den Besuch (persönlicher Ton)
-- HKP-Erläuterung: "Sie haben einen Heil- und Kostenplan erhalten / erhalten ihn in den nächsten Tagen. Was das bedeutet: ..."
-- Nächste Schritte: Was passiert bevor der Behandlungstermin (HKP-Einreichung GKV, Rückfragen klären)
-- Kontakt: "Fragen zum HKP? Melden Sie sich direkt bei uns — [Telefon / Email]"
-- Soft-CTA: "Wenn Sie bereit sind, rufen wir an, um den Behandlungstermin festzulegen."
-
-**Brevo-Tag:** `transactional-post-consultation`
-
----
-
-### 6.4 Vor-Behandlung-Mail ("Was mitbringen")
-
-**Trigger:** `appointments INSERT treatment.category = 'behandlung'` + 24h-Cron
-**Timing:** 24–48h vor Behandlungstermin
-**Subject:** `Ihr Behandlungstermin bei Wunschlachen — Vorbereitung`
-**Pre-Header:** So bereiten Sie sich optimal auf Ihren Behandlungstag vor
-
-**Body-Inhalt:**
-- Termin-Datum und -Uhrzeit
-- Praktische Vorbereitung: Nüchternheit (falls Sedierung), leichte Mahlzeit vorher, keine aufwendigen Pläne direkt danach
-- Was mitbringen: Versicherungskarte, HKP unterschrieben (falls noch nicht übergeben)
-- Nachsorge-Hinweis kurz: "Nach dem Eingriff: Schonung heute empfohlen — Details erläutern wir direkt danach"
-- Kontakt für Fragen
-
-**Brevo-Tag:** `transactional-pre-treatment`
+1. **Standort-Adressen + ÖPNV** für Standort-Spotlight-Mails konkret hinterlegen
+2. **Team-Fotos und Behandler-Namen** für Mail 1002 und Trust-Mails
+3. **Booking-Link-URL** (Onlinebuchungs-System) für alle CTAs
+4. **Segment-Zuordnung `Füllungstherapien`** — Seg A oder Seg F?
+5. **KFO-Ersttermin-Altersempfehlung** für Mail 1024 fachlich abstimmen
+6. **Finanzierungspartner** — welche Ratenzahlungs-Option wird konkret angeboten?
+7. **Lachgas/Vollnarkose-Verfügbarkeit** — an welchen Standorten genau?
+8. **Patienten-Feedback/Zitate** — liegen eingewilligte Patientenstimmen vor oder müssen diese erst eingeholt werden?
 
 ---
 
-### 6.5 Nach-Behandlung-Mail (Pflege + Review-Anfrage)
+*Dieses Dokument ist das operative Konzept für das Wunschlachen Email-Marketing-System. Alle Templates sollten vor dem Live-Gang vom Marketing-Team und dem ärztlichen Leiter auf Richtigkeit geprüft werden. Medizinische Aussagen (Lachgas-Indikation, Implantat-Komplikationsrate, KFO-Altersgrenzen) sind als Skelett-Hinweise formuliert und müssen fachlich vor der Finalisierung freigegeben werden.*
 
-**Trigger:** `appointments UPDATE treatment_finished_date != null`
-**Timing:** 24–48h nach Behandlung
-**Subject:** `Nach Ihrer Behandlung bei Wunschlachen — Pflege-Tipps`
-**Pre-Header:** So pflegen Sie Ihr Implantat in den ersten Wochen
-
-**Body-Inhalt:**
-- Glückwunsch (ruhig, nicht übertrieben)
-- Pflege-Hinweise in der Einheilungsphase: Mund-Hygienehinweise, was zu vermeiden ist, wann welche Einschränkungen aufgehoben werden
-- Wann ist ein Anruf nötig: klare Symptom-Liste (Blutung die nicht aufhört, starke Schwellung nach Tag 3 etc.)
-- Nächster Termin: Nachkontrolle-Termin nennen / Erinnerung
-- **Review-Anfrage:** Sanft und optional — "Wenn Sie zufrieden sind und anderen Patienten helfen möchten: Eine kurze Bewertung bei [Google / Jameda] hilft uns sehr." Link. Kein Druck.
-
-**Brevo-Tag:** `transactional-post-treatment`
-
----
-
-## 7. Re-Engagement-Sequenz für Lost-Leads
-
-### Kontext
-
-Ein Lead bekommt Status `lost` wenn:
-- Sales-Agent nach mehrfachen Kontaktversuchen keinen Kontakt herstellen konnte
-- Patient hat explizit abgesagt
-- Termin wurde nicht gebucht trotz mehrfacher Nachfrage
-
-In diesem Zustand: alle Nurture-Mails stoppen sofort. Nach 90 Tagen startet eine einmalige 3-Touch-Reactivation-Sequenz — sofern kein Unsubscribe vorliegt.
-
-### Philosophie
-
-Lost-Leads reaktivieren ist sensitiv. Kein Druck, kein "Sie haben uns vergessen!". Der Ton ist: "Wir denken an Sie — wenn sich etwas geändert hat, sind wir da."
-
-### 3-Touch-Sequenz
-
-**Touch 1 — Tag 90 nach Lost-Status**
-- **Subject:** `{{firstName}}, haben sich Ihre Wünsche verändert?`
-- **Pre-Header:** Wir melden uns nach einiger Zeit — ohne Druck
-- **Body-Skelett:**
-  - Hook: Sachliche Ansprache — "Vor einigen Monaten haben Sie sich bei uns gemeldet. Wir wollten nicht aufdringlich sein und haben Abstand gehalten."
-  - Angebot: "Falls sich etwas geändert hat — Ihre Situation, Ihre Fragen, Ihre Bereitschaft — sind wir gern für Sie da."
-  - CTA: Sehr weich — "Wenn Sie möchten, können Sie hier einen neuen Termin vereinbaren. Wenn nicht, ist das vollständig in Ordnung."
-  - Unsubscribe-Link prominent: "Sie möchten keine weiteren Nachrichten von uns? Hier können Sie sich abmelden."
-- **CTA:** Termin vereinbaren (sehr weich) | Abmelden
-- **Brevo-Tag:** `reengagement-day-90`
-
-**Touch 2 — Tag 105 (2 Wochen nach Touch 1)**
-- **Subject:** `Zahngesundheit — ein kurzer Hinweis für {{firstName}}`
-- **Pre-Header:** Etwas Nützliches, das Sie vielleicht noch nicht wussten
-- **Body-Skelett:**
-  - Kein Verweis auf vorherigen Kontakt
-  - Substanzieller Inhalt: ein nützlicher medizinischer Hinweis (z.B. Knochen-Atrophie bei fehlendem Zahn — warum frühzeitige Behandlung besser ist)
-  - Weicher CTA: "Falls wir helfen können — wir sind erreichbar."
-- **CTA:** Termin vereinbaren | Abmelden
-- **Brevo-Tag:** `reengagement-day-105`
-
-**Touch 3 — Tag 120 (2 Wochen nach Touch 2)**
-- **Subject:** `Letzte Nachricht von uns, {{firstName}}`
-- **Pre-Header:** Wir respektieren Ihre Entscheidung — aber wollten uns verabschieden
-- **Body-Skelett:**
-  - Hook: "Das ist unsere letzte Nachricht, wenn wir nichts von Ihnen hören."
-  - Klares Angebot: "Falls Sie jemals eine Erstberatung möchten — unsere Türen stehen offen. Kein Druck, kein Verfallsdatum."
-  - Kontaktdaten nochmals sichtbar
-  - Abmelde-Link prominent
-- **CTA:** Termin vereinbaren | Abmelden
-- **Brevo-Tag:** `reengagement-day-120-final`
-
-**Nach Touch 3:**
-Wenn keine Reaktion (kein Klick, keine Buchung): Lead bleibt im Status `lost`. Keine weiteren automatisierten Mails. Sales-Agent kann manuell reaktivieren.
-
-**Abbruch-Bedingungen innerhalb der 3-Touch-Sequenz:**
-- Lead bucht Termin → Sequenz stoppt, Termin-Flow aus §6 übernimmt
-- Lead meldet sich ab → Sequenz stoppt, kein weiteres Mail
-- Lead antwortet auf Mail (Brevo-Reply-Tracking) → Sequenz pausieren, Sales-Agent reagiert manuell
-
----
-
-## 8. KPIs & A/B-Tests
-
-### 8.1 Metriken pro Email-Slot
-
-Die folgenden Ziele sind **branchen-typische Orientierungswerte** für deutschsprachige Medizin/Gesundheits-Emails — keine garantierten Benchmarks.
-
-| Slot-Typ | Primäre KPI | Sekundäre KPI | Gesundheits-Zielbereich (Schätzung) |
-|---|---|---|---|
-| Welcome T+0 | Open-Rate | Click-to-Booking | Open > 50% (frischer Lead), Click-to-Booking 5–15% |
-| Welcome T+1 bis T+14 | Open-Rate | Click-Rate | Open 35–50% (sinkend), Click 5–12% |
-| Steady-State Mittwoch | Open-Rate | Time-on-Mail (wenn trackbar) | Open 20–35%, kein Booking-Druck |
-| Steady-State Sonntag | Click-to-Booking | Unsubscribe-Rate | Click-to-Booking 2–8%, Unsub < 0,5% |
-| Termin-Trigger | Open-Rate | No-Show-Rate | Open > 70%, No-Show-Ziel < 20% |
-| Re-Engagement Touch 1 | Open-Rate | Reaktivierungsrate | Open 15–25%, Reaktivierung 3–8% |
-
-**Im CRM sichtbar (via `email_events`-Schema):**
-- Open, Click, Bounce, Spam-Report pro Lead — bereits in Modul A vorgesehen
-- Welcome-Sequenz-Position ("Mail #6 von 6 versandt") — via `welcome_sequence_position`
-- Engagement-Heatmap im Sales-Dashboard (wer hat was geöffnet) — hilft dem Sales-Agent beim Priorisieren von Anrufen
-
-### 8.2 A/B-Test-Vorschläge (Priorität 1–5)
-
-**A/B-Test 1: Subject-Line "Re:" vs. ohne (Welcome T+0)**
-- Variante A: `Re: Ihre Anfrage zu Zahnimplantaten bei Wunschlachen`
-- Variante B: `Ihre Anfrage ist bei uns eingegangen — so geht es weiter`
-- Metrik: Open-Rate T+0
-- Hypothese: "Re:" erhöht Open-Rate, weil es menschliche Antwort signalisiert
-- Laufzeit: Minimum 200 Leads pro Variante
-
-**A/B-Test 2: CTA-Wording Termin-Buchung**
-- Variante A: `Beratungstermin buchen`
-- Variante B: `Kostenlosen Ersttermin sichern`
-- Variante C: `Jetzt Termin vereinbaren`
-- Metrik: Click-to-Booking über alle CTA-Mails (Sonntag-Slots)
-- Hypothese: "kostenlos" erhöht CTR, weil es Kostenhürde explizit adressiert
-
-**A/B-Test 3: Versand-Zeit Sonntag-CTA**
-- Variante A: Sonntag 10:00 Uhr
-- Variante B: Sonntag 18:00 Uhr
-- Metrik: Open-Rate + Click-Rate
-- Hypothese: Morgens ist der Lead aktiver (Kaffee, ruhige Zeit), abends möglicherweise entspannter für Buchungsentscheidung
-- Hinweis: Brevo erlaubt zeitzonenbasiertes Senden
-
-**A/B-Test 4: Personalisierungstiefe**
-- Variante A: Nur `{{firstName}}` in Subject und Anrede
-- Variante B: `{{firstName}}` + Hinweis auf Anfrage-Datum ("Seit Ihrer Anfrage am {{signupDate}}")
-- Metrik: Open-Rate + Click-Rate
-- Hypothese: Kontext-Personalisierung kann positiv wirken (führt sich relevanter an) oder negativ (wirkt trackend/aufdringlich)
-- DSGVO-Note: Beide Varianten DSGVO-konform solange nur intern gespeicherte Daten genutzt werden
-
-**A/B-Test 5: Frequenz Welcome-Sequenz**
-- Variante A: Standard-Sequenz (T+0, T+1, T+3, T+7, T+10, T+14)
-- Variante B: Schlankere Sequenz (T+0, T+3, T+7, T+14) — nur 4 Mails
-- Metrik: Unsubscribe-Rate in den ersten 14 Tagen + Conversion-to-Booking
-- Hypothese: Weniger Mails = weniger Unsubscribes, aber auch weniger Touchpoints; relevant wenn Frequenz-Beschwerden auftreten
-
----
-
-## 9. Brevo-Setup-Hinweise
-
-### 9.1 Listen-Struktur
-
-```
-Brevo-Listen:
-├── patient-leads-active         → alle Leads mit GDPR + Status new/contacting/contacted
-├── patient-leads-consultation   → Leads ab consultation_scheduled (Termin-Trigger-Mails)
-├── patient-leads-reengagement   → Leads mit status=lost (90-Tage-Pause dann 3-Touch)
-└── patient-leads-unsubscribed   → Suppression-Liste (Brevo verwaltet das automatisch)
-```
-
-**Wichtig:** Transaktionale Mails (§6) sollten über **Transactional Email API** in Brevo gesendet werden — nicht über Campaign-Listen. Das stellt sicher, dass sie auch bei Unsubscribes zugestellt werden (wenn separate Einwilligung vorliegt) und aus dem Domain-Reputation-Pool der Marketing-Mails herausgehalten werden.
-
-### 9.2 Template-Struktur in Brevo
-
-**Pflicht in jedem Marketing-Template:**
-- Unsubscribe-Link (Brevo-Standard: `{{unsubscribeLink}}`)
-- Praxis-Adresse im Footer (DSGVO-Impressum-Pflicht)
-- Absender: `service@wunschlachen.app` (DSGVO: erkennbarer Absender)
-
-**Empfohlene Template-Kategorien in Brevo:**
-- Kategorie `welcome_sequence` → Templates 1001–1006 (6 Mails)
-- Kategorie `steady_state` → Templates 2001–2042 (34 Mails)
-- Kategorie `season_specials` → Templates 3001–3004 (4 Mails)
-- Kategorie `transactional` → Templates 4001–4005 (5 Trigger-Mails)
-- Kategorie `reengagement` → Templates 5001–5003 (3 Touch-Mails)
-
-**Gesamtzahl: 52 Templates** (44 reguläre + 5 transaktional + 3 Re-Engagement)
-
-### 9.3 Suppression-Liste
-
-Brevo verwaltet Bounces und Unsubscribes automatisch in der Suppression-Liste. Zusätzlich:
-- DSGVO-Löschungsanfragen müssen auch in Directus (`leads.mail`, `leads.GDPR_accepted_at`) verarbeitet werden — nicht nur in Brevo
-- Spam-Reports: Brevo-Webhook → `email_events` → Lead bekommt Tag `spam_report` → Sales-Agent informiert → kein weiterer Kontakt
-
-### 9.4 Sender-Domain
-
-- Domain `wunschlachen.app` oder `wunschlachen.de` in Brevo verifizieren (SPF + DKIM)
-- Warm-up-Plan falls Domain neu: in ersten 4 Wochen täglich +20% des Volumens hochfahren
-- Separate Subdomain für Transactional empfehlenswert: `mail.wunschlachen.app` (isoliert Reputation)
-
-### 9.5 Brevo-Webhook-Konfiguration
-
-Folgende Events per Webhook an `CRM /api/brevo/webhook` senden (bereits in Spec geplant):
-- `email.opened`
-- `email.clicked`
-- `email.bounced` (Hard + Soft)
-- `email.spam`
-- `email.unsubscribed`
-
-Webhook-Endpoint validiert HMAC-Signature (Spec §4, Sicherheit).
-
----
-
-## 10. Nächste Schritte für das Marketing-Team
-
-### 10.1 Prioritäten-Übersicht
-
-| Priorität | Aufgabe | Owner | Deadline-Vorschlag | Status |
-|---|---|---|---|---|
-| P0 | USP-Liste aus §1.2 gegen echte Praxis-Positionierung prüfen | Tony | Sofort | offen |
-| P0 | Brevo-Sender-Domain verifizieren (SPF/DKIM) | IT/Tony | Vor erstem Mail-Versand | offen |
-| P1 | 6 Welcome-Templates (1001–1006) in Brevo anlegen | Marketing | 2 Wochen | offen |
-| P1 | Template-IDs in `welcome-sequence-slots.ts` eintragen | Entwicklung | Nach P1 | offen |
-| P2 | 5 Transaktionale Templates (4001–4005) anlegen | Marketing | 3 Wochen | offen |
-| P2 | 3 Re-Engagement-Templates (5001–5003) anlegen | Marketing | 3 Wochen | offen |
-| P3 | Steady-State-Templates (Woche 3–12, also ~20 Templates) first batch | Marketing | 4–6 Wochen | offen |
-| P3 | Steady-State-Templates Woche 13–20 (2. Batch) | Marketing | 6–10 Wochen | offen |
-| P4 | Saison-Specials (S1–S4) — zum richtigen Timing | Marketing | Kalender-gesteuert | offen |
-| P5 | A/B-Tests konfigurieren (§8.2) | Marketing + Tech | Nach 2 Monaten Live-Betrieb | offen |
-
-### 10.2 Copywriting-Brief-Vorlage
-
-Für jedes Template erhält der Copywriter folgenden Brief:
-
-```
-COPYWRITING-BRIEF: [Template-Nummer] — [Slot-Name]
-
-Zielgruppe:    Erwachsene 45–70 Jahre, Implantat-Interessent, 
-               deutschsprachig, GKV/PKV-Patient
-
-Slot:          [Tag-Offset / Woche-Position]
-Cluster:       [Trust / Mythen / Pain Point / Cost / Lifestyle / CTA]
-Subject:       [Subject-Zeile aus Tabelle §2 — nur als Ausgangspunkt, kann angepasst werden]
-Pre-Header:    [Pre-Header aus §2 — 75–90 Zeichen Ziel]
-
-Brand-Voice:   Sachkundig-warm, keine Drängerei, kein Vertriebsjargon.
-               Referenz: §1.1 Brand-Voice-Tabelle.
-
-Body:
-  - Hook:      [aus Body-Skelett §2 oder §3-§7]
-  - Story:     [aus Body-Skelett]
-  - CTA:       [primär + sekundär aus §2]
-
-Länge:         200–350 Wörter (fertig formuliert)
-Format:        HTML-kompatibel, ein <h1> erlaubt, 1 CTA-Button
-DSGVO-Footer:  Unsubscribe-Link + Praxis-Adresse (Brevo fügt Footer-Template ein)
-
-Deliverable:   Notion-Seite oder Google-Doc mit:
-               - Fertig formulierter Subject-Zeile
-               - Body-Text (HTML-bereit)
-               - Alternativ-Subject (für A/B-Test wenn relevant)
-```
-
-### 10.3 Qualitätsprüfung vor Aktivierung
-
-Vor dem ersten Live-Versand der Welcome-Sequenz:
-- [ ] Alle 6 Welcome-Templates intern getestet (Inbox-Rendering, Links funktionieren)
-- [ ] Unsubscribe-Link in jedem Template verifiziert
-- [ ] "Re:" Subject-Line intern getestet (kein Spam-Filter-Problem)
-- [ ] DSGVO-Footer mit korrekter Praxis-Adresse
-- [ ] Brevo-Webhook aktiv und `email_events` werden in Directus geschrieben
-- [ ] Cron-Endpoint (Modul A) einmalig manuell getriggert mit echten Test-Leads (eigene Email-Adressen)
-
----
-
-*Dieses Dokument ist die Grundlage für Content-Erstellung und technische Umsetzung. Es ist kein finaler Copywriting-Stand — Texte werden vom Marketing-Team ausgearbeitet. Für technische Details zur Cron-Implementierung: [docs/WELCOME_SEQUENCE_OPS.md](../WELCOME_SEQUENCE_OPS.md).*
-
-*Letzte Aktualisierung: 2026-05-13*
+*DSGVO-Hinweis: Jede Mail enthält einen Pflicht-Unsubscribe-Footer gemäß deutschem und europäischem Datenschutzrecht. Marketing-Mails werden ausschließlich an Kontakte versendet, bei denen `GDPR_accepted_at` gesetzt ist.*
