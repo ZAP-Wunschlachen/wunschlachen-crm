@@ -304,7 +304,7 @@
           <PatientenLeadAppointments
             ref="leadAppointmentsRef"
             :lead-id="(route.params.id as string)"
-            @create="appointmentDialogVisible = true"
+            @create="openKalenderForBooking"
           />
 
           <!-- HKP-Sub-State (nur bei status='hkp_sent', Plan v9 Phase E) -->
@@ -428,13 +428,6 @@
       :lead-id="(route.params.id as string)"
       :lead="lead"
       @saved="refreshActivities"
-    />
-
-    <!-- Appointment Create Dialog -->
-    <PatientenAppointmentCreateDialog
-      v-model:visible="appointmentDialogVisible"
-      :lead-id="(route.params.id as string)"
-      @saved="onAppointmentSaved"
     />
 
     <!-- Reschedule-Dialog -->
@@ -601,7 +594,7 @@ const onAction = (action: import('../../../composables/useNextBestAction').NextB
       activityDialogVisible.value = true
       break
     case 'book_meeting':
-      appointmentDialogVisible.value = true
+      openKalenderForBooking()
       break
     case 'send_hkp':
       emailDialogVisible.value = true // TODO Phase B: eigener HKP-Versand-Dialog
@@ -907,11 +900,41 @@ const activityDialogType = ref<LeadActivityType>('note')
 const emailDialogVisible = ref(false)
 
 // Appointments
-const appointmentDialogVisible = ref(false)
 const leadAppointmentsRef = ref<InstanceType<typeof import('~/components/crm/LeadAppointments.vue').default> | null>(null)
 
-const onAppointmentSaved = () => {
-  leadAppointmentsRef.value?.reload()
+/**
+ * Termin-Buchung im Kalender (Plan v9 Modul C+D — Deep-Link statt Nachbau).
+ * Kopiert Lead-Daten ins Clipboard für schnelles Einfügen im Kalender,
+ * öffnet anschließend den Kalender im neuen Tab. Der Kalender ist Source-of-
+ * Truth für Verfügbarkeiten + Patient-Anlage; unser Sync zieht den Termin
+ * danach via WebSocket/Cron automatisch ins Lead.
+ */
+const openKalenderForBooking = async () => {
+  if (!lead.value) return
+  const kalenderUrl = (useRuntimeConfig().public.kalenderUrl as string) || 'https://kalender.wunschlachen.app'
+  const fullName = `${lead.value.first_name || ''} ${lead.value.last_name || ''}`.trim()
+  const lines = [
+    fullName,
+    lead.value.mail || '',
+    lead.value.phone || '',
+  ].filter(Boolean).join('\n')
+
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      await navigator.clipboard.writeText(lines)
+      toast.add({
+        severity: 'info',
+        summary: 'Lead-Daten in Zwischenablage',
+        detail: `${fullName} · ${lead.value.mail || lead.value.phone || ''} — im Kalender einfügen. Email muss matchen, sonst kein Auto-Sync!`,
+        life: 7000,
+      })
+    }
+  } catch (e) {
+    // Clipboard kann z.B. ohne HTTPS-Permission fehlschlagen — kein Blocker
+    console.warn('[kalender] clipboard write failed:', e)
+  }
+
+  window.open(kalenderUrl, '_blank', 'noopener,noreferrer')
 }
 
 // Tags

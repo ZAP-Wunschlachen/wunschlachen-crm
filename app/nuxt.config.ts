@@ -33,5 +33,9 @@ export default defineNuxtConfig({
     hkpIngestSecret: '',         // env: NUXT_HKP_INGEST_SECRET
     directusUrl: '',             // env: NUXT_DIRECTUS_URL (server-side fetch, ggf. interne URL)
     directusServiceToken: '',    // env: NUXT_DIRECTUS_SERVICE_TOKEN
+    public: {
+      // Deep-Link in den Kalender für Termin-Buchung (Plan v9 Modul C+D)
+      kalenderUrl: 'https://kalender.wunschlachen.app',   // env: NUXT_PUBLIC_KALENDER_URL
+    },
   },
 })
