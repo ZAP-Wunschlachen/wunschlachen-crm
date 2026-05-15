@@ -59,8 +59,12 @@
         <!-- LEFT COLUMN -->
         <div class="lg:col-span-2 space-y-6">
 
-          <!-- 🕐 Communication Timeline (Plan v9 A3) -->
-          <PatientenCommunicationTimeline :activities="allLeadActivities" />
+          <!-- Aktivitäten — nach oben gezogen, ersetzt die separate Communication-Timeline (war redundant) -->
+          <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
+            <h2 class="text-sm font-semibold text-dental-blue-0 mb-3">Aktivitäten</h2>
+            <PatientenActivityQuickActions class="mb-4" @select="openActivityDialog" @book="openKalenderForBooking" />
+            <PatientenActivityFeed :activities="activities" @removed="onActivityRemoved" />
+          </div>
 
           <!-- Contact Card -->
           <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
@@ -207,12 +211,6 @@
             />
           </div>
 
-          <!-- Activities -->
-          <div class="bg-white rounded-lg p-4 border border-dental-blue--5">
-            <h2 class="text-sm font-semibold text-dental-blue-0 mb-3">Aktivitäten</h2>
-            <PatientenActivityQuickActions class="mb-4" @select="openActivityDialog" @book="openKalenderForBooking" />
-            <PatientenActivityFeed :activities="activities" @removed="onActivityRemoved" />
-          </div>
         </div>
 
         <!-- RIGHT COLUMN -->
@@ -544,9 +542,6 @@ watch(() => lead.value?.last_appointment_synced_at, async (val, oldVal) => {
   await loadActivities()
   leadAppointmentsRef.value?.reload?.()
 })
-
-// Aliasing für Timeline (gleiche Daten, expliziterer Name)
-const allLeadActivities = computed(() => activities.value)
 
 // Plan v9 Phase E: Lost-Lead-Reaktivierung
 const { getStrategy, reactivate } = useReactivationQueue()
